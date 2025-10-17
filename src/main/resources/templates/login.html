@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập DMS</title>
+</head>
+<body>
+<h2>Đăng nhập hệ thống DMS</h2>
+
+<form th:action="@{/login}" method="post">
+    <label>Tên đăng nhập:</label><br>
+    <input type="text" name="username" required><br><br>
+
+    <label>Mật khẩu:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <button type="submit">Đăng nhập</button>
+</form>
+
+<p style="color:red" th:text="${error}"></p>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang chủ</title>
+</head>
+<body>
+<h2>Xin chào, <span th:text="${user.username}"></span>!</h2>
+<p>Bạn đã đăng nhập thành công với vai trò: <span th:text="${user.role}"></span></p>
+</body>
+</html>
