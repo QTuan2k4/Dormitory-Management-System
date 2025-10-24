@@ -1,6 +1,6 @@
 package com.group7.DMS.controller;
 
-import com.group7.DMS.entity.User;
+import com.group7.DMS.entity.Users;
 import com.group7.DMS.service.UserService;
 import com.group7.DMS.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class LoginController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("users", new Users());
         return "register";
     }
 
@@ -66,7 +66,7 @@ public class LoginController {
             }
 
             // Create user
-            User user = userService.createUser(username, email, password, User.Role.STUDENT);
+            Users user = userService.createUser(username, email, password, Users.Role.STUDENT);
             
             // Create student profile
             studentService.createStudent(user, fullName, studentId, phone, address);
@@ -83,14 +83,14 @@ public class LoginController {
     public String dashboard(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
-        User user = userService.findByUsername(username);
+        Users user = userService.findByUsername(username);
         
         model.addAttribute("user", user);
         
         // Redirect based on role
-        if (user.getRole() == User.Role.ADMIN) {
+        if (user.getRole() == Users.Role.ADMIN) {
             return "redirect:/admin/dashboard";
-        } else if (user.getRole() == User.Role.STAFF) {
+        } else if (user.getRole() == Users.Role.STAFF) {
             return "redirect:/staff/dashboard";
         } else {
             return "redirect:/student/dashboard";

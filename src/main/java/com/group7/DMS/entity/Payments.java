@@ -10,14 +10,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-public class Payment {
+public class Payments {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    private Invoice invoice;
+    private Invoices invoice;
 
     private BigDecimal amount;
     private PaymentMethod paymentMethod;
@@ -41,11 +41,11 @@ public class Payment {
         this.id = id;
     }
 
-    public Invoice getInvoice() {
+    public Invoices getInvoice() {
         return invoice;
     }
 
-    public void setInvoice(Invoice invoice) {
+    public void setInvoice(Invoices invoice) {
         this.invoice = invoice;
     }
 

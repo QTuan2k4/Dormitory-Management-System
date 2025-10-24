@@ -1,7 +1,7 @@
 package com.group7.DMS.dao;
 
-import com.group7.DMS.entity.User;
+import com.group7.DMS.entity.Users;
 
 public interface UserDAO {
-    User findByUsername(String username);
+    Users findByUsername(String username);
 }

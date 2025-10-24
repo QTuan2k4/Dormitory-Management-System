@@ -1,6 +1,6 @@
 package com.group7.DMS.dao;
 
-import com.group7.DMS.entity.User;
+import com.group7.DMS.entity.Users;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +13,10 @@ public class UserDAOImpl implements UserDAO {
     private EntityManager entityManager;
 
     @Override
-    public User findByUsername(String username) {
+    public Users findByUsername(String username) {
         try {
             return entityManager.createQuery(
-                    "FROM User WHERE username = :username", User.class)
+                    "FROM Users WHERE username = :username", Users.class)
                     .setParameter("username", username)
                     .getSingleResult();
         } catch (NoResultException e) {

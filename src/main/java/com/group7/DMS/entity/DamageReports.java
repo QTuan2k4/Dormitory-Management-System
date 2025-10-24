@@ -12,18 +12,18 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DamageReport {
+public class DamageReports {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
+    private Students student;
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    private Rooms room;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -39,7 +39,7 @@ public class DamageReport {
 
     @ManyToOne
     @JoinColumn(name = "assigned_staff_id")
-    private User assignedStaff;
+    private Users assignedStaff;
 
     @Column(name = "resolution_notes", columnDefinition = "TEXT")
     private String resolutionNotes;

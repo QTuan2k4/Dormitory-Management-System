@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Building {
+public class Buildings {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -31,5 +31,5 @@ public class Building {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Room> rooms;
+    private List<Rooms> rooms;
 }
