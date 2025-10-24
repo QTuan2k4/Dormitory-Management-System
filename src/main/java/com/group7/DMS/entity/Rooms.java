@@ -14,14 +14,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Room {
+public class Rooms {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
     @JoinColumn(name = "building_id", nullable = false)
-    private Building building;
+    private Buildings building;
 
     @Column(name = "room_number", nullable = false, length = 20)
     private String roomNumber;
@@ -48,10 +48,10 @@ public class Room {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Contract> contracts;
+    private List<Contracts> contracts;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DamageReport> damageReports;
+    private List<DamageReports> damageReports;
 
     public enum RoomStatus {
         AVAILABLE, OCCUPIED, MAINTENANCE

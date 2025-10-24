@@ -1,22 +1,22 @@
 package com.group7.DMS.service;
 
-import com.group7.DMS.entity.Student;
-import com.group7.DMS.entity.User;
+import com.group7.DMS.entity.Students;
+import com.group7.DMS.entity.Users;
 
 import java.util.List;
 
 public interface StudentService {
-    Student save(Student student);
-    Student update(Student student);
+    Students save(Students student);
+    Students update(Students student);
     void delete(int id);
-    Student findById(int id);
-    Student findByStudentId(String studentId);
-    Student findByUserId(int userId);
-    List<Student> findAll();
-    List<Student> findByRegistrationStatus(Student.RegistrationStatus status);
-    List<Student> findByFullNameContaining(String name);
-    Student createStudent(User user, String fullName, String studentId, String phone, String address);
+    Students findById(int id);
+    Students findByStudentId(String studentId);
+    Students findByUserId(int userId);
+    List<Students> findAll();
+    List<Students> findByRegistrationStatus(Students.RegistrationStatus status);
+    List<Students> findByFullNameContaining(String name);
+    Students createStudent(Users user, String fullName, String studentId, String phone, String address);
     void approveRegistration(int studentId);
     void rejectRegistration(int studentId);
-    void updateRegistrationStatus(int studentId, Student.RegistrationStatus status);
+    void updateRegistrationStatus(int studentId, Students.RegistrationStatus status);
 }

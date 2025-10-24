@@ -9,14 +9,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-public class Invoice {
+public class Invoices {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    private Contract contract;
+    private Contracts contract;
 
     private String invoiceNumber;
     private LocalDate issueDate;
@@ -43,11 +43,11 @@ public class Invoice {
         this.id = id;
     }
 
-    public Contract getContract() {
+    public Contracts getContract() {
         return contract;
     }
 
-    public void setContract(Contract contract) {
+    public void setContract(Contracts contract) {
         this.contract = contract;
     }
 

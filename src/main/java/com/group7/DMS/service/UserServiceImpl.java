@@ -1,6 +1,6 @@
 package com.group7.DMS.service;
 
-import com.group7.DMS.entity.User;
+import com.group7.DMS.entity.Users;
 import com.group7.DMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+        Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         
         return org.springframework.security.core.userdetails.User.builder()
@@ -41,27 +41,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String username) {
+    public Users findByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
     }
 
     @Override
-    public User findByEmail(String email) {
+    public Users findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
     }
 
     @Override
-    public User findByUsernameOrEmail(String username, String email) {
+    public Users findByUsernameOrEmail(String username, String email) {
         return userRepository.findByUsernameOrEmail(username, email).orElse(null);
     }
 
     @Override
-    public User save(User user) {
+    public Users save(Users user) {
         return userRepository.save(user);
     }
 
     @Override
-    public User update(User user) {
+    public Users update(Users user) {
         return userRepository.save(user);
     }
 
@@ -71,12 +71,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAll() {
+    public List<Users> findAll() {
         return userRepository.findAll();
     }
 
     @Override
-    public List<User> findByRole(User.Role role) {
+    public List<Users> findByRole(Users.Role role) {
         return userRepository.findAll().stream()
                 .filter(user -> user.getRole() == role)
                 .toList();
@@ -93,8 +93,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(String username, String email, String password, User.Role role) {
-        User user = new User();
+    public Users createUser(String username, String email, String password, Users.Role role) {
+        Users user = new Users();
         user.setUsername(username);
         user.setEmail(email);
         user.setPasswordHash(passwordEncoder.encode(password));
@@ -105,9 +105,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean changePassword(int userId, String oldPassword, String newPassword) {
-        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Users> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
-            User user = userOpt.get();
+            Users user = userOpt.get();
             if (passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
                 user.setPasswordHash(passwordEncoder.encode(newPassword));
                 userRepository.save(user);
@@ -119,9 +119,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateUser(int userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Users> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
-            User user = userOpt.get();
+            Users user = userOpt.get();
             user.setActive(true);
             userRepository.save(user);
         }
@@ -129,9 +129,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deactivateUser(int userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Users> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
-            User user = userOpt.get();
+            Users user = userOpt.get();
             user.setActive(false);
             userRepository.save(user);
         }
