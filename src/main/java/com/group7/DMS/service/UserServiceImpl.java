@@ -1,22 +1,139 @@
 package com.group7.DMS.service;
 
-import com.group7.DMS.dao.UserDAO;
 import com.group7.DMS.entity.User;
+import com.group7.DMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
-
+    
     @Autowired
-    private UserDAO userDAO;
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
-    public User login(String username, String password) {
-        User user = userDAO.findByUsername(username);
-        if (user != null && user.getPassword().equals(password)) {
-            return user;
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPasswordHash())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())))
+                .accountExpired(false)
+                .accountLocked(!user.isActive())
+                .credentialsExpired(false)
+                .disabled(!user.isActive())
+                .build();
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public User findByUsernameOrEmail(String username, String email) {
+        return userRepository.findByUsernameOrEmail(username, email).orElse(null);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User update(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void delete(int id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public List<User> findByRole(User.Role role) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole() == role)
+                .toList();
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public User createUser(String username, String email, String password, User.Role role) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setRole(role);
+        user.setActive(true);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public boolean changePassword(int userId, String oldPassword, String newPassword) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+                user.setPasswordHash(passwordEncoder.encode(newPassword));
+                userRepository.save(user);
+                return true;
+            }
         }
-        return null;
+        return false;
+    }
+
+    @Override
+    public void activateUser(int userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setActive(true);
+            userRepository.save(user);
+        }
+    }
+
+    @Override
+    public void deactivateUser(int userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setActive(false);
+            userRepository.save(user);
+        }
     }
 }
