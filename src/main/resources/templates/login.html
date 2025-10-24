@@ -83,11 +83,15 @@
 <body>
     <div class="login-card">
         <div class="university-logo">
-            <div class="logo">N</div>
-
-            <h4 class="mb-1">TRƯỜNG ĐẠI HỌC QUY NHƠN</h4>
+            <div class="logo">
+			<a href="https://daotao.qnu.edu.vn/Content/images/logoQuyNhon-icon.jpg" target="_blank">
+    	<img src="https://daotao.qnu.edu.vn/Content/images/logoQuyNhon-icon.jpg"
+         alt="Logo Trường Đại học Quy Nhơn"
+         style="width: 80px; height: 80px; border-radius: 50%;">
+			</a>
+			</div>
             <p class="text-muted mb-0">Ký túc xá sinh viên</p>
-        </div><a href="https://drive.google.com/your-file-link" target="_blank">Tải file từ đám mây</a>
+        </div>
         <form th:action="@{/login}" method="post">
             <div class="mb-3">
                 <label for="username" class="form-label">Mã sinh viên</label>
