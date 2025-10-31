@@ -23,23 +23,6 @@
             width: 100%;
             max-width: 500px;
         }
-        .university-logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: #667eea;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
         .form-control {
             border-radius: 10px;
             border: 2px solid #e9ecef;
@@ -75,51 +58,38 @@
 </head>
 <body>
     <div class="register-card">
-        <div class="university-logo">
-            <div class="logo">N</div>
-            <h4 class="mb-1">TRƯỜNG ĐẠI HỌC QUY NHƠN</h4>
-            <p class="text-muted mb-0">Ký túc xá sinh viên</p>
-        </div>
 
         <h3 class="text-center mb-4">Đăng ký</h3>
 
         <form th:action="@{/register}" method="post">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="username" class="form-label">Tên đăng nhập</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="password" class="form-label">Mật khẩu</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="fullName" class="form-label">Họ và tên</label>
-                    <input type="text" class="form-control" id="fullName" name="fullName" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="studentId" class="form-label">Mã sinh viên</label>
-                    <input type="text" class="form-control" id="studentId" name="studentId" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Số điện thoại</label>
-                    <input type="tel" class="form-control" id="phone" name="phone">
-                </div>
+            <div class="mb-3">
+                <label for="username" class="form-label">Tên đăng nhập</label>
+                <input type="text" class="form-control" id="username" name="username" required>
             </div>
 
             <div class="mb-3">
-                <label for="address" class="form-label">Địa chỉ</label>
-                <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                <label for="fullName" class="form-label">Họ và tên</label>
+                <input type="text" class="form-control" id="fullName" name="fullName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="studentId" class="form-label">Mã sinh viên</label>
+                <input type="text" class="form-control" id="studentId" name="studentId" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">Số điện thoại</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required>
             </div>
 
             <button type="submit" class="btn btn-register">

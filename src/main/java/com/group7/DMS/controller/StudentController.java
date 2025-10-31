@@ -1,9 +1,9 @@
 package com.group7.DMS.controller;
 
-import com.group7.DMS.entity.Invoice;
-import com.group7.DMS.entity.Payment;
-import com.group7.DMS.entity.Student;
-import com.group7.DMS.entity.User;
+import com.group7.DMS.entity.Invoices;
+import com.group7.DMS.entity.Payments;
+import com.group7.DMS.entity.Students;
+import com.group7.DMS.entity.Users;
 import com.group7.DMS.service.InvoiceService;
 import com.group7.DMS.service.StudentService;
 import com.group7.DMS.service.UserService;
@@ -28,11 +28,12 @@ public class StudentController {
     @Autowired
     private InvoiceService invoiceService;
 
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication auth) {
         String username = auth.getName();
-        User user = userService.findByUsername(username);
-        Student student = studentService.findByUserId(user.getId());
+        Users user = userService.findByUsername(username);
+        Students student = studentService.findByUserId(user.getId());
         
         model.addAttribute("user", user);
         model.addAttribute("student", student);
@@ -42,8 +43,8 @@ public class StudentController {
     @GetMapping("/room-info")
     public String roomInfo(Model model, Authentication auth) {
         String username = auth.getName();
-        User user = userService.findByUsername(username);
-        Student student = studentService.findByUserId(user.getId());
+        Users user = userService.findByUsername(username);
+        Students student = studentService.findByUserId(user.getId());
         
         model.addAttribute("user", user);
         model.addAttribute("student", student);
@@ -53,10 +54,10 @@ public class StudentController {
     @GetMapping("/invoices")
     public String invoiceList(Model model, Authentication auth) {
         String username = auth.getName();
-        User user = userService.findByUsername(username);
-        Student student = studentService.findByUserId(user.getId());
+        Users user = userService.findByUsername(username);
+        Students student = studentService.findByUserId(user.getId());
         
-        List<Invoice> invoices = invoiceService.findByStudentId(student.getId());
+        List<Invoices> invoices = invoiceService.findByStudentId(student.getId());
         
         model.addAttribute("user", user);
         model.addAttribute("student", student);
@@ -67,10 +68,10 @@ public class StudentController {
     @GetMapping("/invoices/{id}/payment")
     public String paymentPage(@PathVariable int id, Model model, Authentication auth) {
         String username = auth.getName();
-        User user = userService.findByUsername(username);
-        Student student = studentService.findByUserId(user.getId());
+        Users user = userService.findByUsername(username);
+        Students student = studentService.findByUserId(user.getId());
         
-        Invoice invoice = invoiceService.findById(id);
+        Invoices invoice = invoiceService.findById(id);
         if (invoice != null && invoice.getContract().getStudent().getId() == student.getId()) {
             model.addAttribute("user", user);
             model.addAttribute("student", student);
@@ -86,12 +87,12 @@ public class StudentController {
                                 @RequestParam String transactionId,
                                 Authentication auth) {
         String username = auth.getName();
-        User user = userService.findByUsername(username);
-        Student student = studentService.findByUserId(user.getId());
+        Users user = userService.findByUsername(username);
+        Students student = studentService.findByUserId(user.getId());
         
-        Invoice invoice = invoiceService.findById(id);
+        Invoices invoice = invoiceService.findById(id);
         if (invoice != null && invoice.getContract().getStudent().getId() == student.getId()) {
-            Payment.PaymentMethod method = Payment.PaymentMethod.valueOf(paymentMethod.toUpperCase());
+            Payments.PaymentMethod method = Payments.PaymentMethod.valueOf(paymentMethod.toUpperCase());
             invoiceService.processPayment(id, invoice.getTotalAmount(), method, transactionId);
         }
         return "redirect:/student/invoices";

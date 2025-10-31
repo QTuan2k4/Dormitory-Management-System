@@ -1,29 +1,29 @@
 package com.group7.DMS.service;
 
-import com.group7.DMS.entity.Invoice;
-import com.group7.DMS.entity.Payment;
+import com.group7.DMS.entity.Invoices;
+import com.group7.DMS.entity.Payments;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 public interface InvoiceService {
-    Invoice save(Invoice invoice);
-    Invoice update(Invoice invoice);
+    Invoices save(Invoices invoice);
+    Invoices update(Invoices invoice);
     void delete(int id);
-    Invoice findById(int id);
-    Invoice findByInvoiceNumber(String invoiceNumber);
-    List<Invoice> findAll();
-    List<Invoice> findByStudentId(int studentId);
-    List<Invoice> findByStudentIdAndStatus(int studentId, Invoice.InvoiceStatus status);
-    List<Invoice> findByRoomId(int roomId);
-    List<Invoice> findByStatus(Invoice.InvoiceStatus status);
-    List<Invoice> findOverdueInvoices();
-    Invoice createInvoice(int contractId, String invoiceNumber, LocalDate issueDate, LocalDate dueDate,
+    Invoices findById(int id);
+    Invoices findByInvoiceNumber(String invoiceNumber);
+    List<Invoices> findAll();
+    List<Invoices> findByStudentId(int studentId);
+    List<Invoices> findByStudentIdAndStatus(int studentId, Invoices.InvoiceStatus status);
+    List<Invoices> findByRoomId(int roomId);
+    List<Invoices> findByStatus(Invoices.InvoiceStatus status);
+    List<Invoices> findOverdueInvoices();
+    Invoices createInvoice(int contractId, String invoiceNumber, LocalDate issueDate, LocalDate dueDate,
                         BigDecimal roomFee, BigDecimal electricityFee, BigDecimal waterFee, BigDecimal internetFee);
     void markAsPaid(int invoiceId);
     void markAsOverdue(int invoiceId);
-    Payment processPayment(int invoiceId, BigDecimal amount, Payment.PaymentMethod method, String transactionId);
+    Payments processPayment(int invoiceId, BigDecimal amount, Payments.PaymentMethod method, String transactionId);
     BigDecimal calculateTotalAmount(BigDecimal roomFee, BigDecimal electricityFee, BigDecimal waterFee, BigDecimal internetFee);
-    List<Invoice> findByDateRange(LocalDate startDate, LocalDate endDate);
+    List<Invoices> findByDateRange(LocalDate startDate, LocalDate endDate);
 }

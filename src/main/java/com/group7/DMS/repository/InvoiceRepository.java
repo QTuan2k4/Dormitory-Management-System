@@ -1,7 +1,7 @@
 package com.group7.DMS.repository;
 
-import com.group7.DMS.entity.Invoice;
-import com.group7.DMS.entity.Invoice.InvoiceStatus;
+import com.group7.DMS.entity.Invoices;
+import com.group7.DMS.entity.Invoices.InvoiceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,25 +12,25 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
+public interface InvoiceRepository extends JpaRepository<Invoices, Integer> {
     
-    Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
+    Optional<Invoices> findByInvoiceNumber(String invoiceNumber);
 
-    List<Invoice> findByContractId(int contractId);
+    List<Invoices> findByContractId(int contractId);
 
-    List<Invoice> findByStatus(InvoiceStatus status);
+    List<Invoices> findByStatus(InvoiceStatus status);
 
-    @Query("SELECT i FROM Invoice i WHERE i.contract.student.id = :studentId")
-    List<Invoice> findByStudentId(@Param("studentId") int studentId);
+    @Query("SELECT i FROM Invoices i WHERE i.contract.student.id = :studentId")
+    List<Invoices> findByStudentId(@Param("studentId") int studentId);
 
-    @Query("SELECT i FROM Invoice i WHERE i.contract.student.id = :studentId AND i.status = :status")
-    List<Invoice> findByStudentIdAndStatus(@Param("studentId") int studentId,
+    @Query("SELECT i FROM Invoices i WHERE i.contract.student.id = :studentId AND i.status = :status")
+    List<Invoices> findByStudentIdAndStatus(@Param("studentId") int studentId,
                                            @Param("status") InvoiceStatus status);
 
-    // ✅ Sửa lỗi Enum: dùng Enum thay vì String literal
-    @Query("SELECT i FROM Invoice i WHERE i.dueDate < :date AND i.status = com.group7.DMS.entity.Invoice$InvoiceStatus.UNPAID")
-    List<Invoice> findOverdueInvoices(@Param("date") LocalDate date);
+    @Query("SELECT i FROM Invoices i WHERE i.dueDate < :date AND i.status = :status")
+    List<Invoices> findOverdueInvoices(@Param("date") LocalDate date, 
+                                       @Param("status") InvoiceStatus status);
 
-    @Query("SELECT i FROM Invoice i WHERE i.contract.room.id = :roomId")
-    List<Invoice> findByRoomId(@Param("roomId") int roomId);
+    @Query("SELECT i FROM Invoices i WHERE i.contract.room.id = :roomId")
+    List<Invoices> findByRoomId(@Param("roomId") int roomId);
 }
