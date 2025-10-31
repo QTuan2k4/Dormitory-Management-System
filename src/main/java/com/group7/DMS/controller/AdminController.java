@@ -27,7 +27,13 @@ public class AdminController {
     public String dashboard(Model model, Authentication auth) {
         String username = auth.getName();
         Users user = userService.findByUsername(username);
-        model.addAttribute("user", user);
+        if (user != null) {
+            model.addAttribute("user", user);
+            model.addAttribute("username", user.getUsername());
+        } else {
+            // Fallback for in-memory users or users not present in DB
+            model.addAttribute("username", username);
+        }
         return "admin/dashboard";
     }
 

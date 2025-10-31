@@ -11,6 +11,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -49,7 +54,23 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
+                .successHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+                    String contextPath = request.getContextPath();
+                    boolean isAdmin = authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(role -> role.equals("ROLE_ADMIN"));
+                    boolean isStaff = authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(role -> role.equals("ROLE_STAFF"));
+
+                    if (isAdmin) {
+                        response.sendRedirect(contextPath + "/admin/dashboard");
+                    } else if (isStaff) {
+                        response.sendRedirect(contextPath + "/staff/dashboard");
+                    } else {
+                        response.sendRedirect(contextPath + "/student/dashboard");
+                    }
+                })
                 .failureUrl("/login?error=true")
                 .permitAll()
             )
