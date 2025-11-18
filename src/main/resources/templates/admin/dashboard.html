@@ -79,7 +79,7 @@
             <a class="nav-link" href="#" th:href="@{/admin/dashboard}">
                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
             </a>
-            <a class="nav-link" href="#" th:href="@{/admin/students}">
+            <a class="nav-link" href="#" th:href="@{/admin/student-list}">
                 <i class="fas fa-users me-2"></i>Quản lý sinh viên
             </a>
             <a class="nav-link" href="#" th:href="@{/admin/dormitories}">
@@ -105,7 +105,7 @@
         <!-- Header -->
         <div class="header d-flex justify-content-between align-items-center">
             <div>
-                <h4 class="mb-0">Xin chào, <span th:text="${user.username}">Admin</span></h4>
+                <h4 class="mb-0">Xin chào, <span th:text="${username}">Admin</span></h4>
                 <small class="text-muted">Quản trị viên hệ thống</small>
             </div>
             <a href="#" th:href="@{/logout}" class="btn btn-logout">
