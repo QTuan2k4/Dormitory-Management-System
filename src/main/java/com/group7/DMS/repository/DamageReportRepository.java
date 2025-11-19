@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DamageReportRepository extends JpaRepository<DamageReports, Long> {
+public interface DamageReportRepository extends JpaRepository<DamageReports, Integer> {
     List<DamageReports> findByStudentId(int studentId);
     List<DamageReports> findByRoomId(int roomId);
     List<DamageReports> findByStatus(DamageReports.DamageStatus status);
