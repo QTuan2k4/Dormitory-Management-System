@@ -2,6 +2,7 @@ package com.group7.DMS.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +21,7 @@ public class Students {
     private int id;
 
     @OneToOne
+    @JoinColumn(name = "user_id")
     private Users user;
 
     @Column(name = "full_name")
@@ -39,6 +41,7 @@ public class Students {
     
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "registration_status")
+    private String documentsPath;
     private RegistrationStatus registrationStatus;
 
     public enum RegistrationStatus {
@@ -116,4 +119,11 @@ public class Students {
     public void setDocumentsPath(String documentsPath) {
         this.documentsPath = documentsPath;
     }
+	public String getDocumentsPath() {
+		return documentsPath;
+	}
+
+	public void setDocumentsPath(String documentsPath) {
+		this.documentsPath = documentsPath;
+	}
 }
