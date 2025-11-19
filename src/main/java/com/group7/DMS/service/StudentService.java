@@ -5,6 +5,8 @@ import com.group7.DMS.entity.Users;
 
 import java.util.List;
 
+
+
 public interface StudentService {
     Students save(Students student);
     Students update(Students student);
@@ -19,4 +21,5 @@ public interface StudentService {
     void approveRegistration(int studentId);
     void rejectRegistration(int studentId);
     void updateRegistrationStatus(int studentId, Students.RegistrationStatus status);
+
 }

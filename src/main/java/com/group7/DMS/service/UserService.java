@@ -4,7 +4,7 @@ import com.group7.DMS.entity.Users;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
-import java.util.Optional;
+
 
 public interface UserService extends UserDetailsService {
     Users findByUsername(String username);
