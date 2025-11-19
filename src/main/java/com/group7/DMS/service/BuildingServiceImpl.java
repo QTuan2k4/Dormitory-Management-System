@@ -2,6 +2,9 @@ package com.group7.DMS.service;
 
 import com.group7.DMS.entity.Buildings;
 import com.group7.DMS.repository.BuildingRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -46,5 +49,11 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     public List<Buildings> searchBuildingsByName(String name) {
         return buildingRepository.searchByName(name);
+    }
+    
+    @Override
+    @Transactional 
+    public Optional<Buildings> findBuildingByIdWithRooms(int id) {
+        return buildingRepository.findByIdWithRooms(id);
     }
 }

@@ -12,5 +12,6 @@ public interface BuildingService {
 	Optional<Buildings> findBuildingById(int id);
 	void deleteBuilding(int id);
 	List<Buildings> searchBuildingsByName(String name);
+	Optional<Buildings> findBuildingByIdWithRooms(int id);
 	
 }

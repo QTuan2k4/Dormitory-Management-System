@@ -126,6 +126,9 @@
                                         <td th:text="${building.description}">Tòa nhà chính</td>
                                         <td th:text="${#temporals.format(building.createdAt, 'dd-MM-yyyy HH:mm')}">01-01-2025 10:00</td>
                                         <td>
+                                        	<a th:href="@{/admin/buildings/view/{id}(id=${building.id})}" class="btn btn-sm btn-primary me-2" title="Xem Chi tiết">
+                                                <i class="fas fa-eye"></i> 
+                                            </a>
                                             <a th:href="@{/admin/buildings/edit/{id}(id=${building.id})}" class="btn btn-sm btn-info me-2" title="Sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>

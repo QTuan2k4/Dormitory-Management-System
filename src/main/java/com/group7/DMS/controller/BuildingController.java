@@ -1,6 +1,7 @@
 package com.group7.DMS.controller;
 
 import com.group7.DMS.entity.Buildings;
+import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.service.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -84,5 +85,33 @@ public class BuildingController {
             ra.addFlashAttribute("errorMessage", "Không thể xóa Tòa nhà ID " + id.toString() + ". Tòa nhà này có thể đang chứa các phòng.");
         }
         return "redirect:/admin/buildings";
+    }
+ // --- 6. GET: Hiển thị Chi tiết Tòa nhà (View: building-details.html) ---
+    @GetMapping("/view/{id}")
+    public String showBuildingDetails(@PathVariable("id") Integer id, Model model,  RedirectAttributes ra) {
+    	try {
+    		Optional<Buildings> buildingData = buildingService.findBuildingByIdWithRooms(id);
+    		
+    		if (buildingData.isPresent()) {
+    			Buildings building = buildingData.get();
+    			List<Rooms> roomsList = building.getRooms();
+    			
+    			if (roomsList == null) {
+                    roomsList = java.util.Collections.emptyList();
+                }
+    			
+    			model.addAttribute("building", building);
+    			model.addAttribute("rooms", roomsList);
+    			model.addAttribute("pageTitle", "Chi Tiết Tòa Nhà: " + building.getName());
+    			
+    			return "admin/building-details";
+    		} else {
+    			ra.addFlashAttribute("errorMesseage", "Không tìm thấy Tòa nhà ID " + id);
+    			return "redirect:/admin/buildings";
+    		}
+    	} catch (Exception e) {
+    		ra.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi tải chi tiết tòa nhà.");
+    		return "redirect:/admin/buildings";
+    	}
     }
 }
