@@ -89,23 +89,28 @@ public class AdminController {
                                @RequestParam(required = false) String search,
                                @RequestParam(required = false) String status,
                                Authentication auth) {
-        List<Students> students = studentService.findAll();
+        List<Students> students;
 
-        // Filter by status if provided
         if (status != null && !status.isBlank()) {
             try {
-                Students.RegistrationStatus regStatus = Students.RegistrationStatus.valueOf(status.toUpperCase());
+                Students.RegistrationStatus regStatus = Students.RegistrationStatus.valueOf(status.toLowerCase());
                 students = studentService.findByRegistrationStatus(regStatus);
             } catch (IllegalArgumentException e) {
-                // invalid status - ignore filtering by status
+                students = studentService.findAll();
             }
+        } else {
+            students = studentService.findAll();
         }
 
-        // Filter by search if provided (search in full name)
         if (search != null && !search.isBlank()) {
-            List<Students> byName = studentService.findByFullNameContaining(search);
-            // intersect results if status filter was applied
-            students.retainAll(byName);
+            String keyword = search.trim().toLowerCase();
+            students = students.stream()
+                    .filter(student -> {
+                        String fullName = student.getFullName() != null ? student.getFullName().toLowerCase() : "";
+                        String studentId = student.getStudentId() != null ? student.getStudentId().toLowerCase() : "";
+                        return fullName.contains(keyword) || studentId.contains(keyword);
+                    })
+                    .toList();
             model.addAttribute("search", search);
         }
 
