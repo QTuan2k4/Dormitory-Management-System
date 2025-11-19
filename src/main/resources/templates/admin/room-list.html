@@ -93,7 +93,32 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
-                        <div class="d-flex justify-content-end mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <form th:action="@{/admin/rooms}" method="GET" class="d-flex align-items-center">
+                                
+                                <input type="text" name="roomNumber" class="form-control me-2" 
+                                       placeholder="Tìm kiếm theo Số Phòng" 
+                                       style="width: 200px;"
+                                       th:value="${searchRoomNumber}">
+                                
+                                <select name="buildingId" class="form-select me-2" style="width: 150px;">
+                                    <option value="">-- Tòa Nhà --</option>
+                                    <option th:each="b : ${buildingList}" 
+                                            th:value="${b.id}" 
+                                            th:text="${b.name}"
+                                            th:selected="${searchBuildingId != null and b.id == searchBuildingId}">
+                                        Tòa A
+                                    </option>
+                                </select>
+                                
+                                <button type="submit" class="btn btn-secondary">
+                                    <i class="fas fa-search"></i> Tìm
+                                </button>
+                                <a th:href="@{/admin/rooms}" class="btn btn-outline-secondary ms-2" title="Xóa bộ lọc">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </form>
+                            
                             <a th:href="@{/admin/rooms/new}" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i> Thêm Phòng Mới
                             </a>

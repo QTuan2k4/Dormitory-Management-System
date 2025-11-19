@@ -33,22 +33,18 @@ public class BuildingServiceImpl implements BuildingService {
  // 3. Lấy Tòa nhà theo ID
     @Override
     public Optional<Buildings> findBuildingById(int id) {
-        // Sử dụng Optional để xử lý trường hợp không tìm thấy
         return buildingRepository.findById(id);
     }
     
  // 4. Xóa Tòa nhà
     @Override
     public void deleteBuilding(int id) {
-        // Có thể thêm kiểm tra xem Tòa nhà có phòng đang có sinh viên ở không trước khi xóa
         buildingRepository.deleteById(id);
     }
     
  // 5. Tìm kiếm theo tên
     @Override
     public List<Buildings> searchBuildingsByName(String name) {
-        // Bạn có thể chọn 1 trong 2 phương thức Repository đã tạo:
-        // return buildingRepository.findByNameContainingIgnoreCase(name);
         return buildingRepository.searchByName(name);
     }
 }
