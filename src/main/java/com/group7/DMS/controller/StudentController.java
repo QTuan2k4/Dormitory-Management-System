@@ -39,6 +39,47 @@ public class StudentController {
         model.addAttribute("student", student);
         return "student/dashboard";
     }
+    
+    @GetMapping("/personal-info")
+    public String personalInfo(Model model, Authentication auth) {
+    	String username = auth.getName();
+    	Users user = userService.findByUsername(username);
+    	Students student = studentService.findByUserId(user.getId());
+    	
+    	model.addAttribute("user", user);
+    	model.addAttribute("student", student);
+    	
+    	return "student/personal-info";
+    }
+    
+    @GetMapping("/edit-profile")
+    public String editProfileForm(Model model, Authentication auth) {
+    	String username = auth.getName();
+    	Users user = userService.findByUsername(username);
+    	Students student = studentService.findByUserId(user.getId());
+    	
+    	model.addAttribute("student", student);
+    	model.addAttribute("user", user);
+    	
+    	return "student/edit-profile";
+    }
+    
+    @PostMapping("/edit-profile")
+    public String updateProfile(@ModelAttribute("student") Students studentDetails, Model model, Authentication auth) {
+    	String username = auth.getName();
+        Users currentUser = userService.findByUsername(username);
+        Students currentStudent = studentService.findByUserId(currentUser.getId());
+        
+        if (currentStudent != null) {
+        	currentStudent.setFullName(studentDetails.getFullName());
+        	currentStudent.setPhone(studentDetails.getPhone());
+        	currentStudent.setAddress(studentDetails.getAddress());
+        	
+        	studentService.update(currentStudent);
+        		
+        }
+        return "redirect:/student/personal-info";
+    }
 
     @GetMapping("/room-info")
     public String roomInfo(Model model, Authentication auth) {
@@ -50,6 +91,7 @@ public class StudentController {
         model.addAttribute("student", student);
         return "student/room-info";
     }
+    
 
     @GetMapping("/invoices")
     public String invoiceList(Model model, Authentication auth) {
