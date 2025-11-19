@@ -6,8 +6,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
 
 @Entity
+@Table(name = "students")
 public class Students {
 
     @Id
@@ -18,10 +24,23 @@ public class Students {
     @JoinColumn(name = "user_id")
     private Users user;
 
+    @Column(name = "full_name")
     private String fullName;
+    
+    @Column(name = "student_id")
     private String studentId;
+    
     private String phone;
     private String address;
+    
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+    
+    @Column(name = "documents_path")
+    private String documentsPath;
+    
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "registration_status")
     private String documentsPath;
     private RegistrationStatus registrationStatus;
 
@@ -85,6 +104,21 @@ public class Students {
         this.registrationStatus = registrationStatus;
     }
 
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getDocumentsPath() {
+        return documentsPath;
+    }
+
+    public void setDocumentsPath(String documentsPath) {
+        this.documentsPath = documentsPath;
+    }
 	public String getDocumentsPath() {
 		return documentsPath;
 	}
