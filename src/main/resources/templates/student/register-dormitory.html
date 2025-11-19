@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle != null} ? ${pageTitle} : 'Đăng ký ở Ký túc xá'">Đăng ký KTX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-home me-2"></i>
+                        <span th:text="${isUpdate} ? 'Cập nhật hồ sơ cư trú KTX' : 'Đăng ký ở Ký túc xá'"></span>
+                    </h3>
+                </div>
+
+                <div class="card-body p-5">
+
+                    <!-- Thông báo thành công / lỗi -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Form đăng ký -->
+                    <form th:action="@{/student/register-dormitory}" 
+                          method="post" 
+                          enctype="multipart/form-data" 
+                          class="needs-validation" 
+                          novalidate>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    Họ và tên <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       name="fullName" 
+                                       th:value="${student?.fullName}" 
+                                       required 
+                                       placeholder="Nguyễn Văn A">
+                                <div class="invalid-feedback">Vui lòng nhập họ và tên</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    Mã sinh viên <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       name="studentId" 
+                                       th:value="${student?.studentId}" 
+                                       required 
+                                       placeholder="B1234567">
+                                <div class="invalid-feedback">Vui lòng nhập mã sinh viên</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    Số điện thoại <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       name="phone" 
+                                       th:value="${student?.phone}" 
+                                       required 
+                                       pattern="0[0-9]{9}" 
+                                       placeholder="0901234567">
+                                <div class="invalid-feedback">Số điện thoại không hợp lệ</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    Địa chỉ thường trú <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       name="address" 
+                                       th:value="${student?.address}" 
+                                       required 
+                                       placeholder="123 Đường Láng, Đống Đa, Hà Nội">
+                                <div class="invalid-feedback">Vui lòng nhập địa chỉ</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                Tài liệu đính kèm <span class="text-danger">*</span>
+                                <small class="text-muted">(CMND/CCCD, giấy báo nhập học, xác nhận sinh viên...)</small>
+                            </label>
+                            <input type="file" 
+                                   class="form-control form-control-lg" 
+                                   name="document" 
+                                   accept=".pdf,.jpg,.jpeg,.png" 
+                                   th:required="${!isUpdate}">
+
+                            <div class="form-text">
+                                Dung lượng tối đa 10MB. Định dạng: PDF, JPG, PNG
+                            </div>
+
+                            <!-- Hiển thị file đã upload trước đó -->
+                            <div th:if="${student?.documentsPath}" class="mt-3 p-3 bg-light rounded border">
+                                <i class="fas fa-paperclip text-success me-2"></i>
+                                <strong>Đã upload:</strong> 
+                                <a th:href="${student.documentsPath}" 
+                                   target="_blank" 
+                                   class="text-decoration-none">
+                                    <i class="fas fa-external-link-alt"></i> Xem file hiện tại
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" 
+                                    class="btn btn-primary btn-lg fw-bold">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                <span th:text="${isUpdate} ? 'Cập nhật hồ sơ' : 'Nộp hồ sơ đăng ký'"></span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                Sau khi nộp, hồ sơ sẽ được xét duyệt trong vòng <strong>3-5 ngày làm việc</strong>.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Bootstrap validation
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+</body>
+</html>

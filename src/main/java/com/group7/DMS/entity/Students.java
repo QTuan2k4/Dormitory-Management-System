@@ -41,7 +41,7 @@ public class Students {
     
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "registration_status")
-    private String documentsPath;
+    
     private RegistrationStatus registrationStatus;
 
     public enum RegistrationStatus {
@@ -119,11 +119,5 @@ public class Students {
     public void setDocumentsPath(String documentsPath) {
         this.documentsPath = documentsPath;
     }
-	public String getDocumentsPath() {
-		return documentsPath;
-	}
 
-	public void setDocumentsPath(String documentsPath) {
-		this.documentsPath = documentsPath;
-	}
 }
