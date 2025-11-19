@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/admin/rooms") // Sử dụng /admin/rooms để đồng bộ với cấu trúc của bạn
+@RequestMapping("/admin/rooms") 
 public class RoomController {
 
     private final RoomService roomService;
-    private final BuildingService buildingService; // Dùng để lấy danh sách tòa nhà
+    private final BuildingService buildingService; 
 
     @Autowired
     public RoomController(RoomService roomService, BuildingService buildingService) {
@@ -27,22 +27,35 @@ public class RoomController {
     }
 
     // --- 1. GET: Hiển thị Danh sách Phòng ---
-    // URL: /admin/rooms
     @GetMapping
-    public String listRooms(Model model) {
+    public String listRooms(Model model,
+        @RequestParam(required = false) String roomNumber,
+        @RequestParam(required = false) Integer buildingId) { 
         
-        List<Rooms> rooms = roomService.findAllRooms();
+        List<Rooms> rooms;
         
+        // --- LOGIC XỬ LÝ TÌM KIẾM ---
+        if (roomNumber != null && !roomNumber.isEmpty() && buildingId != null) {
+            rooms = roomService.searchRoomsByNumberAndBuildingId(roomNumber, buildingId);
+            model.addAttribute("searchBuildingId", buildingId);
+
+        } else if (roomNumber != null && !roomNumber.isEmpty()) {
+            rooms = roomService.searchRoomsByNumber(roomNumber);
+        } else if (buildingId != null) {
+            rooms = roomService.findRoomsByBuildingId(buildingId);
+            model.addAttribute("searchBuildingId", buildingId);    
+        } else {
+            rooms = roomService.findAllRooms();
+        }
+
         model.addAttribute("roomList", rooms);
-        // Thêm danh sách Buildings để tiện cho việc lọc/hiển thị tên Building
-        model.addAttribute("buildingList", buildingService.findAllBuildings()); 
-        
-        // Trả về view: src/main/resources/templates/admin/room-list.html
-        return "admin/room-list"; 
+        model.addAttribute("buildingList", buildingService.findAllBuildings());
+        model.addAttribute("searchRoomNumber", roomNumber);
+
+        return "admin/room-list";
     }
 
     // --- 2. GET: Hiển thị Form Thêm mới ---
-    // URL: /admin/rooms/new
     @GetMapping("/new")
     public String showNewRoomForm(Model model) {
     	Rooms room = new Rooms();
@@ -57,17 +70,13 @@ public class RoomController {
     }
     
     // --- 3. GET: Hiển thị Form Sửa ---
-    // URL: /admin/rooms/edit/{id}
     @GetMapping("/edit/{id}")
     public String showEditRoomForm(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
     	Optional<Rooms> roomOpt = roomService.findRoomById(id);
         if (roomOpt.isEmpty()) {
-             // Xử lý lỗi không tìm thấy
              return "redirect:/admin/rooms"; 
         }
-
         Rooms room = roomOpt.get();
-        // Vẫn nên kiểm tra nếu building có thể bị null do lỗi dữ liệu
         if (room.getBuilding() == null) {
              room.setBuilding(new Buildings());
         }
@@ -84,13 +93,10 @@ public class RoomController {
     @PostMapping("/save")
     public String saveRoom(@ModelAttribute("room") Rooms room, RedirectAttributes ra) {
         try {
-            // Spring sẽ tự động bind building_id từ form vào trường Buildings
             roomService.saveRoom(room);
             ra.addFlashAttribute("message", "Phòng đã được lưu thành công!");
         } catch (RuntimeException e) {
-             // Xử lý các ngoại lệ từ Service (như Building không tồn tại, số tầng không hợp lệ)
             ra.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
-            // Có thể chuyển hướng lại form để người dùng sửa
             if (room.getId() == 0) {
                  return "redirect:/admin/rooms/new";
             } else {
@@ -101,8 +107,7 @@ public class RoomController {
     }
     
     // --- 5. GET: Xóa Phòng ---
-    // URL: /admin/rooms/delete/{id}
-    @GetMapping("/rooms/delete/{id}")
+    @GetMapping("/delete/{id}")
     public String deleteRoom(@PathVariable("id") Integer id, RedirectAttributes ra) {
         try {
             roomService.deleteRoom(id);

@@ -69,15 +69,15 @@
                             <input type="hidden" th:field="*{id}" />
 
                             <div class="mb-3">
-    <label for="building" class="form-label">Tòa Nhà <span class="text-danger">*</span></label>
-    <select name="building.id" id="building" class="form-select" required>
-        <option value="">-- Chọn Tòa Nhà --</option>
-        <option th:each="b : ${buildingList}" 
-                th:value="${b.id}" 
-                th:text="${b.name}"
-                th:selected="${room.building != null and b.id == room.building.id}">Tòa A</option>
-    </select>
-</div>
+    							<label for="building" class="form-label">Tòa Nhà <span class="text-danger">*</span></label>
+    							<select name="building.id" id="building" class="form-select" required>
+        							<option value="">-- Chọn Tòa Nhà --</option>
+        							<option th:each="b : ${buildingList}" 
+                					th:value="${b.id}" 
+                					th:text="${b.name}"
+                					th:selected="${room.building != null and b.id == room.building.id}">Tòa A</option>
+    							</select>
+							</div>
 
                             <div class="mb-3">
                                 <label for="roomNumber" class="form-label">Số Phòng <span class="text-danger">*</span></label>

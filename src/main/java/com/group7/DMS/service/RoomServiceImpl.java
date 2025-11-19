@@ -1,9 +1,9 @@
 package com.group7.DMS.service;
 
 import com.group7.DMS.entity.Rooms;
-import com.group7.DMS.entity.Buildings; // Cần Entity Buildings để kiểm tra
+import com.group7.DMS.entity.Buildings; 
 import com.group7.DMS.repository.RoomRepository;
-import com.group7.DMS.repository.BuildingRepository; // Nếu cần kiểm tra sự tồn tại của Building
+import com.group7.DMS.repository.BuildingRepository; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true) // Đặt mặc định là chỉ đọc
+@Transactional(readOnly = true) 
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
-    private final BuildingRepository buildingRepository; // Giả sử đã có BuildingRepository
+    private final BuildingRepository buildingRepository; 
 
     @Autowired
     public RoomServiceImpl(RoomRepository roomRepository, BuildingRepository buildingRepository) {
@@ -24,21 +24,16 @@ public class RoomServiceImpl implements RoomService {
         this.buildingRepository = buildingRepository;
     }
 
-    // --- CRUD Cơ bản ---
-
     @Override
-    @Transactional // Cần @Transactional khi thực hiện thay đổi dữ liệu (write operation)
+    @Transactional 
     public Rooms saveRoom(Rooms room) {
-        // NGHIỆP VỤ 1: Đảm bảo Building tồn tại trước khi lưu Room
         int buildingId = room.getBuilding().getId();
         Optional<Buildings> existingBuilding = buildingRepository.findById(buildingId);
 
         if (!existingBuilding.isPresent()) {
-            // Ném ngoại lệ tùy chỉnh nếu Building không tồn tại
             throw new RuntimeException("Building with ID " + buildingId + " not found.");
         }
         
-        // NGHIỆP VỤ 2: Kiểm tra số tầng hợp lệ (ví dụ: không được vượt quá totalFloors của Building)
         if (room.getFloor() > existingBuilding.get().getTotalFloors()) {
              throw new RuntimeException("Floor number " + room.getFloor() + " exceeds total floors of the building.");
         }
@@ -46,13 +41,9 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.save(room);
     }
 
-    // Chú ý: Vì bạn đã định nghĩa ID là int trong entity Buildings/Rooms, 
-    // bạn cần đảm bảo Repository của Rooms cũng dùng Integer thay vì Long
-    // => Cần sửa lại RoomRepository extends JpaRepository<Rooms, Integer>
     @Override
     public Optional<Rooms> findRoomById(int id) {
-        // Cần ép kiểu ID nếu Repository dùng Long
-        return roomRepository.findById((int) id); 
+        return roomRepository.findById(id); 
     }
 
     @Override
@@ -63,10 +54,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public void deleteRoom(int id) {
-        roomRepository.deleteById((int) id); // Cần ép kiểu ID nếu Repository dùng Long
+        roomRepository.deleteById(id); 
     }
-
-    // --- Nghiệp vụ Tìm kiếm ---
 
     @Override
     public List<Rooms> findRoomsByBuildingId(int buildingId) {
@@ -80,7 +69,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Optional<Rooms> findByBuildingAndRoomNumber(int buildingId, String roomNumber) {
-        return roomRepository.findByBuildingAndRoomNumber(buildingId, roomNumber);
+        return roomRepository.findByBuildingIdAndRoomNumber(buildingId, roomNumber);
     }
 
     @Override
@@ -90,7 +79,19 @@ public class RoomServiceImpl implements RoomService {
     
     @Override
     public List<Rooms> findRoomsByBuildingAndFloor(int buildingId, int floor) {
-        return roomRepository.findByBuildingAndFloor(buildingId, floor);
+        return roomRepository.findByBuildingIdAndFloor(buildingId, floor);
+    }
+
+    // --- TRIỂN KHAI PHƯƠNG THỨC TÌM KIẾM MỚI ---
+    
+    @Override
+    public List<Rooms> searchRoomsByNumber(String roomNumber) {
+        return roomRepository.findByRoomNumberContainingIgnoreCase(roomNumber);
+    }
+
+    @Override
+    public List<Rooms> searchRoomsByNumberAndBuildingId(String roomNumber, int buildingId) {
+        return roomRepository.findByRoomNumberContainingIgnoreCaseAndBuildingId(roomNumber, buildingId);
     }
 
     // --- Logic Nghiệp vụ Phức tạp ---
@@ -98,7 +99,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public Rooms updateOccupancy(int roomId, int changeInOccupants) {
-        Optional<Rooms> roomData = roomRepository.findById((int) roomId);
+        // Đã bỏ ép kiểu (int)
+        Optional<Rooms> roomData = roomRepository.findById(roomId);
         
         if (!roomData.isPresent()) {
             throw new RuntimeException("Room with ID " + roomId + " not found.");
@@ -118,7 +120,7 @@ public class RoomServiceImpl implements RoomService {
         if (newOccupants == room.getSlot()) {
             room.setStatus(Rooms.RoomStatus.OCCUPIED);
         } else if (newOccupants > 0 && newOccupants < room.getSlot()) {
-            room.setStatus(Rooms.RoomStatus.AVAILABLE); // Hoặc PARTIALLY_OCCUPIED tùy theo logic của bạn
+            room.setStatus(Rooms.RoomStatus.AVAILABLE); 
         } else if (newOccupants == 0) {
             room.setStatus(Rooms.RoomStatus.AVAILABLE);
         }

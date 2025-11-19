@@ -10,17 +10,22 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RoomRepository extends JpaRepository<Rooms, Long> {
-    List<Rooms> findByBuildingId(int buildingId);
+public interface RoomRepository extends JpaRepository<Rooms, Integer> {
+    
+    List<Rooms> findByBuildingId(Integer buildingId);
+
     List<Rooms> findByStatus(Rooms.RoomStatus status);
-    List<Rooms> findByFloor(int floor);
-    
-    @Query("SELECT r FROM Rooms r WHERE r.building.id = :buildingId AND r.roomNumber = :roomNumber")
-    Optional<Rooms> findByBuildingAndRoomNumber(@Param("buildingId") int buildingId, @Param("roomNumber") String roomNumber);
-    
-    @Query("SELECT r FROM Rooms r WHERE r.building.id = :buildingId AND r.floor = :floor")
-    List<Rooms> findByBuildingAndFloor(@Param("buildingId") int buildingId, @Param("floor") int floor);
-    
+
+    List<Rooms> findByFloor(Integer floor);
+
+    List<Rooms> findByRoomNumberContainingIgnoreCase(String roomNumber);
+
+    Optional<Rooms> findByBuildingIdAndRoomNumber(Integer buildingId, String roomNumber);
+
+    List<Rooms> findByBuildingIdAndFloor(Integer buildingId, Integer floor);
+
+    List<Rooms> findByRoomNumberContainingIgnoreCaseAndBuildingId(String roomNumber, Integer buildingId);
+
     @Query("SELECT r FROM Rooms r WHERE r.currentOccupants < r.slot")
     List<Rooms> findAvailableRooms();
 }
