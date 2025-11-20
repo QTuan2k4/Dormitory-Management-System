@@ -45,6 +45,15 @@ public class Students {
     @Column(name = "birth_date")
     private LocalDate birthDate;
     
+    @Column(name = "gender")
+    private String gender;
+    
+    @Column(name = "citizen_id")
+    private String citizenId;
+    
+    @Column(name = "floor")
+    private String floor;
+    
     @Column(name = "documents_path", columnDefinition = "TEXT")
     private String documentsPath;
     
@@ -159,6 +168,30 @@ public class Students {
 
     public void setMajor(String major) {
         this.major = major;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getCitizenId() {
+        return citizenId;
+    }
+
+    public void setCitizenId(String citizenId) {
+        this.citizenId = citizenId;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
     }
 
 }

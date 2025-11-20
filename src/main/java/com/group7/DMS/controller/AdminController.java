@@ -134,10 +134,36 @@ public class AdminController {
     public String studentDetail(@PathVariable int id, Model model) {
         Students student = studentService.findById(id);
         if (student != null) {
+            // Parse documents path to map for image display
+            if (student.getDocumentsPath() != null && !student.getDocumentsPath().isEmpty()) {
+                model.addAttribute("documentMap", parseDocumentsPath(student.getDocumentsPath()));
+            }
             model.addAttribute("student", student);
             return "admin/student-detail";
         }
         return "redirect:/admin/students";
+    }
+    
+    /**
+     * Parse documents path string to Map
+     * Format: "key1:path1;key2:path2;..."
+     */
+    private java.util.Map<String, String> parseDocumentsPath(String documentsPath) {
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        if (documentsPath == null || documentsPath.isEmpty()) {
+            return map;
+        }
+        
+        String[] pairs = documentsPath.split(";");
+        for (String pair : pairs) {
+            if (pair.contains(":")) {
+                String[] keyValue = pair.split(":", 2);
+                if (keyValue.length == 2) {
+                    map.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
+        return map;
     }
 
     // ========== Approve/Reject Registration ==========
