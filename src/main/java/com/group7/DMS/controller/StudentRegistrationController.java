@@ -5,12 +5,16 @@ import com.group7.DMS.entity.Users;
 import com.group7.DMS.service.StudentService;
 import com.group7.DMS.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +30,9 @@ public class StudentRegistrationController {
     
     @Autowired
     private UserService userService;
+    
+    @Value("${app.upload.base-dir:}")
+    private String uploadBaseDir;
     
     private static final String UPLOAD_DIR = "uploads/documents/";
     
@@ -76,6 +83,7 @@ public class StudentRegistrationController {
             student.setPhone(phone);
             student.setAddress(address);
             student.setBirthDate(LocalDate.parse(birthDate));
+            student.setApplicationDate(LocalDate.now());
             student.setRegistrationStatus(Students.RegistrationStatus.PENDING);
             
             // Upload document
@@ -128,7 +136,7 @@ public class StudentRegistrationController {
                 return "redirect:/student/status";
             }
             
-            // Chỉ cho phép cập nhật nếu trạng thái là PENDING hoặc REJECTED
+            // Chỉ cho phép cập nhật nếu trạng thái là pending hoặc rejected
             if (!student.getRegistrationStatus().equals(Students.RegistrationStatus.PENDING) &&
                 !student.getRegistrationStatus().equals(Students.RegistrationStatus.REJECTED)) {
                 model.addAttribute("error", "Không thể cập nhật hồ sơ đã duyệt!");
@@ -140,7 +148,8 @@ public class StudentRegistrationController {
             student.setPhone(phone);
             student.setAddress(address);
             student.setBirthDate(LocalDate.parse(birthDate));
-            student.setRegistrationStatus(Students.RegistrationStatus.PENDING); // Reset về PENDING
+            student.setApplicationDate(LocalDate.now());
+            student.setRegistrationStatus(Students.RegistrationStatus.PENDING); // Reset về pending
             
             // Upload document mới
             if (document != null && !document.isEmpty()) {
@@ -159,8 +168,18 @@ public class StudentRegistrationController {
     
     // ========== Helper: Save Document ==========
     private String saveDocument(MultipartFile file) throws IOException {
-        // Tạo thư mục nếu không tồn tại
-        Path uploadPath = Paths.get(UPLOAD_DIR);
+        // Get upload base directory
+        String baseDir;
+        if (uploadBaseDir != null && !uploadBaseDir.isEmpty()) {
+            // Use configured directory (absolute path)
+            baseDir = uploadBaseDir;
+        } else {
+            // Find project root directory
+            baseDir = getProjectRootDirectory();
+        }
+        
+        Path uploadPath = Paths.get(baseDir, "uploads", "documents");
+        
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
@@ -173,6 +192,57 @@ public class StudentRegistrationController {
         // Save file
         Files.write(filePath, file.getBytes());
         
-        return "uploads/documents/" + fileName;
+        return UPLOAD_DIR + fileName;
+    }
+    
+    /**
+     * Get project root directory by finding pom.xml or src folder
+     * This avoids System32 issue when user.dir is wrong
+     */
+    private String getProjectRootDirectory() {
+        // Try user.dir first
+        String currentDir = System.getProperty("user.dir");
+        File dir = new File(currentDir);
+        
+        // Check if pom.xml or src folder exists (project root indicators)
+        if (new File(dir, "pom.xml").exists() || new File(dir, "src").exists()) {
+            return currentDir;
+        }
+        
+        // If not, try going up one level
+        File parent = dir.getParentFile();
+        if (parent != null) {
+            if (new File(parent, "pom.xml").exists() || new File(parent, "src").exists()) {
+                return parent.getAbsolutePath();
+            }
+        }
+        
+        // Try to find project root by looking for Dormitory-Management-System folder
+        File current = dir;
+        int maxDepth = 5; // Prevent infinite loop
+        while (current != null && maxDepth > 0) {
+            if (current.getName().equals("Dormitory-Management-System") || 
+                new File(current, "pom.xml").exists()) {
+                return current.getAbsolutePath();
+            }
+            current = current.getParentFile();
+            maxDepth--;
+        }
+        
+        // Fallback: use current working directory
+        return currentDir;
+    }
+    
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public String handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, Model model, Authentication auth) {
+        try {
+            String username = auth.getName();
+            Users user = userService.findByUsername(username);
+            model.addAttribute("user", user);
+            model.addAttribute("error", "Kích thước file quá lớn! Vui lòng chọn file nhỏ hơn 50MB.");
+        } catch (Exception e) {
+            model.addAttribute("error", "Kích thước file quá lớn! Vui lòng chọn file nhỏ hơn 50MB.");
+        }
+        return "student/registration";
     }
 }

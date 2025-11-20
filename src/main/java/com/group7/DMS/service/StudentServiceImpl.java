@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -65,13 +66,14 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Students createStudent(Users user, String fullName, String studentId, String phone, String address) {
+    public Students createStudent(Users user, String fullName, String studentId, String course, String major) {
         Students student = new Students();
         student.setUser(user);
         student.setFullName(fullName);
         student.setStudentId(studentId);
-        student.setPhone(phone);
-        student.setAddress(address);
+        student.setCourse(course);
+        student.setMajor(major);
+        student.setApplicationDate(LocalDate.now());
         student.setRegistrationStatus(Students.RegistrationStatus.PENDING);
         return studentRepository.save(student);
     }
