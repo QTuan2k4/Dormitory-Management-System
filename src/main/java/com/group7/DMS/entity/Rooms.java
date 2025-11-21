@@ -41,7 +41,103 @@ public class Rooms {
     @Column(name = "price_per_year", precision = 10, scale = 2)
     private BigDecimal pricePerYear = BigDecimal.ZERO;
 
-    @Column(columnDefinition = "TEXT")
+    public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public Buildings getBuilding() {
+		return building;
+	}
+
+	public void setBuilding(Buildings building) {
+		this.building = building;
+	}
+
+	public String getRoomNumber() {
+		return roomNumber;
+	}
+
+	public void setRoomNumber(String roomNumber) {
+		this.roomNumber = roomNumber;
+	}
+
+	public int getFloor() {
+		return floor;
+	}
+
+	public void setFloor(int floor) {
+		this.floor = floor;
+	}
+
+	public int getSlot() {
+		return slot;
+	}
+
+	public void setSlot(int slot) {
+		this.slot = slot;
+	}
+
+	public int getCurrentOccupants() {
+		return currentOccupants;
+	}
+
+	public void setCurrentOccupants(int currentOccupants) {
+		this.currentOccupants = currentOccupants;
+	}
+
+	public RoomStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(RoomStatus status) {
+		this.status = status;
+	}
+
+	public BigDecimal getPricePerYear() {
+		return pricePerYear;
+	}
+
+	public void setPricePerYear(BigDecimal pricePerYear) {
+		this.pricePerYear = pricePerYear;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public List<Contracts> getContracts() {
+		return contracts;
+	}
+
+	public void setContracts(List<Contracts> contracts) {
+		this.contracts = contracts;
+	}
+
+	public List<DamageReports> getDamageReports() {
+		return damageReports;
+	}
+
+	public void setDamageReports(List<DamageReports> damageReports) {
+		this.damageReports = damageReports;
+	}
+
+	@Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "created_at")
@@ -54,6 +150,6 @@ public class Rooms {
     private List<DamageReports> damageReports;
 
     public enum RoomStatus {
-        AVAILABLE, OCCUPIED, MAINTENANCE
+    	AVAILABLE, OCCUPIED, MAINTENANCE
     }
 }

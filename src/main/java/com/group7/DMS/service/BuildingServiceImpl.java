@@ -47,4 +47,6 @@ public class BuildingServiceImpl implements BuildingService {
     public List<Buildings> searchBuildingsByName(String name) {
         return buildingRepository.searchByName(name);
     }
+    
+    
 }

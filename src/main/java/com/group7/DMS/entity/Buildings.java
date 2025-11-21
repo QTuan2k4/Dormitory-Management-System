@@ -21,7 +21,55 @@ public class Buildings {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(name = "total_floors")
+    public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getTotalFloors() {
+		return totalFloors;
+	}
+
+	public void setTotalFloors(int totalFloors) {
+		this.totalFloors = totalFloors;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public List<Rooms> getRooms() {
+		return rooms;
+	}
+
+	public void setRooms(List<Rooms> rooms) {
+		this.rooms = rooms;
+	}
+
+	@Column(name = "total_floors")
     private int totalFloors = 0;
 
     @Column(columnDefinition = "TEXT")

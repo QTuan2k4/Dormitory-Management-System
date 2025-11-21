@@ -1,10 +1,14 @@
 package com.group7.DMS.controller;
 
+import com.group7.DMS.entity.Buildings;
 import com.group7.DMS.entity.Invoices;
 import com.group7.DMS.entity.Payments;
+import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.entity.Students;
 import com.group7.DMS.entity.Users;
+import com.group7.DMS.service.BuildingService;
 import com.group7.DMS.service.InvoiceService;
+import com.group7.DMS.service.RoomService;
 import com.group7.DMS.service.StudentService;
 import com.group7.DMS.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -27,6 +32,12 @@ public class AdminController {
     
     @Autowired
     private StudentService studentService;
+ // === THÊM 2 SERVICE MỚI ===
+    @Autowired
+    private BuildingService buildingService;
+
+    @Autowired
+    private RoomService roomService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication auth) {
@@ -156,5 +167,37 @@ public class AdminController {
             model.addAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/students/" + id;
+    }
+    
+ // QUẢN LÝ KÝ TÚC XÁ
+
+    /** Danh sách các tòa nhà */
+    @GetMapping("/dormitories")
+    public String listDormitories(Model model) {
+        model.addAttribute("buildings", buildingService.getAllBuildings());
+        model.addAttribute("pageTitle", "Quản lý Ký túc xá");
+        return "admin/dormitory/list";
+    }
+
+    /** Chi tiết tòa nhà + phòng theo tầng */
+    @GetMapping("/dormitories/{id}")
+    public String viewDormitoryDetail(@PathVariable("id") int buildingId, Model model) {
+        Buildings building = buildingService.getBuildingById(buildingId);
+        if (building == null) {
+            return "redirect:/admin/dormitories";
+        }
+
+        Map<Integer, List<Rooms>> roomsByFloor = roomService.getRoomsGroupedByFloor(buildingId);
+        
+     // Tính tổng số phòng để gửi sang template (Thymeleaf không làm được stream)
+        int totalRooms = roomsByFloor.values().stream()
+                                     .mapToInt(List::size)
+                                     .sum();
+        model.addAttribute("building", building);
+        model.addAttribute("roomsByFloor", roomsByFloor);
+        model.addAttribute("totalRooms", totalRooms);
+        model.addAttribute("pageTitle", "Tòa " + building.getName());
+
+        return "admin/dormitory/detail";
     }
 }

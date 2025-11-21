@@ -13,4 +13,8 @@ public interface BuildingService {
 	void deleteBuilding(int id);
 	List<Buildings> searchBuildingsByName(String name);
 	
+	// ← BỔ SUNG: method bạn đang dùng trong controller
+    default List<Buildings> getAllBuildings() { return findAllBuildings(); }
+    default Buildings getBuildingById(int id) { return findBuildingById(id).orElse(null); }
+	
 }

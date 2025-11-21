@@ -3,6 +3,7 @@ package com.group7.DMS.service;
 import com.group7.DMS.entity.Rooms;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 public interface RoomService {
     Rooms saveRoom(Rooms room);
@@ -20,4 +21,6 @@ public interface RoomService {
     List<Rooms> searchRoomsByNumberAndBuildingId(String roomNumber, int buildingId);
 
     Rooms updateOccupancy(int roomId, int changeInOccupants);
+ // ← BỔ SUNG: gom nhóm theo tầng để hiển thị đẹp
+    Map<Integer, List<Rooms>> getRoomsGroupedByFloor(int buildingId);
 }
