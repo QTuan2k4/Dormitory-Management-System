@@ -32,11 +32,29 @@ public class Students {
     
     private String phone;
     private String address;
+
+    @Column(name = "class_name")
+    private String studentClass;
+    @Column(name = "course")
+    private String course;
+    @Column(name = "major")
+    private String major;
+    @Column(name = "application_date")
+    private LocalDate applicationDate;
     
     @Column(name = "birth_date")
     private LocalDate birthDate;
     
-    @Column(name = "documents_path")
+    @Column(name = "gender")
+    private String gender;
+    
+    @Column(name = "citizen_id")
+    private String citizenId;
+    
+    @Column(name = "floor")
+    private String floor;
+    
+    @Column(name = "documents_path", columnDefinition = "TEXT")
     private String documentsPath;
     
     @Enumerated(EnumType.ORDINAL)
@@ -96,6 +114,22 @@ public class Students {
         this.address = address;
     }
 
+    public String getStudentClass() {
+        return studentClass;
+    }
+
+    public void setStudentClass(String studentClass) {
+        this.studentClass = studentClass;
+    }
+
+    public LocalDate getApplicationDate() {
+        return applicationDate;
+    }
+
+    public void setApplicationDate(LocalDate applicationDate) {
+        this.applicationDate = applicationDate;
+    }
+
     public RegistrationStatus getRegistrationStatus() {
         return registrationStatus;
     }
@@ -118,6 +152,46 @@ public class Students {
 
     public void setDocumentsPath(String documentsPath) {
         this.documentsPath = documentsPath;
+    }
+
+    public String getCourse() {
+        return course;
+    }
+
+    public void setCourse(String course) {
+        this.course = course;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getCitizenId() {
+        return citizenId;
+    }
+
+    public void setCitizenId(String citizenId) {
+        this.citizenId = citizenId;
+    }
+
+    public String getFloor() {
+        return floor;
+    }
+
+    public void setFloor(String floor) {
+        this.floor = floor;
     }
 
 }
