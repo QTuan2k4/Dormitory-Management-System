@@ -4,6 +4,9 @@ package com.group7.DMS.service;
 import com.group7.DMS.entity.Students;
 import com.group7.DMS.entity.Users;
 import com.group7.DMS.repository.StudentRepository;
+import com.group7.DMS.repository.ContractRepository;
+import com.group7.DMS.entity.Contracts;
+import com.group7.DMS.entity.Contracts.ContractStatus;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -18,6 +23,9 @@ public class StudentServiceImpl implements StudentService {
     
     @Autowired
     private StudentRepository studentRepository;
+    
+    @Autowired 
+    private ContractRepository contractRepository;
 
     @Override
     public Students save(Students student) {
@@ -101,6 +109,38 @@ public class StudentServiceImpl implements StudentService {
             student.setRegistrationStatus(status);
             studentRepository.save(student);
         }
+    }
+    
+    @Override
+    public Students findByUsername(String username) {
+        return studentRepository.findByUsername(username).orElse(null); 
+    }
+    
+    @Override
+    public Optional<Contracts> findActiveContractByUsername(String username) {
+        // 1. Tìm đối tượng Student
+        Students student = findByUsername(username);
+        
+        if (student == null) {
+            return Optional.empty();
+        }
+
+        // 2. Tìm hợp đồng ACTIVE của sinh viên đó
+        return contractRepository.findActiveContractByStudentId(student.getId());
+    }
+    
+    @Override
+    public List<Students> findRoomMatesByRoomId(int roomId, int currentStudentId) {
+        
+        // 1. Tìm tất cả các Hợp đồng đang ACTIVE trong phòng đó, loại trừ sinh viên hiện tại
+        List<Contracts> roomMateContracts = contractRepository.findActiveContractsForRoomMates(
+            roomId, currentStudentId
+        );
+
+        // 2. Trích xuất đối tượng Students từ mỗi Contracts và trả về
+        return roomMateContracts.stream()
+            .map(Contracts::getStudent)
+            .collect(Collectors.toList());
     }
    
 }

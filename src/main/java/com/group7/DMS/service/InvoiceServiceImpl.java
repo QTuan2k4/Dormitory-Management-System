@@ -3,10 +3,13 @@ package com.group7.DMS.service;
 import com.group7.DMS.entity.Invoices;
 import com.group7.DMS.entity.Payments;
 import com.group7.DMS.entity.Contracts;
+import com.group7.DMS.entity.Invoices.InvoiceStatus;
 import com.group7.DMS.repository.InvoiceRepository;
 import com.group7.DMS.repository.PaymentRepository;
 import com.group7.DMS.repository.ContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -162,4 +165,46 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .filter(invoice -> !invoice.getIssueDate().isBefore(startDate) && !invoice.getIssueDate().isAfter(endDate))
                 .toList();
     }
+    
+    @Override
+    public BigDecimal calculateTotalPaidAmount(int studentId) {
+        // Lấy tất cả hóa đơn ĐÃ THANH TOÁN của sinh viên
+        List<Invoices> paidInvoices = invoiceRepository.findByStudentIdAndStatus(studentId, InvoiceStatus.PAID);
+        return paidInvoices.stream()
+            .map(Invoices::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    
+    @Override
+    public BigDecimal calculateTotalUnpaidAmount(int studentId) {
+        // Lấy tất cả hóa đơn CHƯA THANH TOÁN
+        List<Invoices> unpaidInvoices = invoiceRepository.findByStudentIdAndStatus(studentId, InvoiceStatus.UNPAID);        
+        // Lấy tất cả hóa đơn QUÁ HẠN
+        List<Invoices> overdueInvoices = invoiceRepository.findByStudentIdAndStatus(studentId, InvoiceStatus.OVERDUE);
+        // Cộng tổng tiền của cả hai danh sách
+        BigDecimal totalUnpaid = unpaidInvoices.stream()
+            .map(Invoices::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        BigDecimal totalOverdue = overdueInvoices.stream()
+            .map(Invoices::getTotalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+        return totalUnpaid.add(totalOverdue);
+    }
+    
+    @Override
+    public List<Payments> findRecentPaymentsByStudent(int studentId, int limit) {
+        List<Invoices> paidInvoices = invoiceRepository.findByStudentIdAndStatus(studentId, InvoiceStatus.PAID);       
+        // Lấy tất cả Payments cho các hóa đơn này
+        List<Payments> allPayments = paidInvoices.stream()
+            .flatMap(invoice -> paymentRepository.findByInvoice(invoice).stream()) 
+            .toList();
+        // Sắp xếp và giới hạn kết quả
+        return allPayments.stream()
+            .sorted((p1, p2) -> p2.getPaymentDate().compareTo(p1.getPaymentDate())) // Sắp xếp giảm dần theo ngày
+            .limit(limit)
+            .toList();
+    }
+    
 }

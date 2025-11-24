@@ -1,6 +1,7 @@
 package com.group7.DMS.repository;
 
 import com.group7.DMS.entity.Payments;
+import com.group7.DMS.entity.Invoices;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,7 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<Payments, Integer> {
     List<Payments> findByInvoiceId(int invoiceId);
     List<Payments> findByStatus(Payments.PaymentStatus status);
+    List<Payments> findByInvoice(Invoices invoice);
     
     @Query("SELECT p FROM Payments p WHERE p.invoice.contract.student.id = :studentId")
     List<Payments> findByStudentId(@Param("studentId") int studentId);

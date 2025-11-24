@@ -70,7 +70,6 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
         <div class="p-3">
             <h4 class="text-white mb-4">
@@ -81,7 +80,7 @@
             <a class="nav-link" href="#" th:href="@{/student/dashboard}">
                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
             </a>
-            <a class="nav-link" href="#" th:href="@{/student/profile}">
+            <a class="nav-link" href="#" th:href="@{/student/personal-info}">
                 <i class="fas fa-user me-2"></i>Thông tin cá nhân
             </a>
             <a class="nav-link active" href="#" th:href="@{/student/room-info}">
@@ -93,9 +92,7 @@
         </nav>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
         <div class="header d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="mb-0">Xin chào, <span th:text="${user.username}">Sinh viên</span></h4>
@@ -106,155 +103,155 @@
             </a>
         </div>
 
-        <!-- Room Information -->
-        <div class="room-info">
-            <h5 class="mb-3">
-                <i class="fas fa-home me-2"></i>PHÒNG 102
-            </h5>
-            <div class="row">
-                <div class="col-md-3">
-                    <strong>Tòa nhà:</strong> Tòa A
-                </div>
-                <div class="col-md-3">
-                    <strong>Tầng:</strong> 1
-                </div>
-                <div class="col-md-3">
-                    <strong>Số người:</strong> 4/4
-                </div>
-                <div class="col-md-3">
-                    <strong>Trạng thái:</strong> <span class="badge bg-success">Đang ở</span>
-                </div>
-            </div>
+        <div th:unless="${hasRoom}" class="alert alert-warning card p-4">
+            <h5 class="mb-2"><i class="fas fa-exclamation-triangle me-2"></i> Không tìm thấy thông tin phòng</h5>
+            <p class="mb-0">Xin lỗi, hiện tại bạn không có hợp đồng phòng ở nào đang hoạt động. Vui lòng liên hệ ban quản lý ký túc xá để đăng ký phòng hoặc kiểm tra lại trạng thái hợp đồng.</p>
         </div>
 
-        <!-- Room Details -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Thông tin chi tiết
-                        </h5>
+
+        <div th:if="${hasRoom}">
+            <div class="room-info">
+                <h5 class="mb-3" th:text="'PHÒNG ' + ${room.roomNumber}">
+                    <i class="fas fa-home me-2"></i>PHÒNG 102
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Tòa nhà:</strong> <span th:text="${building.name}">Tòa A</span>
                     </div>
-                    <div class="card-body">
-                        <table class="table table-borderless">
-                            <tr>
-                                <td><strong>Mã phòng:</strong></td>
-                                <td>P102</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tòa nhà:</strong></td>
-                                <td>Tòa A - Ký túc xá sinh viên</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tầng:</strong></td>
-                                <td>Tầng 1</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Sức chứa:</strong></td>
-                                <td>4 người</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Hiện tại:</strong></td>
-                                <td>4/4 người</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Giá phòng:</strong></td>
-                                <td>2.000.000 Đ/năm</td>
-                            </tr>
-                        </table>
+                    <div class="col-md-3">
+                        <strong>Tầng:</strong> <span th:text="${room.floor}">1</span>
+                    </div>
+                    <div class="col-md-3">
+    					<strong>Số người:</strong> <span th:text="${roomMates.size() + 1} + '/' + ${room.slot}">4/4</span>
+					</div>
+                    <div class="col-md-3">
+                        <strong>Trạng thái:</strong> <span class="badge bg-success">Đang ở</span>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>Danh sách bạn cùng phòng
-                        </h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Thông tin chi tiết
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Mã phòng:</strong></td>
+                                    <td th:text="${room.roomNumber}">P102</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tòa nhà:</strong></td>
+                                    <td th:text="${building.name} + ' - Ký túc xá sinh viên'">Tòa A - Ký túc xá sinh viên</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tầng:</strong></td>
+                                    <td th:text="${room.floor}">Tầng 1</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sức chứa:</strong></td>
+                                    <td th:text="${room.slot} + ' người'">4 người</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hiện tại:</strong></td>
+                                    <td th:text="${roomMates.size() + 1} + '/' + ${room.slot} + ' người'">4/4 người</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Giá phòng:</strong></td>
+                                    <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'COMMA', 0, 'POINT')} + ' Đ/năm'">2.000.000 Đ/năm</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <div class="list-group-item">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-primary text-white rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Nguyễn Văn A</strong>
-                                        <br>
-                                        <small class="text-muted">MSSV: 2021001</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="list-group-item">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-success text-white rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Trần Thị B</strong>
-                                        <br>
-                                        <small class="text-muted">MSSV: 2021002</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="list-group-item">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-info text-white rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-user"></i>
-                                    </div>
-                                    <div>
-                                        <strong>Lê Văn C</strong>
-                                        <br>
-                                        <small class="text-muted">MSSV: 2021003</small>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users me-2"></i>Danh sách bạn cùng phòng
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                
+                                <div class="list-group-item bg-light">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar bg-success text-white rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <strong th:text="${student.fullName}">Nguyễn Văn A (Bạn)</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="'MSSV: ' + ${student.studentId}">MSSV: 2021001</small>
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                <div class="list-group-item" th:each="mate : ${roomMates}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar bg-primary text-white rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <strong th:text="${mate.fullName}">Trần Thị B</strong>
+                                            <br>
+                                            <small class="text-muted" th:text="'MSSV: ' + ${mate.studentId}">MSSV: 2021002</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div th:if="${roomMates.isEmpty() and (roomMates.size() + 1 == room.slot)}">
+                                    <p class="mt-2 text-center text-muted">Phòng đã đầy và bạn là sinh viên duy nhất.</p>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Room Facilities -->
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-tools me-2"></i>Tiện ích phòng
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="text-center p-3">
-                                    <i class="fas fa-bed fa-2x text-primary mb-2"></i>
-                                    <h6>Giường</h6>
-                                    <small class="text-muted">4 giường tầng</small>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tools me-2"></i>Tiện ích phòng
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center p-3">
+                                        <i class="fas fa-bed fa-2x text-primary mb-2"></i>
+                                        <h6>Giường</h6>
+                                        <small class="text-muted">4 giường tầng</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center p-3">
-                                    <i class="fas fa-fan fa-2x text-success mb-2"></i>
-                                    <h6>Quạt</h6>
-                                    <small class="text-muted">2 quạt trần</small>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3">
+                                        <i class="fas fa-fan fa-2x text-success mb-2"></i>
+                                        <h6>Quạt</h6>
+                                        <small class="text-muted">2 quạt trần</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center p-3">
-                                    <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
-                                    <h6>Đèn</h6>
-                                    <small class="text-muted">4 đèn LED</small>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3">
+                                        <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
+                                        <h6>Đèn</h6>
+                                        <small class="text-muted">4 đèn LED</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="text-center p-3">
-                                    <i class="fas fa-wifi fa-2x text-info mb-2"></i>
-                                    <h6>WiFi</h6>
-                                    <small class="text-muted">Miễn phí</small>
+                                <div class="col-md-3">
+                                    <div class="text-center p-3">
+                                        <i class="fas fa-wifi fa-2x text-info mb-2"></i>
+                                        <h6>WiFi</h6>
+                                        <small class="text-muted">Miễn phí</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>

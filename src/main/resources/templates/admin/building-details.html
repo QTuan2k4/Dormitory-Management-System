@@ -4,10 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle}"></title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .details-card { margin-top: 20px; }
+        .details-card { margin-top: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .rooms-table th, .rooms-table td { vertical-align: middle; }
+        .card-header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            border-radius: 10px 10px 0 0 !important; 
+        }
+        /* CSS cho trạng thái phòng */
+        .badge-available { background-color: #198754; color: white; }
+        .badge-full { background-color: #dc3545; color: white; }
+        .badge-repair { background-color: #ffc107; color: #343a40 !important; }
     </style>
 </head>
 <body>
@@ -23,16 +33,16 @@
     <div class="row mb-3">
         <div class="col-12">
             <a th:href="@{/admin/buildings}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Quay lại Danh sách Tòa nhà
+                <i class="fas fa-arrow-left me-1"></i> Quay lại Danh sách Tòa nhà
             </a>
-            <a th:href="@{'/admin/buildings/edit/' + ${building.id}}" class="btn btn-warning ml-2">
-                <i class="fas fa-edit"></i> Chỉnh sửa Tòa nhà
+            <a th:href="@{/admin/buildings/edit/{id}(id=${building.id})}" class="btn btn-warning ml-2">
+                <i class="fas fa-edit me-1"></i> Chỉnh sửa Tòa nhà
             </a>
         </div>
     </div>
 
     <div class="card details-card">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header">
             <h4 class="mb-0" th:text="${building.name}">Tên Tòa Nhà</h4>
         </div>
         <div class="card-body">
@@ -67,38 +77,47 @@
             <h2 class="mt-4">Danh sách Phòng trong Tòa nhà</h2>
             
             <table class="table table-striped rooms-table">
-    <thead class="thead-dark">
-        <tr>
-            <th>ID Phòng</th>
-            <th>Số Phòng</th> <th>Tầng</th>
-            <th>Slot</th> <th>Giá/Năm</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="room : ${rooms}">
-            <td th:text="${room.id}">101</td>
-            <td th:text="${room.roomNumber}">A101</td> <td th:text="${room.floor}">1</td>
-            <td th:text="${room.slot}">4</td>
-            <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">12,000,000 VNĐ</td> 
-            
-            <td th:text="${room.status}">AVAILABLE</td> 
-            
-            <td>
-                <a th:href="@{'/admin/rooms/view/' + ${room.id}}" class="btn btn-info btn-sm">Xem</a>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(rooms)}">
-            <td colspan="7" class="text-center">Tòa nhà này hiện chưa có phòng nào.</td>
-        </tr>
-    </tbody>
-</table>
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID Phòng</th>
+                        <th>Số Phòng</th> <th>Tầng</th>
+                        <th>Slot</th> <th>Giá/Năm</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="room : ${rooms}">
+                        <td th:text="${room.id}">101</td>
+                        <td th:text="${room.roomNumber}">A101</td> <td th:text="${room.floor}">1</td>
+                        <td th:text="${room.slot}">4</td>
+                        <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">12,000,000 VNĐ</td> 
+                        
+                        <td class="text-center">
+                            <span th:switch="${room.status}">
+                                <span th:case="'AVAILABLE'" class="badge badge-available">Còn chỗ</span>
+                                <span th:case="'FULL'" class="badge badge-full">Đầy</span>
+                                <span th:case="'REPAIR'" class="badge badge-repair">Bảo trì</span>
+                                <span th:case="*" class="badge bg-secondary">Không rõ</span>
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <a th:href="@{/admin/rooms/details/{id}(id=${room.id})}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i> Xem
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(rooms)}">
+                        <td colspan="7" class="text-center">Tòa nhà này hiện chưa có phòng nào.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
 
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
