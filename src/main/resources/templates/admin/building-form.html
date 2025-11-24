@@ -35,10 +35,10 @@
             <h4 class="text-white mb-4"><i class="fas fa-university me-2"></i>DMS Admin</h4>
         </div>
         <nav class="nav flex-column">
-            <a class="nav-link active" href="#" th:href="@{/buildings}"><i class="fas fa-building me-2"></i>Quản lý Tòa nhà</a>
+            <a class="nav-link active" href="#" th:href="@{/admin/buildings}"><i class="fas fa-building me-2"></i>Quản lý Tòa nhà</a>
             <a class="nav-link" href="#" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
             <a class="nav-link" href="#" th:href="@{/admin/students}"><i class="fas fa-users me-2"></i>Quản lý sinh viên</a>
-            <a class="nav-link" href="#" th:href="@{/admin/invoices}"><i class="fas fa-file-invoice me-2"></i>Quản lý hóa đơn</a>
+            <a class="nav-link" href="#" th:href="@{/admin/rooms}"><i class="fas fa-building me-2"></i>Quản lý phòng</a> <a class="nav-link" href="#" th:href="@{/admin/invoices}"><i class="fas fa-file-invoice me-2"></i>Quản lý hóa đơn</a>
             <a class="nav-link" href="#" th:href="@{/admin/system}"><i class="fas fa-cogs me-2"></i>Quản lý hệ thống</a>
             <a class="nav-link" href="#" th:href="@{/admin/backup}"><i class="fas fa-database me-2"></i>Backup dữ liệu</a>
             <a class="nav-link" href="#" th:href="@{/admin/statistics}"><i class="fas fa-chart-bar me-2"></i>Thống kê</a>
@@ -64,30 +64,58 @@
                     </div>
                     <div class="card-body">
                         
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${errorMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        
                         <form th:action="@{/admin/buildings/save}" method="POST" th:object="${building}">
                             
                             <input type="hidden" th:field="*{id}" />
+                            
+                            <div class="mb-3">
+    							<label for="name" class="form-label">Tên Tòa Nhà <span class="text-danger">*</span></label>
+    							<input type="text" th:field="*{name}" id="name" class="form-control" 
+           							th:classappend="${#fields.hasErrors('name') ? 'is-invalid' : ''}">
+    							<div class="invalid-feedback" th:if="${#fields.hasErrors('name')}">
+        							<span th:errors="*{name}"></span>
+    							</div>
+							</div>
 
                             <div class="mb-3">
-                                <label for="name" class="form-label">Tên Tòa Nhà <span class="text-danger">*</span></label>
-                                <input type="text" th:field="*{name}" id="name" class="form-control" required minlength="2" maxlength="100">
-                            </div>
+    							<label for="totalFloors" class="form-label">Tổng số Tầng</label>
+    							<input type="number" th:field="*{totalFloors}" id="totalFloors" class="form-control" min="0" 
+           							th:classappend="${#fields.hasErrors('totalFloors') ? 'is-invalid' : ''}">
+    							<div class="invalid-feedback" th:if="${#fields.hasErrors('totalFloors')}">
+        							<span th:errors="*{totalFloors}"></span>
+    							</div>
+							</div>
 
                             <div class="mb-3">
-                                <label for="totalFloors" class="form-label">Tổng số Tầng</label>
-                                <input type="number" th:field="*{totalFloors}" id="totalFloors" class="form-control" min="0" value="0">
+                                <label for="status" class="form-label">Trạng Thái <span class="text-danger">*</span></label>
+                                <select th:field="*{status}" id="status" class="form-select" 
+                                        th:classappend="${#fields.hasErrors('status') ? 'is-invalid' : ''}"> <option value="">-- Chọn Trạng Thái --</option>
+                                    <option value="ACTIVE" th:selected="${#strings.equals(building.status, 'ACTIVE')}">Hoạt động</option>
+                                    <option value="MAINTENANCE" th:selected="${#strings.equals(building.status, 'MAINTENANCE')}">Bảo trì</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}"> <span th:errors="*{status}"></span>
+                                </div>
                             </div>
-
+                            
                             <div class="mb-3">
                                 <label for="description" class="form-label">Mô Tả</label>
-                                <textarea th:field="*{description}" id="description" class="form-control" rows="3"></textarea>
+                                <textarea th:field="*{description}" id="description" class="form-control" rows="3"
+                                          th:classappend="${#fields.hasErrors('description') ? 'is-invalid' : ''}"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}">
+                                    <span th:errors="*{description}"></span>
+                                </div>
                             </div>
 
                             <div class="mt-4">
                                 <button type="submit" class="btn btn-success me-2">
                                     <i class="fas fa-save me-1"></i> Lưu
                                 </button>
-                                <a th:href="@{/buildings}" class="btn btn-secondary">
+                                <a th:href="@{/admin/buildings}" class="btn btn-secondary">
                                     <i class="fas fa-times me-1"></i> Hủy
                                 </a>
                             </div>

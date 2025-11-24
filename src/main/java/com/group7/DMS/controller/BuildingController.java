@@ -1,12 +1,19 @@
 package com.group7.DMS.controller;
 
 import com.group7.DMS.entity.Buildings;
+import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.service.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,19 +29,28 @@ public class BuildingController {
         this.buildingService = buildingService;
     }
 
-    // --- 1. GET: Hiển thị Danh sách và Tìm kiếm (View: building-list.html) ---
+    // --- 1. GET: Hiển thị Danh sách, Tìm kiếm và PHÂN TRANG (View: building-list.html) ---
     @GetMapping({"", "/"}) 
-    public String listBuildings(Model model, @RequestParam(required = false) String name) {
+    public String listBuildings(
+    		Model model, 
+            @RequestParam(defaultValue = "1") int page, 
+            @RequestParam(defaultValue = "10") int size, 
+    		@RequestParam(required = false) String name,
+    		@RequestParam(required = false) String status
+    	) {
         
-        List<Buildings> buildings;
-        if (name != null && !name.isEmpty()) {
-            buildings = buildingService.searchBuildingsByName(name);
-        } else {
-            buildings = buildingService.findAllBuildings();
-        }
+        Pageable pageable = PageRequest.of(page - 1, size);
         
-        model.addAttribute("buildingList", buildings);
-        model.addAttribute("searchName", name); 
+        Page<Buildings> buildingPage = buildingService.searchAndFilter(name, status, pageable);
+        
+        model.addAttribute("buildingList", buildingPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", buildingPage.getTotalPages());
+        model.addAttribute("totalItems", buildingPage.getTotalElements());
+        model.addAttribute("pageSize", size); 
+        
+        model.addAttribute("searchName", name);
+        model.addAttribute("searchStatus", status);
         
         return "admin/building-list"; 
     }
@@ -49,10 +65,38 @@ public class BuildingController {
     
     // --- 3. POST: Xử lý Lưu (Thêm mới hoặc Cập nhật) ---
     @PostMapping("/save")
-    public String saveBuilding(@ModelAttribute("building") Buildings building, RedirectAttributes ra) {
-        buildingService.saveBuilding(building);
-        ra.addFlashAttribute("message", "Tòa nhà đã được lưu thành công!");
-        return "redirect:/admin/buildings"; 
+    public String saveBuilding(
+    	@Valid	@ModelAttribute("building") Buildings building, 
+    	BindingResult bindingResult,
+    	RedirectAttributes ra,
+    	Model model
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("pageTitle", (building.getId() == 0 ? "Thêm Tòa Nhà Mới" : "Sửa Tòa Nhà (ID: " + building.getId() + ")"));
+            return "admin/building-form"; 
+        }
+
+        try {
+            buildingService.saveBuilding(building);
+            ra.addFlashAttribute("message", "Tòa nhà đã được lưu thành công!");
+        } catch (IllegalArgumentException e) { 
+       
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("building", building); 
+            
+            model.addAttribute("pageTitle", (building.getId() == 0 ? "Thêm Tòa Nhà Mới" : "Sửa Tòa Nhà (ID: " + building.getId() + ")"));
+            return "admin/building-form"; 
+            
+        } catch (org.springframework.dao.DataIntegrityViolationException e) { 
+            
+            model.addAttribute("errorMessage", "Lỗi cơ sở dữ liệu: Vui lòng kiểm tra lại thông tin nhập liệu.");
+            model.addAttribute("building", building); 
+            model.addAttribute("pageTitle", (building.getId() == 0 ? "Thêm Tòa Nhà Mới" : "Sửa Tòa Nhà (ID: " + building.getId() + ")"));
+            
+            return "admin/building-form"; 
+        }
+
+        return "redirect:/admin/buildings";
     }
 
     // --- 4. GET: Hiển thị Form Sửa (View: building-form.html) ---
@@ -81,8 +125,38 @@ public class BuildingController {
             buildingService.deleteBuilding(id);
             ra.addFlashAttribute("message", "Tòa nhà ID " + id + " đã được xóa thành công.");
         } catch (Exception e) {
+            // Lỗi xảy ra khi xóa khóa ngoại (ví dụ: Tòa nhà còn phòng)
             ra.addFlashAttribute("errorMessage", "Không thể xóa Tòa nhà ID " + id.toString() + ". Tòa nhà này có thể đang chứa các phòng.");
         }
         return "redirect:/admin/buildings";
+    }
+    
+    // --- 6. GET: Hiển thị Chi tiết Tòa nhà (View: building-details.html) ---
+    @GetMapping("/details/{id}")
+    public String showBuildingDetails(@PathVariable("id") Integer id, Model model,  RedirectAttributes ra) {
+    	try {
+    		Optional<Buildings> buildingData = buildingService.findBuildingByIdWithRooms(id);
+    		
+    		if (buildingData.isPresent()) {
+    			Buildings building = buildingData.get();
+    			List<Rooms> roomsList = building.getRooms();
+    			
+    			if (roomsList == null) {
+                    roomsList = java.util.Collections.emptyList();
+                }
+    			
+    			model.addAttribute("building", building);
+    			model.addAttribute("rooms", roomsList);
+    			model.addAttribute("pageTitle", "Chi Tiết Tòa Nhà: " + building.getName());
+    			
+    			return "admin/building-details";
+    		} else {
+    			ra.addFlashAttribute("errorMesseage", "Không tìm thấy Tòa nhà ID " + id);
+    			return "redirect:/admin/buildings";
+    		}
+    	} catch (Exception e) {
+    		ra.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi tải chi tiết tòa nhà.");
+    		return "redirect:/admin/buildings";
+    	}
     }
 }

@@ -28,4 +28,7 @@ public interface RoomRepository extends JpaRepository<Rooms, Integer> {
 
     @Query("SELECT r FROM Rooms r WHERE r.currentOccupants < r.slot")
     List<Rooms> findAvailableRooms();
+    
+    boolean existsByBuildingIdAndRoomNumberIgnoreCase(Integer buildingId, String roomNumber);
+    boolean existsByBuildingIdAndRoomNumberIgnoreCaseAndIdNot(Integer buildingId, String roomNumber, Integer id);
 }

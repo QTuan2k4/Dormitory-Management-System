@@ -26,4 +26,7 @@ public interface InvoiceService {
     Payments processPayment(int invoiceId, BigDecimal amount, Payments.PaymentMethod method, String transactionId);
     BigDecimal calculateTotalAmount(BigDecimal roomFee, BigDecimal electricityFee, BigDecimal waterFee, BigDecimal internetFee);
     List<Invoices> findByDateRange(LocalDate startDate, LocalDate endDate);
+    BigDecimal calculateTotalPaidAmount(int studentId);
+    BigDecimal calculateTotalUnpaidAmount(int studentId);
+    List<Payments> findRecentPaymentsByStudent(int studentId, int limit);
 }
