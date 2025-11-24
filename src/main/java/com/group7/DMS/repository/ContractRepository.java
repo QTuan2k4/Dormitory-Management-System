@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contracts, Integer> {
@@ -20,6 +21,15 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
     
     @Query("SELECT c FROM Contracts c WHERE c.room.id = :roomId AND c.status = com.group7.DMS.entity.Contracts$ContractStatus.ACTIVE")
     List<Contracts> findActiveContractsByRoom(@Param("roomId") int roomId);
+    
+    @Query("SELECT c FROM Contracts c WHERE c.room.id = :roomId AND c.status = com.group7.DMS.entity.Contracts$ContractStatus.ACTIVE AND c.student.id != :currentStudentId")
+    List<Contracts> findActiveContractsForRoomMates(
+        @Param("roomId") int roomId,
+        @Param("currentStudentId") int currentStudentId
+    );
+    
+    @Query("SELECT c FROM Contracts c WHERE c.student.id = :studentId AND c.status = com.group7.DMS.entity.Contracts$ContractStatus.ACTIVE")
+    Optional<Contracts> findActiveContractByStudentId(@Param("studentId") int studentId);
     
     @Query("SELECT c FROM Contracts c WHERE c.endDate < :date AND c.status = com.group7.DMS.entity.Contracts$ContractStatus.ACTIVE")
     List<Contracts> findExpiredContracts(@Param("date") LocalDateTime date);

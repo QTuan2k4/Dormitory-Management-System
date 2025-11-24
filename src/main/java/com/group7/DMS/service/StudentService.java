@@ -2,8 +2,10 @@ package com.group7.DMS.service;
 
 import com.group7.DMS.entity.Students;
 import com.group7.DMS.entity.Users;
+import com.group7.DMS.entity.Contracts;
 
 import java.util.List;
+import java.util.Optional;
 
 
 
@@ -22,5 +24,9 @@ public interface StudentService {
     void approveRegistration(int studentId);
     void rejectRegistration(int studentId);
     void updateRegistrationStatus(int studentId, Students.RegistrationStatus status);
+    Students findByUsername(String username);
+    Optional<Contracts> findActiveContractByUsername(String username);
+    List<Students> findRoomMatesByRoomId(int roomId, int currentStudentId);
+    
 
 }

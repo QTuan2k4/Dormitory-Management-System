@@ -109,135 +109,138 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
-        <div class="header d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-0">Xin chào, <span th:text="${user.username}">Sinh viên</span></h4>
-                <small class="text-muted">Sinh viên</small>
-            </div>
-            <a href="#" th:href="@{/logout}" class="btn btn-logout">
-                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
-            </a>
-        </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-invoice me-2"></i>Phí sinh hoạt | Mã HD: <span th:text="${invoice.invoiceNumber}">[Mã HD]</span> | Phòng: <span th:text="${invoice.contract.room.roomNumber}">[P102]</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3">Chi tiết Hóa đơn</h6>
+                            <div class="mb-2">
+                                <strong>NGÀY PHÁT HÀNH:</strong> <span th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>HẠN THANH TOÁN:</strong> <span th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}"></span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>TIỀN ĐIỆN (Đơn giá/đơn vị):</strong> <span th:text="${invoice.electricityFee} + ' VNĐ'"></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>TIỀN NƯỚC (Đơn giá/đơn vị):</strong> <span th:text="${invoice.waterFee} + ' VNĐ'"></span>
+                            </div>
 
-        <!-- Payment Content -->
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-file-invoice me-2"></i>Phí sinh hoạt | P102
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="mb-3">Thông tin sử dụng</h6>
-                                <div class="mb-2">
-                                    <strong>SỐ KW ĐIỆN:</strong> 120
-                                </div>
-                                <div class="mb-2">
-                                    <strong>SỐ KHỐI NƯỚC:</strong> 120
-                                </div>
-                                <div class="mb-2">
-                                    <strong>PHÍ BẢO TRÌ (NẾU CÓ):</strong> 120
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Chi phí phát sinh:</strong> 0
-                                </div>
-
-                                <h6 class="mb-3">Chi phí</h6>
-                                <div class="cost-item">
-                                    <div class="d-flex justify-content-between">
-                                        <span>Tiền điện:</span>
-                                        <span>100.000 Đ</span>
-                                    </div>
-                                </div>
-                                <div class="cost-item">
-                                    <div class="d-flex justify-content-between">
-                                        <span>Tiền nước:</span>
-                                        <span>100.000 Đ</span>
-                                    </div>
-                                </div>
-                                <div class="cost-item">
-                                    <div class="d-flex justify-content-between">
-                                        <span>Tiền mạng:</span>
-                                        <span>100.000 Đ</span>
-                                    </div>
-                                </div>
-                                <div class="cost-item">
-                                    <div class="d-flex justify-content-between">
-                                        <span>Tiền bảo trì:</span>
-                                        <span>100.000 Đ</span>
-                                    </div>
+                            <h6 class="mb-3">Tổng hợp chi phí</h6>
+                            
+                            <div class="cost-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Phí phòng:</span>
+                                    <span th:text="${#numbers.formatDecimal(invoice.roomFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="text-center">
-                                    <h6 class="mb-3">Thanh toán</h6>
-                                    <div class="qr-code">
-                                        <i class="fas fa-qrcode fa-3x text-muted"></i>
-                                    </div>
-                                    <div class="mt-3">
-                                        <strong>Tổng tiền: 400.000 Đ</strong>
-                                    </div>
+                            <div class="cost-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Tiền điện:</span>
+                                    <span th:text="${#numbers.formatDecimal(invoice.electricityFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
                                 </div>
+                            </div>
+                            <div class="cost-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Tiền nước:</span>
+                                    <span th:text="${#numbers.formatDecimal(invoice.waterFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
+                                </div>
+                            </div>
+                            <div class="cost-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Tiền mạng:</span>
+                                    <span th:text="${#numbers.formatDecimal(invoice.internetFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
+                                </div>
+                            </div>
+                             <div class="cost-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Phí khác/Bảo trì:</span>
+                                    <span>0 VNĐ</span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h6 class="mb-3">Thanh toán</h6>
+                                <div class="qr-code">
+                                    <i class="fas fa-qrcode fa-3x text-muted"></i>
+                                </div>
+                                <div class="mt-3 text-danger fw-bold fs-5">
+                                    <span th:with="total=${invoice.getTotalAmount()}">
+                                        Tổng tiền: <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[400.000 Đ]</span>
+                                    </span>
+                                </div>
+                                <small class="text-muted">Vui lòng thanh toán chính xác số tiền này.</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form th:action="@{/student/invoices/{id}/payment(id=${invoice.id})}" method="post">
-                            <div class="mb-3">
-                                <label class="form-label">Chọn phương thức</label>
-                                <select class="form-select" name="paymentMethod" required>
-                                    <option value="QR_BANK">QR Banking</option>
-                                    <option value="BANK_TRANSFER">Chuyển khoản</option>
-                                    <option value="CASH">Tiền mặt</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Mã giao dịch</label>
-                                <input type="text" class="form-control" name="transactionId" placeholder="Nhập mã giao dịch">
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-check me-2"></i>Xác nhận thanh toán
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán
+                    </h5>
                 </div>
+                <div class="card-body">
+                    <form th:action="@{/student/invoices/{id}/payment(id=${invoice.id})}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn phương thức</label>
+                            <select class="form-select" name="paymentMethod" required>
+                                <option value="BANK_TRANSFER">Chuyển khoản Ngân hàng (Ưu tiên)</option>
+                                <option value="CARD">Thẻ ATM/Visa</option>
+                                <option value="CASH">Tiền mặt (Chỉ áp dụng tại văn phòng)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Mã giao dịch/Mã tham chiếu</label>
+                            <input type="text" class="form-control" name="transactionId" placeholder="Nhập mã giao dịch" required>
+                            <small class="text-danger">Bắt buộc phải nhập mã giao dịch để xác minh thanh toán.</small>
+                        </div>
 
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>Hướng dẫn
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <ol class="small">
-                            <li>Quét mã QR bằng ứng dụng ngân hàng</li>
-                            <li>Nhập số tiền: <strong>400.000 Đ</strong></li>
-                            <li>Nhập nội dung: <strong>Thanh toán phí KTX</strong></li>
-                            <li>Xác nhận giao dịch</li>
-                            <li>Nhập mã giao dịch vào form bên cạnh</li>
-                        </ol>
-                    </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Xác nhận đã thanh toán
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Hướng dẫn
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol class="small">
+                        <li>Quét mã QR bằng ứng dụng ngân hàng</li>
+                        <li th:with="total=${invoice.getTotalAmount()}">Nhập số tiền: 
+                            <strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[400.000 Đ]</strong>
+                        </li>
+                        <li>Nhập nội dung chuyển khoản: **HD[Mã Hóa đơn]_[Tên sinh viên]** (Ví dụ: HD<span th:text="${invoice.invoiceNumber}"></span>_AN)</li>
+                        <li>Xác nhận giao dịch</li>
+                        <li>Nhập mã giao dịch vào form bên cạnh</li>
+                    </ol>
                 </div>
             </div>
         </div>
+    </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

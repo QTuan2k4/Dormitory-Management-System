@@ -84,14 +84,8 @@ public class LoginController {
             }
 
             // 2. Kiểm tra Mã sinh viên
-            if (!studentId.matches("\\d{1,10}")) {
-                
-                if (studentId.matches(".*\\D.*")) {
+            if (studentId.matches(".*\\D.*")) {
                     model.addAttribute("error", "Mã sinh viên chỉ được chứa chữ số. Vui lòng nhập số.");
-                } else {
-                    model.addAttribute("error", "Mã sinh viên chỉ gồm tối đa 10 chữ số.");
-                }
-                
                 return "register"; // FORWARD
             }
             
