@@ -321,11 +321,40 @@
                 <div class="detail-row">
                     <div class="detail-item">
                         <span class="detail-label">Ngày Sinh</span>
-                        <div class="detail-value" th:text="${#temporals.format(student.birthDate, 'dd/MM/yyyy')}"></div>
+                        <div class="detail-value" th:text="${student.birthDate != null ? #temporals.format(student.birthDate, 'dd/MM/yyyy') : 'Chưa cập nhật'}"></div>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Địa Chỉ</span>
-                        <div class="detail-value" th:text="${student.address}"></div>
+                        <div class="detail-value" th:text="${student.address ?: 'Chưa cập nhật'}"></div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">Lớp/Khoa</span>
+                        <div class="detail-value" th:text="${student.studentClass ?: 'Chưa cập nhật'}"></div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Khóa</span>
+                        <div class="detail-value" th:text="${student.course ?: 'Chưa cập nhật'}"></div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">Ngành</span>
+                        <div class="detail-value" th:text="${student.major ?: 'Chưa cập nhật'}"></div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Căn cước công dân</span>
+                        <div class="detail-value" th:text="${student.citizenId ?: 'Chưa cập nhật'}"></div>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">Tầng đã chọn</span>
+                        <div class="detail-value" th:text="${student.floor != null ? ('Tầng ' + student.floor) : 'Chưa chọn'}"></div>
                     </div>
                 </div>
 
@@ -335,10 +364,83 @@
                         <div class="detail-value" th:text="${student.phone}"></div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Giấy Tờ Kèm Theo</span>
+                        <span class="detail-label">Giới tính</span>
+                        <div class="detail-value" th:text="${student.gender ?: 'Chưa cập nhật'}"></div>
+                    </div>
+                </div>
+
+                <!-- Documents Section -->
+                <div class="detail-title" style="margin-top: 30px;">Giấy Tờ Kèm Theo</div>
+                
+                <!-- ID Cards -->
+                <div class="detail-row" th:if="${documentMap != null && (documentMap.containsKey('idCardFront') || documentMap.containsKey('idCardBack'))}">
+                    <div class="detail-item" th:if="${documentMap.containsKey('idCardFront')}">
+                        <span class="detail-label">Căn cước mặt trước</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('idCardFront')}}" 
+                                 alt="Căn cước mặt trước" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                    <div class="detail-item" th:if="${documentMap.containsKey('idCardBack')}">
+                        <span class="detail-label">Căn cước mặt sau</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('idCardBack')}}" 
+                                 alt="Căn cước mặt sau" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Discount Documents -->
+                <div class="detail-row" th:if="${documentMap != null && (documentMap.containsKey('congenitalDefect') || documentMap.containsKey('difficultArea') || documentMap.containsKey('poorHousehold') || documentMap.containsKey('revolutionaryFamily') || documentMap.containsKey('ethnicMinority'))}">
+                    <div class="detail-item" th:if="${documentMap.containsKey('congenitalDefect')}">
+                        <span class="detail-label">Khiếm khuyết bẩm sinh</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('congenitalDefect')}}" 
+                                 alt="Khiếm khuyết bẩm sinh" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                    <div class="detail-item" th:if="${documentMap.containsKey('difficultArea')}">
+                        <span class="detail-label">Vùng đặc biệt khó khăn</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('difficultArea')}}" 
+                                 alt="Vùng đặc biệt khó khăn" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                    <div class="detail-item" th:if="${documentMap.containsKey('poorHousehold')}">
+                        <span class="detail-label">Sổ hộ nghèo/cận nghèo</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('poorHousehold')}}" 
+                                 alt="Sổ hộ nghèo/cận nghèo" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                    <div class="detail-item" th:if="${documentMap.containsKey('revolutionaryFamily')}">
+                        <span class="detail-label">Con nhà cách mạng</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('revolutionaryFamily')}}" 
+                                 alt="Con nhà cách mạng" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                    <div class="detail-item" th:if="${documentMap.containsKey('ethnicMinority')}">
+                        <span class="detail-label">Dân tộc thiểu số</span>
+                        <div class="detail-value" style="padding: 0;">
+                            <img th:src="@{'/' + ${documentMap.get('ethnicMinority')}}" 
+                                 alt="Dân tộc thiểu số" 
+                                 style="max-width: 100%; max-height: 300px; border: 1px solid #ddd; border-radius: 8px; display: block;">
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${documentMap == null || documentMap.isEmpty()}" class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">Giấy Tờ</span>
                         <div class="detail-value">
-                            <a href="#" class="reference-document" th:if="${student.documentsPath}" th:text="${student.documentsPath}"></a>
-                            <span th:unless="${student.documentsPath}">Không có</span>
+                            <span>Không có giấy tờ được tải lên</span>
                         </div>
                     </div>
                 </div>

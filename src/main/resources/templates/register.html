@@ -61,35 +61,47 @@
 
         <h3 class="text-center mb-4">Đăng ký</h3>
 
-        <form th:action="@{/register}" method="post">
-            <div class="mb-3">
-                <label for="username" class="form-label">Tên đăng nhập</label>
-                <input type="text" class="form-control" id="username" name="username" required>
-            </div>
-
+        <form th:action="@{/register}" method="post" novalidate>
             <div class="mb-3">
                 <label for="fullName" class="form-label">Họ và tên</label>
-                <input type="text" class="form-control" id="fullName" name="fullName" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="password" class="form-label">Mật khẩu</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
+                <input type="text" class="form-control" id="fullName" name="fullName" required
+                        th:value="${fullName ?: param.fullName}"> 
+                        </div>
 
             <div class="mb-3">
                 <label for="studentId" class="form-label">Mã sinh viên</label>
-                <input type="text" class="form-control" id="studentId" name="studentId" required>
+                <input type="text" class="form-control" id="studentId" name="studentId" required
+                        pattern="[0-9]{1,10}" maxlength="10" inputmode="numeric"
+                        title="Mã sinh viên tối đa 10 chữ số"
+                        th:value="${studentId ?: param.studentId}">
+                        </div>
+
+            <div class="mb-3">
+                <label for="course" class="form-label">Khóa</label>
+                <input type="text" class="form-control" id="course" name="course" required
+                        th:value="${course ?: param.course}">
+                        </div>
+
+            <div class="mb-3">
+                <label for="major" class="form-label">Ngành</label>
+                <input type="text" class="form-control" id="major" name="major" required
+                        th:value="${major ?: param.major}">
+                        </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required
+                        th:value="${email ?: param.email}">
+                        </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input type="password" class="form-control" id="password" name="password" required minlength="6">
             </div>
 
             <div class="mb-3">
-                <label for="phone" class="form-label">Số điện thoại</label>
-                <input type="tel" class="form-control" id="phone" name="phone" required>
+                <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required minlength="6">
             </div>
 
             <button type="submit" class="btn btn-register">

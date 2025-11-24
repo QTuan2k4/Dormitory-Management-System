@@ -13,7 +13,15 @@ public interface BuildingService {
 	List<Buildings> findAllBuildings();
 	Optional<Buildings> findBuildingById(int id);
 	void deleteBuilding(int id);
-	// List<Buildings> searchBuildingsByName(String name);
+	
 	Optional<Buildings> findBuildingByIdWithRooms(int id);
 	Page<Buildings> searchAndFilter(String name, String status, Pageable pageable);
+
+	List<Buildings> searchBuildingsByName(String name);
+	
+	// ← BỔ SUNG: method bạn đang dùng trong controller
+    default List<Buildings> getAllBuildings() { return findAllBuildings(); }
+    default Buildings getBuildingById(int id) { return findBuildingById(id).orElse(null); }
+	
+
 }

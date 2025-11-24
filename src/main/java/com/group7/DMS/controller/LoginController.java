@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.util.StringUtils;
 
 @Controller
 public class LoginController {
@@ -24,6 +25,14 @@ public class LoginController {
     @GetMapping("/")
     public String home() {
         return "redirect:/login";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordPage(Model model) {
+        model.addAttribute("supportEmail", "ktx.support@qnu.edu.vn");
+        model.addAttribute("supportPhone", "0256 123 4567");
+        model.addAttribute("supportOffice", "Phòng Quản lý KTX - Tòa nhà A1");
+        return "forgot-password";
     }
 
     @GetMapping("/login")
@@ -46,36 +55,79 @@ public class LoginController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestParam String username,
-                          @RequestParam String email,
-                          @RequestParam String password,
-                          @RequestParam String fullName,
-                          @RequestParam String studentId,
-                          @RequestParam(required = false) String phone,
-                          @RequestParam(required = false) String address,
-                          RedirectAttributes redirectAttributes) {
+    public String register(@RequestParam String fullName,
+                            @RequestParam String studentId,
+                            @RequestParam String course,
+                            @RequestParam String major,
+                            @RequestParam String email,
+                            @RequestParam String password,
+                            @RequestParam String confirmPassword,
+                            Model model, // Dùng Model để giữ lại dữ liệu khi lỗi
+                            RedirectAttributes redirectAttributes) { // Giữ lại RedirectAttributes cho trường hợp thành công
+        
+        // 1. Chuyển các giá trị đã nhập vào Model để giữ lại trên form khi có lỗi
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("studentId", studentId);
+        model.addAttribute("course", course);
+        model.addAttribute("major", major);
+        model.addAttribute("email", email);
+
         try {
-            // Check if username or email already exists
-            if (userService.existsByUsername(username)) {
-                redirectAttributes.addFlashAttribute("error", "Tên đăng nhập đã tồn tại");
-                return "redirect:/register";
-            }
-            if (userService.existsByEmail(email)) {
-                redirectAttributes.addFlashAttribute("error", "Email đã tồn tại");
-                return "redirect:/register";
+            // Basic validations
+            if (!StringUtils.hasText(fullName) || !StringUtils.hasText(studentId) ||
+                !StringUtils.hasText(course) || !StringUtils.hasText(major) ||
+                !StringUtils.hasText(email) || !StringUtils.hasText(password) ||
+                !StringUtils.hasText(confirmPassword)) {
+                
+                model.addAttribute("error", "Vui lòng điền đầy đủ tất cả thông tin.");
+                return "register"; // FORWARD
             }
 
-            // Create user
-            Users user = userService.createUser(username, email, password, Users.Role.STUDENT);
+            // 2. Kiểm tra Mã sinh viên
+            if (studentId.matches(".*\\D.*")) {
+                    model.addAttribute("error", "Mã sinh viên chỉ được chứa chữ số. Vui lòng nhập số.");
+                return "register"; // FORWARD
+            }
             
-            // Create student profile
-            studentService.createStudent(user, fullName, studentId, phone, address);
+            // 3. Kiểm tra Mật khẩu
+            if (!password.equals(confirmPassword)) {
+                model.addAttribute("error", "Mật khẩu và xác nhận mật khẩu không khớp.");
+                return "register"; // FORWARD
+            }
+
+            if (password.length() < 6) {
+                model.addAttribute("error", "Mật khẩu phải có ít nhất 6 ký tự.");
+                return "register"; // FORWARD
+            }
+
+            // 4. Kiểm tra sự tồn tại (Existence Check)
+            if (userService.existsByUsername(studentId)) {
+                model.addAttribute("error", "Mã sinh viên này đã được sử dụng để đăng nhập.");
+                return "register"; // FORWARD
+            }
+            if (studentService.findByStudentId(studentId) != null) {
+                model.addAttribute("error", "Mã sinh viên này đã được đăng ký.");
+                return "register"; // FORWARD
+            }
+            if (userService.existsByEmail(email)) {
+                model.addAttribute("error", "Email đã tồn tại.");
+                return "register"; // FORWARD
+            }
+
+            // --- XỬ LÝ THÀNH CÔNG ---
+            // Create user with studentId as username
+            Users user = userService.createUser(studentId, email, password, Users.Role.STUDENT);
+
+            // Create student profile with course/major stored in available fields
+            studentService.createStudent(user, fullName, studentId, course, major);
+
+            // Chuyển hướng thành công (vẫn dùng RedirectAttributes)
+            redirectAttributes.addFlashAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
+            return "redirect:/login"; // REDIRECT
             
-            redirectAttributes.addFlashAttribute("success", "Đăng ký thành công! Vui lòng đợi phê duyệt.");
-            return "redirect:/login";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            return "redirect:/register";
+            model.addAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            return "register"; // FORWARD
         }
     }
 

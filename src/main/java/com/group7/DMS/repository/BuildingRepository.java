@@ -19,7 +19,7 @@ public interface BuildingRepository extends JpaRepository<Buildings, Integer> {
     boolean existsByNameIgnoreCaseAndIdNot(String name, int id);
     
 //    @Query("SELECT b FROM Buildings b WHERE b.name LIKE %:name%")
-//    List<Buildings> searchByName(@Param("name") String name);
+    List<Buildings> searchByName(@Param("name") String name);
     
     @Query("SELECT b FROM Buildings b LEFT JOIN FETCH b.rooms r WHERE b.id = :id")
     Optional<Buildings> findByIdWithRooms(@Param("id") int id);

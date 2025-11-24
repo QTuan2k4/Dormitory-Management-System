@@ -19,7 +19,8 @@ public interface StudentService {
     List<Students> findAll();
     List<Students> findByRegistrationStatus(Students.RegistrationStatus status);
     List<Students> findByFullNameContaining(String name);
-    Students createStudent(Users user, String fullName, String studentId, String phone, String address);
+    // FIX: Cập nhật phương thức để nhận course và major từ form đăng ký
+    Students createStudent(Users user, String fullName, String studentId, String course, String major); 
     void approveRegistration(int studentId);
     void rejectRegistration(int studentId);
     void updateRegistrationStatus(int studentId, Students.RegistrationStatus status);

@@ -88,6 +88,9 @@
         <a class="nav-link active" href="#" th:href="@{/student/personal-info}"> 
             <i class="fas fa-user me-2"></i>Thông tin cá nhân
         </a>
+        <a class="nav-link" href="#" th:href="@{/student/register-personal-info}">
+            <i class="fas fa-user-edit me-2"></i>Đăng ký thông tin
+        </a>
         <a class="nav-link" href="#" th:href="@{/student/room-info}">
             <i class="fas fa-home me-2"></i>Thông tin phòng
         </a>
@@ -139,26 +142,43 @@
                         <td th:text="${student.studentId}"></td>
                     </tr>
                     <tr>
+                        <td style="font-weight: bold;">Lớp:</td>
+                        <td th:text="${student.studentClass != null ? student.studentClass : 'Chưa cập nhật'}"></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">Khóa:</td>
+                        <td th:text="${student.course != null ? student.course : 'Chưa cập nhật'}"></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;">Ngành:</td>
+                        <td th:text="${student.major != null ? student.major : 'Chưa cập nhật'}"></td>
+                    </tr>
+                    <tr>
                         <td style="font-weight: bold;">Số điện thoại:</td>
-                        <td th:text="${student.phone}"></td>
+                        <td th:text="${student.phone != null ? student.phone : 'Chưa cập nhật'}"></td>
                     </tr>
                     <tr>
                         <td style="font-weight: bold;">Địa chỉ:</td>
-                        <td th:text="${student.address}"></td>
+                        <td th:text="${student.address != null ? student.address : 'Chưa cập nhật'}"></td>
                     </tr>
                     <tr>
                         <td style="font-weight: bold;">Trạng thái đăng ký:</td>
                         <td>
-                            <span class="badge" th:classappend="${student.registrationStatus.name() == 'APPROVED'} ? 'bg-success' : 
-                                                            (${student.registrationStatus.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-danger')"
-                                  th:text="${student.registrationStatus}">PENDING</span>
+                            <span class="badge" th:classappend="${student.registrationStatus.name() == 'approved'} ? 'bg-success' : 
+                                                            (${student.registrationStatus.name() == 'pending'} ? 'bg-warning text-dark' : 'bg-danger')"
+                                  th:text="${student.registrationStatus}">pending</span>
                         </td>
                     </tr>
                 </table>
                 
-                <a th:href="@{/student/edit-profile}" class="btn btn-primary mt-3">
-                    <i class="fas fa-edit me-1"></i> Chỉnh sửa thông tin
-                </a>
+                <div class="d-flex gap-2 mt-3">
+                    <a th:href="@{/student/register-personal-info}" class="btn btn-primary">
+                        <i class="fas fa-user-edit me-1"></i> Đăng ký/Cập nhật thông tin
+                    </a>
+                    <a th:href="@{/student/edit-profile}" class="btn btn-secondary">
+                        <i class="fas fa-edit me-1"></i> Chỉnh sửa thông tin
+                    </a>
+                </div>
                 
             </div>
         </div>

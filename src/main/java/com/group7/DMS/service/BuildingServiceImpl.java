@@ -60,11 +60,11 @@ public class BuildingServiceImpl implements BuildingService {
         buildingRepository.deleteById(id);
     }
     
- // 5. Tìm kiếm theo tên
-//    @Override
-//    public List<Buildings> searchBuildingsByName(String name) {
-//        return buildingRepository.searchByName(name);
-//    }
+  // 5. Tìm kiếm theo tên
+    @Override
+    public List<Buildings> searchBuildingsByName(String name) {
+        return buildingRepository.searchByName(name);
+    }
     
     @Override
     @Transactional 
@@ -79,4 +79,6 @@ public class BuildingServiceImpl implements BuildingService {
 
         return buildingRepository.searchAndFilter(finalName, finalStatus, pageable);
     }
+    
+    
 }

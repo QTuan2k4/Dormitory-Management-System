@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true) 
@@ -81,6 +83,13 @@ public class RoomServiceImpl implements RoomService {
     public List<Rooms> findRoomsByBuildingAndFloor(int buildingId, int floor) {
         return roomRepository.findByBuildingIdAndFloor(buildingId, floor);
     }
+    
+    @Override
+    public Map<Integer, List<Rooms>> getRoomsGroupedByFloor(int buildingId) {
+        return findRoomsByBuildingId(buildingId)
+                .stream()
+                .collect(Collectors.groupingBy(Rooms::getFloor));
+    }
 
     // --- TRIỂN KHAI PHƯƠNG THỨC TÌM KIẾM MỚI ---
     
@@ -127,4 +136,5 @@ public class RoomServiceImpl implements RoomService {
         
         return roomRepository.save(room);
     }
+    
 }

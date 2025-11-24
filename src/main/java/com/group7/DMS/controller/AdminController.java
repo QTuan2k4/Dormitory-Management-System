@@ -1,10 +1,14 @@
 package com.group7.DMS.controller;
 
+import com.group7.DMS.entity.Buildings;
 import com.group7.DMS.entity.Invoices;
 import com.group7.DMS.entity.Payments;
+import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.entity.Students;
 import com.group7.DMS.entity.Users;
+import com.group7.DMS.service.BuildingService;
 import com.group7.DMS.service.InvoiceService;
+import com.group7.DMS.service.RoomService;
 import com.group7.DMS.service.StudentService;
 import com.group7.DMS.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -27,6 +32,12 @@ public class AdminController {
     
     @Autowired
     private StudentService studentService;
+ // === THÊM 2 SERVICE MỚI ===
+    @Autowired
+    private BuildingService buildingService;
+
+    @Autowired
+    private RoomService roomService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication auth) {
@@ -89,23 +100,28 @@ public class AdminController {
                                @RequestParam(required = false) String search,
                                @RequestParam(required = false) String status,
                                Authentication auth) {
-        List<Students> students = studentService.findAll();
+        List<Students> students;
 
-        // Filter by status if provided
         if (status != null && !status.isBlank()) {
             try {
-                Students.RegistrationStatus regStatus = Students.RegistrationStatus.valueOf(status.toUpperCase());
+                Students.RegistrationStatus regStatus = Students.RegistrationStatus.valueOf(status.toLowerCase());
                 students = studentService.findByRegistrationStatus(regStatus);
             } catch (IllegalArgumentException e) {
-                // invalid status - ignore filtering by status
+                students = studentService.findAll();
             }
+        } else {
+            students = studentService.findAll();
         }
 
-        // Filter by search if provided (search in full name)
         if (search != null && !search.isBlank()) {
-            List<Students> byName = studentService.findByFullNameContaining(search);
-            // intersect results if status filter was applied
-            students.retainAll(byName);
+            String keyword = search.trim().toLowerCase();
+            students = students.stream()
+                    .filter(student -> {
+                        String fullName = student.getFullName() != null ? student.getFullName().toLowerCase() : "";
+                        String studentId = student.getStudentId() != null ? student.getStudentId().toLowerCase() : "";
+                        return fullName.contains(keyword) || studentId.contains(keyword);
+                    })
+                    .toList();
             model.addAttribute("search", search);
         }
 
@@ -129,10 +145,36 @@ public class AdminController {
     public String studentDetail(@PathVariable int id, Model model) {
         Students student = studentService.findById(id);
         if (student != null) {
+            // Parse documents path to map for image display
+            if (student.getDocumentsPath() != null && !student.getDocumentsPath().isEmpty()) {
+                model.addAttribute("documentMap", parseDocumentsPath(student.getDocumentsPath()));
+            }
             model.addAttribute("student", student);
             return "admin/student-detail";
         }
         return "redirect:/admin/students";
+    }
+    
+    /**
+     * Parse documents path string to Map
+     * Format: "key1:path1;key2:path2;..."
+     */
+    private java.util.Map<String, String> parseDocumentsPath(String documentsPath) {
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        if (documentsPath == null || documentsPath.isEmpty()) {
+            return map;
+        }
+        
+        String[] pairs = documentsPath.split(";");
+        for (String pair : pairs) {
+            if (pair.contains(":")) {
+                String[] keyValue = pair.split(":", 2);
+                if (keyValue.length == 2) {
+                    map.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
+        return map;
     }
 
     // ========== Approve/Reject Registration ==========
@@ -156,5 +198,37 @@ public class AdminController {
             model.addAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/students/" + id;
+    }
+    
+ // QUẢN LÝ KÝ TÚC XÁ
+
+    /** Danh sách các tòa nhà */
+    @GetMapping("/dormitories")
+    public String listDormitories(Model model) {
+        model.addAttribute("buildings", buildingService.getAllBuildings());
+        model.addAttribute("pageTitle", "Quản lý Ký túc xá");
+        return "admin/dormitory/list";
+    }
+
+    /** Chi tiết tòa nhà + phòng theo tầng */
+    @GetMapping("/dormitories/{id}")
+    public String viewDormitoryDetail(@PathVariable("id") int buildingId, Model model) {
+        Buildings building = buildingService.getBuildingById(buildingId);
+        if (building == null) {
+            return "redirect:/admin/dormitories";
+        }
+
+        Map<Integer, List<Rooms>> roomsByFloor = roomService.getRoomsGroupedByFloor(buildingId);
+        
+     // Tính tổng số phòng để gửi sang template (Thymeleaf không làm được stream)
+        int totalRooms = roomsByFloor.values().stream()
+                                     .mapToInt(List::size)
+                                     .sum();
+        model.addAttribute("building", building);
+        model.addAttribute("roomsByFloor", roomsByFloor);
+        model.addAttribute("totalRooms", totalRooms);
+        model.addAttribute("pageTitle", "Tòa " + building.getName());
+
+        return "admin/dormitory/detail";
     }
 }

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Chi tiết tòa nhà</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .floor-header {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,123,255,0.3);
+        }
+        .room-card {
+            height: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+        .room-available   { background: #d1e7dd; border: 2px solid #0f5132; color: #0f5132; }
+        .room-occupied    { background: #f8d7da; border: 2px solid #842029; color: #842029; }
+        .room-maintenance { background: #fff3cd; border: 2px solid #997404; color: #997404; }
+        .occupancy { font-size: 0.9rem; margin-top: 8px; font-weight: normal; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">
+            <i class="fas fa-building me-3"></i>
+            Tòa <span th:text="${building.name}">C1</span>
+        </h2>
+        <a th:href="@{/admin/dormitories}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
+
+    <!-- Thông tin tổng quan tòa nhà -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <strong>Tổng số tầng:</strong> <span class="fs-4" th:text="${building.totalFloors}">8</span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Tổng số phòng:</strong> 
+                    <span class="fs-4">
+                        <span th:text="${totalRooms}">0</span>
+                    </span>
+                </div>
+                <div class="col-md-4">
+                    <strong>Mô tả:</strong><br>
+                    <span th:text="${building.description} ?: 'Chưa có mô tả'" class="text-muted">Chưa có mô tả</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách tầng & phòng -->
+    <div th:each="floorEntry : ${roomsByFloor}" class="mb-5">
+        <div class="floor-header">
+            <i class="fas fa-layer-group me-2"></i>
+            Tầng <span th:text="${floorEntry.key}">1</span>
+            <span class="badge bg-light text-dark ms-3"
+                  th:text="'(' + ${#lists.size(floorEntry.value)} + ' phòng)'">
+                8 phòng
+            </span>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-4">
+            <div th:each="room : ${floorEntry.value}" class="col">
+                <a href="#" class="text-decoration-none">
+                    <div class="room-card text-center"
+                         th:classappend="${
+                            room.status == T(com.group7.DMS.entity.Rooms$RoomStatus).AVAILABLE ? 'room-available' :
+                            room.status == T(com.group7.DMS.entity.Rooms$RoomStatus).OCCUPIED ? 'room-occupied' :
+                            'room-maintenance'
+                         }">
+                        <div class="fs-4 fw-bold" th:text="${room.roomNumber}">C101</div>
+                        <div class="occupancy">
+                            <span th:text="${room.currentOccupants}">2</span>
+                            <small>/</small>
+                            <span th:text="${room.slot}">4</span>
+                            <i class="fas fa-users ms-1"></i>
+                        </div>
+                        <small class="mt-1">
+                            <span th:text="${
+                                room.status == T(com.group7.DMS.entity.Rooms$RoomStatus).AVAILABLE ? 'Còn trống' :
+                                room.status == T(com.group7.DMS.entity.Rooms$RoomStatus).OCCUPIED ? 'Đã đầy' : 'Bảo trì'
+                            }"></span>
+                        </small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khi không có phòng -->
+    <div th:if="${roomsByFloor == null or #maps.size(roomsByFloor) == 0}" class="text-center py-5">
+        <i class="fas fa-home fa-5x text-muted mb-4"></i>
+        <h4 class="text-muted">Chưa có phòng nào trong tòa nhà này</h4>
+    </div>
+</div>
+
+</body>
+</html>
