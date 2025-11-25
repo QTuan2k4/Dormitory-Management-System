@@ -312,10 +312,10 @@
 								<a th:href="@{'/admin/students/' + ${student.id} + '/assign-room'}"
 								   class="btn btn-sm btn-success"
 								   th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}">
-								    Phân phòng
+								    Duyệt
 								</a>
 								<span class="badge bg-success" th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED}">
-								    Đã phân phòng
+								    Đã duyệt
 								</span>
                                 <button th:if="${student.registrationStatus.name() == 'PENDING'}" type="button" class="btn btn-reject" onclick="rejectStudent(this)" th:data-id="${student.id}" th:attr="data-reject-url=@{/admin/students/{id}/reject(id=${student.id})}">
                                     <i class="fas fa-times me-1"></i>Từ chối
