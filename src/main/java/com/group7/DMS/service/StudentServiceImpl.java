@@ -152,8 +152,8 @@ public class StudentServiceImpl implements StudentService {
         student.setStudentId(studentId);
         student.setCourse(course);
         student.setMajor(major);
-        student.setApplicationDate(LocalDate.now());
-        student.setRegistrationStatus(Students.RegistrationStatus.PENDING);
+        student.setApplicationDate(null);
+        student.setRegistrationStatus(Students.RegistrationStatus.NOT_SUBMITTED);
         return studentRepository.save(student);
     }
 

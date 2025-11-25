@@ -75,30 +75,7 @@
     </style>
 </head>
 <body>
-    <div class="sidebar">
-    <div class="p-3">
-        <h4 class="text-white mb-4">
-            <i class="fas fa-user-graduate me-2"></i>DMS Student
-        </h4>
-    </div>
-    <nav class="nav flex-column">
-        <a class="nav-link" href="#" th:href="@{/student/dashboard}">
-            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-        </a>
-        <a class="nav-link active" href="#" th:href="@{/student/personal-info}"> 
-            <i class="fas fa-user me-2"></i>Thông tin cá nhân
-        </a>
-        <a class="nav-link" href="#" th:href="@{/student/register-personal-info}">
-            <i class="fas fa-user-edit me-2"></i>Đăng ký thông tin
-        </a>
-        <a class="nav-link" href="#" th:href="@{/student/room-info}">
-            <i class="fas fa-home me-2"></i>Thông tin phòng
-        </a>
-        <a class="nav-link" href="#" th:href="@{/student/invoices}">
-            <i class="fas fa-file-invoice me-2"></i>Danh sách hóa đơn
-        </a>
-    </nav>
-</div>
+    <div th:replace="~{fragments/sidebar :: studentSidebar('personal-info')}"></div>
 
     <div class="main-content">
         
@@ -164,9 +141,19 @@
                     <tr>
                         <td style="font-weight: bold;">Trạng thái đăng ký:</td>
                         <td>
-                            <span class="badge" th:classappend="${student.registrationStatus.name() == 'approved'} ? 'bg-success' : 
-                                                            (${student.registrationStatus.name() == 'pending'} ? 'bg-warning text-dark' : 'bg-danger')"
-                                  th:text="${student.registrationStatus}">pending</span>
+                            <span class="badge"
+                                  th:classappend="${
+                                        student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED ? 'bg-success' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING ? 'bg-warning text-dark' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).NOT_SUBMITTED ? 'bg-secondary' : 'bg-danger'))
+                                  }"
+                                  th:text="${
+                                        student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED ? 'Đã duyệt' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING ? 'Chờ duyệt' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).NOT_SUBMITTED ? 'Chưa gửi' : 'Bị từ chối'))
+                                  }">
+                                Chưa gửi
+                            </span>
                         </td>
                     </tr>
                 </table>

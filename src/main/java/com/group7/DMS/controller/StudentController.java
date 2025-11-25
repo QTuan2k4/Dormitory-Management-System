@@ -240,6 +240,14 @@ public class StudentController {
                 student.setDocumentsPath(documentsPathBuilder.toString());
             }
             
+            // Đánh dấu hồ sơ cần duyệt nếu đây là lần gửi đầu tiên hoặc sau khi bị từ chối
+            if (student.getRegistrationStatus() == null ||
+                student.getRegistrationStatus().equals(Students.RegistrationStatus.NOT_SUBMITTED) ||
+                student.getRegistrationStatus().equals(Students.RegistrationStatus.REJECTED)) {
+                student.setRegistrationStatus(Students.RegistrationStatus.PENDING);
+                student.setApplicationDate(LocalDate.now());
+            }
+            
             studentService.update(student);
             
             // Parse documents path to map

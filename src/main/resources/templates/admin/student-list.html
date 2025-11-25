@@ -166,6 +166,10 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+        .status-draft {
+            background-color: #e2e3e5;
+            color: #495057;
+        }
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -210,36 +214,7 @@
 </head>
 <body>
     <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="p-3">
-            <h4 class="text-white mb-4">
-                <i class="fas fa-university me-2"></i>DMS Admin
-            </h4>
-        </div>
-        <nav class="nav flex-column">
-            <a class="nav-link" href="#" th:href="@{/admin/dashboard}">
-                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-            </a>
-            <a class="nav-link active" href="#" th:href="@{/admin/students}">
-                <i class="fas fa-users me-2"></i>Quản lý sinh viên
-            </a>
-            <a class="nav-link" href="#" th:href="@{/admin/dormitories}">
-                <i class="fas fa-building me-2"></i>Quản lý KTX
-            </a>
-            <a class="nav-link" href="#" th:href="@{/admin/invoices}">
-                <i class="fas fa-file-invoice me-2"></i>Quản lý hóa đơn
-            </a>
-             <a class="nav-link active" href="#" th:href="@{/admin/buildings}">
-                <i class="fas fa-file-invoice me-2"></i>Quản lý tòa nhà
-            </a>
-             <a class="nav-link active" href="#" th:href="@{/admin/rooms}">
-                <i class="fas fa-file-invoice me-2"></i>Quản lý phòng
-            </a>
-            <a class="nav-link" href="#" th:href="@{/admin/statistics}">
-                <i class="fas fa-chart-bar me-2"></i>Thống kê
-            </a>
-        </nav>
-    </div>
+    <div th:replace="~{fragments/sidebar :: adminSidebar('students')}"></div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -267,9 +242,10 @@
                     <label for="statusFilter">Trạng thái:</label>
                     <select id="statusFilter" name="status">
                         <option value="">Tất cả</option>
-						<option value="PENDING"   th:selected="${status != null and status.toUpperCase() == 'PENDING'}">Chờ duyệt</option>
-						<option value="APPROVED"  th:selected="${status != null and status.toUpperCase() == 'APPROVED'}">Đã duyệt</option>
-						<option value="REJECTED"  th:selected="${status != null and status.toUpperCase() == 'REJECTED'}">Từ chối</option>
+						<option value="NOT_SUBMITTED" th:selected="${status != null and status.toUpperCase() == 'NOT_SUBMITTED'}">Chưa gửi</option>
+						<option value="PENDING"        th:selected="${status != null and status.toUpperCase() == 'PENDING'}">Chờ duyệt</option>
+						<option value="APPROVED"       th:selected="${status != null and status.toUpperCase() == 'APPROVED'}">Đã duyệt</option>
+						<option value="REJECTED"       th:selected="${status != null and status.toUpperCase() == 'REJECTED'}">Từ chối</option>
                     </select>
                 </div>
                 <button type="submit">
@@ -299,8 +275,17 @@
                         <td th:text="${student.phone}"></td>
                         <td>
                             <span class="status-badge"
-                                th:classappend="${student.registrationStatus.name() == 'APPROVED' ? 'status-approved' : student.registrationStatus.name() == 'REJECTED' ? 'status-rejected' : 'status-pending'}"
-                                th:text="${student.registrationStatus.name() == 'PENDING' ? 'Chờ duyệt' : student.registrationStatus.name() == 'APPROVED' ? 'Đã duyệt' : 'Từ chối'}">
+                                  th:classappend="${
+                                        student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED ? 'status-approved' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).REJECTED ? 'status-rejected' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).NOT_SUBMITTED ? 'status-draft' : 'status-pending'))
+                                  }"
+                                  th:text="${
+                                        student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED ? 'Đã duyệt' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).REJECTED ? 'Từ chối' :
+                                        (student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).NOT_SUBMITTED ? 'Chưa gửi' : 'Chờ duyệt'))
+                                  }">
+                                Chưa gửi
                             </span>
                         </td>
                         <td>
@@ -317,7 +302,7 @@
 								<span class="badge bg-success" th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED}">
 								    Đã duyệt
 								</span>
-                                <button th:if="${student.registrationStatus.name() == 'PENDING'}" type="button" class="btn btn-reject" onclick="rejectStudent(this)" th:data-id="${student.id}" th:attr="data-reject-url=@{/admin/students/{id}/reject(id=${student.id})}">
+                                <button th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}" type="button" class="btn btn-reject" onclick="rejectStudent(this)" th:data-id="${student.id}" th:attr="data-reject-url=@{/admin/students/{id}/reject(id=${student.id})}">
                                     <i class="fas fa-times me-1"></i>Từ chối
                                 </button>
                             </div>
