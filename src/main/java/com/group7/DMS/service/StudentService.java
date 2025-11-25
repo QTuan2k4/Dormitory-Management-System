@@ -27,6 +27,6 @@ public interface StudentService {
     Students findByUsername(String username);
     Optional<Contracts> findActiveContractByUsername(String username);
     List<Students> findRoomMatesByRoomId(int roomId, int currentStudentId);
-    
+    void approveAndAssignRoom(int studentId, int roomId);
 
 }

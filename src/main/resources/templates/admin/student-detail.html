@@ -271,11 +271,11 @@
             <a class="nav-link" href="#" th:href="@{/admin/invoices}">
                 <i class="fas fa-file-invoice me-2"></i>Quản lý hóa đơn
             </a>
-            <a class="nav-link" href="#" th:href="@{/admin/system}">
-                <i class="fas fa-cogs me-2"></i>Quản lý hệ thống
+             <a class="nav-link active" href="#" th:href="@{/admin/buildings}">
+                <i class="fas fa-file-invoice me-2"></i>Quản lý tòa nhà
             </a>
-            <a class="nav-link" href="#" th:href="@{/admin/backup}">
-                <i class="fas fa-database me-2"></i>Backup dữ liệu
+             <a class="nav-link active" href="#" th:href="@{/admin/rooms}">
+                <i class="fas fa-file-invoice me-2"></i>Quản lý phòng
             </a>
             <a class="nav-link" href="#" th:href="@{/admin/statistics}">
                 <i class="fas fa-chart-bar me-2"></i>Thống kê
@@ -461,11 +461,15 @@
                     <h3>Duyệt Hồ Sơ</h3>
                     <p class="mb-3" style="color: #666; font-size: 14px;">Vui lòng xác nhận duyệt hoặc từ chối hồ sơ của sinh viên này.</p>
                     <div class="action-buttons">
-                        <form method="POST" th:action="@{/admin/students/{id}/approve(id=${student.id})}">
-                            <button type="submit" class="btn-action btn-approve">
-                                <i class="fas fa-check me-2"></i>Duyệt Hồ Sơ
-                            </button>
-                        </form>
+								<!-- Thay thế nút cũ -->
+								<a th:href="@{'/admin/students/' + ${student.id} + '/assign-room'}"
+								   class="btn btn-sm btn-success"
+								   th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}">
+								    Phân phòng
+								</a>
+								<span class="badge bg-success" th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED}">
+								    Đã phân phòng
+								</span>
                         <form method="POST" th:action="@{/admin/students/{id}/reject(id=${student.id})}">
                             <button type="submit" class="btn-action btn-reject">
                                 <i class="fas fa-times me-2"></i>Từ Chối Hồ Sơ

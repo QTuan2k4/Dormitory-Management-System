@@ -229,11 +229,11 @@
             <a class="nav-link" href="#" th:href="@{/admin/invoices}">
                 <i class="fas fa-file-invoice me-2"></i>Quản lý hóa đơn
             </a>
-            <a class="nav-link" href="#" th:href="@{/admin/system}">
-                <i class="fas fa-cogs me-2"></i>Quản lý hệ thống
+             <a class="nav-link active" href="#" th:href="@{/admin/buildings}">
+                <i class="fas fa-file-invoice me-2"></i>Quản lý tòa nhà
             </a>
-            <a class="nav-link" href="#" th:href="@{/admin/backup}">
-                <i class="fas fa-database me-2"></i>Backup dữ liệu
+             <a class="nav-link active" href="#" th:href="@{/admin/rooms}">
+                <i class="fas fa-file-invoice me-2"></i>Quản lý phòng
             </a>
             <a class="nav-link" href="#" th:href="@{/admin/statistics}">
                 <i class="fas fa-chart-bar me-2"></i>Thống kê
@@ -267,9 +267,9 @@
                     <label for="statusFilter">Trạng thái:</label>
                     <select id="statusFilter" name="status">
                         <option value="">Tất cả</option>
-                        <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ duyệt</option>
-                        <option value="APPROVED" th:selected="${status == 'APPROVED'}">Đã duyệt</option>
-                        <option value="REJECTED" th:selected="${status == 'REJECTED'}">Từ chối</option>
+						<option value="PENDING"   th:selected="${status != null and status.toUpperCase() == 'PENDING'}">Chờ duyệt</option>
+						<option value="APPROVED"  th:selected="${status != null and status.toUpperCase() == 'APPROVED'}">Đã duyệt</option>
+						<option value="REJECTED"  th:selected="${status != null and status.toUpperCase() == 'REJECTED'}">Từ chối</option>
                     </select>
                 </div>
                 <button type="submit">
@@ -308,9 +308,15 @@
                                 <a th:href="@{/admin/students/{id}(id=${student.id})}" class="btn btn-view">
                                     <i class="fas fa-eye me-1"></i>Xem
                                 </a>
-                                <button th:if="${student.registrationStatus.name() == 'PENDING'}" type="button" class="btn btn-approve" onclick="approveStudent(this)" th:data-id="${student.id}" th:attr="data-approve-url=@{/admin/students/{id}/approve(id=${student.id})}">
-                                    <i class="fas fa-check me-1"></i>Duyệt
-                                </button>
+								<!-- Thay thế nút cũ -->
+								<a th:href="@{'/admin/students/' + ${student.id} + '/assign-room'}"
+								   class="btn btn-sm btn-success"
+								   th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}">
+								    Phân phòng
+								</a>
+								<span class="badge bg-success" th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED}">
+								    Đã phân phòng
+								</span>
                                 <button th:if="${student.registrationStatus.name() == 'PENDING'}" type="button" class="btn btn-reject" onclick="rejectStudent(this)" th:data-id="${student.id}" th:attr="data-reject-url=@{/admin/students/{id}/reject(id=${student.id})}">
                                     <i class="fas fa-times me-1"></i>Từ chối
                                 </button>

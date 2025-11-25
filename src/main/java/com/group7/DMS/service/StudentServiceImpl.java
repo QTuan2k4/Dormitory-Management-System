@@ -7,13 +7,15 @@ import com.group7.DMS.repository.StudentRepository;
 import com.group7.DMS.repository.ContractRepository;
 import com.group7.DMS.entity.Contracts;
 import com.group7.DMS.entity.Contracts.ContractStatus;
-
+import com.group7.DMS.entity.Rooms;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,6 +29,75 @@ public class StudentServiceImpl implements StudentService {
     
     @Autowired 
     private ContractRepository contractRepository;
+    
+    @Autowired
+    private RoomService roomService;
+
+    @Override
+    @Transactional
+    public void approveAndAssignRoom(int studentId, int roomId) {
+
+        // 1. Lấy sinh viên
+        Students student = findById(studentId);
+        if (student == null) {
+            throw new RuntimeException("Không tìm thấy sinh viên");
+        }
+
+        // 2. Lấy phòng
+        Rooms room = roomService.findRoomById(roomId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng ID: " + roomId));
+
+        // 3. Kiểm tra phòng còn chỗ
+        if (room.getCurrentOccupants() >= room.getSlot()) {
+            throw new RuntimeException("Phòng " + room.getRoomNumber() + " đã đầy!");
+        }
+
+        // 4. Kiểm tra sinh viên đã có hợp đồng ACTIVE chưa
+        if (contractRepository.findActiveContractByStudentId(studentId).isPresent()) {
+            throw new RuntimeException("Sinh viên này đã được phân phòng rồi!");
+        }
+
+        // 5. Chuyển floor (String) → int
+        int floorInt = 6;
+        try {
+            if (student.getFloor() != null && !student.getFloor().trim().isEmpty()) {
+                floorInt = Integer.parseInt(student.getFloor().trim());
+                if (floorInt < 1 || floorInt > 6) floorInt = 6;
+            }
+        } catch (Exception e) {
+            floorInt = 6;
+        }
+
+        // 6. Tính phí theo tầng
+        BigDecimal manualFee = switch (floorInt) {
+            case 1 -> BigDecimal.valueOf(3_000_000);
+            case 2 -> BigDecimal.valueOf(2_700_000);
+            case 3 -> BigDecimal.valueOf(2_400_000);
+            case 4 -> BigDecimal.valueOf(2_100_000);
+            case 5 -> BigDecimal.valueOf(1_800_000);
+            case 6 -> BigDecimal.valueOf(1_500_000);
+            default -> BigDecimal.valueOf(1_500_000);
+        };
+
+        // 7. TẠO HỢP ĐỒNG – ĐÂY LÀ DÒNG BẠN THIẾU!
+        Contracts contract = new Contracts();               // <<< QUAN TRỌNG NHẤT
+        contract.setStudent(student);
+        contract.setRoom(room);
+        contract.setStartDate(LocalDateTime.now());
+        contract.setEndDate(LocalDateTime.now().plusYears(1));
+        contract.setStatus(Contracts.ContractStatus.ACTIVE);
+        contract.setManualFee(manualFee);                   // gán phí theo tầng
+
+        // Lưu hợp đồng
+        contractRepository.save(contract);
+
+        // 8. Cập nhật số người ở phòng
+        roomService.updateOccupancy(roomId, +1);
+
+        // 9. Duyệt hồ sơ sinh viên
+        student.setRegistrationStatus(Students.RegistrationStatus.APPROVED);
+        studentRepository.save(student);
+    }
 
     @Override
     public Students save(Students student) {

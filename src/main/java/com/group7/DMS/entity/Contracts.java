@@ -1,11 +1,13 @@
 package com.group7.DMS.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Entity
 public class Contracts {
@@ -23,6 +25,16 @@ public class Contracts {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private ContractStatus status;
+    @Column(name = "manual_fee", precision = 12, scale = 2, nullable = false)
+    private BigDecimal manualFee;
+
+    public BigDecimal getManualFee() {
+        return manualFee;
+    }
+
+    public void setManualFee(BigDecimal manualFee) {
+        this.manualFee = manualFee;
+    }
 
     public enum ContractStatus {
         ACTIVE, INACTIVE, TERMINATED

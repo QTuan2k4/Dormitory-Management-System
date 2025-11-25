@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Phân phòng cho sinh viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Sidebar cố định */
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+            padding-top: 20px;
+        }
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px 15px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+
+        /* Nội dung chính được đẩy sang phải và có nền trắng */
+        .main-content {
+            margin-left: 250px;         /* Đẩy sang phải đúng bằng chiều rộng sidebar */
+            min-height: 100vh;
+            background-color: #ffffff;  /* Nền trắng sạch */
+            padding: 30px 20px;
+        }
+
+        .card {
+            max-width: 780px;
+            margin: 0 auto;
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 25px;
+            text-align: center;
+            color: white;
+        }
+
+        .floor-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.3);
+        }
+        .floor-box h5 { margin: 0 0 8px 0; opacity: 0.9; }
+        .floor-box h2 { margin: 0; font-size: 3rem; font-weight: 800; }
+
+        /* Responsive cho điện thoại và tablet */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar .nav-link span {
+                display: none;
+            }
+            .sidebar h4 {
+                font-size: 1rem;
+                text-align: center;
+            }
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 15px 10px;
+            }
+            .card {
+                margin: 10px;
+                border-radius: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="p-3 text-center">
+            <h4 class="text-white mb-4">
+                <i class="fas fa-university me-2"></i>
+                <span>DMS Admin</span>
+            </h4>
+        </div>
+        <nav class="nav flex-column px-2">
+            <a class="nav-link" href="#" th:href="@{/admin/dashboard}">
+                <i class="fas fa-tachometer-alt me-2"></i><span>Dashboard</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/student-list}">
+                <i class="fas fa-users me-2"></i><span>Quản lý sinh viên</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/dormitories}">
+                <i class="fas fa-building me-2"></i><span>Quản lý KTX</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/buildings}">
+                <i class="fas fa-home me-2"></i><span>Quản lý tòa nhà</span>
+            </a>
+            <a class="nav-link active" href="#" th:href="@{/admin/rooms}">
+                <i class="fas fa-door-open me-2"></i><span>Quản lý phòng</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/invoices}">
+                <i class="fas fa-file-invoice me-2"></i><span>Quản lý hóa đơn</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/system}">
+                <i class="fas fa-cogs me-2"></i><span>Quản lý hệ thống</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/backup}">
+                <i class="fas fa-database me-2"></i><span>Backup dữ liệu</span>
+            </a>
+            <a class="nav-link" href="#" th:href="@{/admin/statistics}">
+                <i class="fas fa-chart-bar me-2"></i><span>Thống kê</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main content với nền trắng -->
+    <div class="main-content">
+        <div class="card">
+            <!-- Header -->
+            <div class="card-header">
+                <h4><i class="fas fa-user-graduate me-2"></i> Phân phòng cho sinh viên</h4>
+                <div class="mt-2 fs-5">
+                    <strong th:text="${student.fullName}">Nguyễn Văn A</strong>
+                    <span class="mx-3">|</span>
+                    MSSV: <strong th:text="${student.studentId}">21100412</strong>
+                </div>
+            </div>
+
+            <div class="card-body p-5">
+
+                <!-- Tầng mong muốn -->
+                <div class="floor-box">
+                    <h5><i class="fas fa-layer-group me-2"></i> Tầng mong muốn</h5>
+                    <h2 th:text="${student.floor}">1</h2>
+                </div>
+
+                <hr class="my-5">
+
+                <!-- Chọn tòa nhà -->
+                <form th:action="@{'/admin/students/' + ${student.id} + '/assign-room'}" method="get">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5 text-primary">
+                            <i class="fas fa-building me-2"></i> Chọn tòa nhà
+                        </label>
+                        <select name="buildingId" class="form-select form-select-lg shadow-sm"
+                                onchange="this.form.submit()"
+                                th:disabled="${buildingId != null}">
+                            <option value="">-- Chọn tòa nhà --</option>
+                            <option th:each="b : ${buildings}"
+                                    th:value="${b.id}"
+                                    th:text="${b.name} + ' (' + ${b.totalFloors} + ' tầng)'"
+                                    th:selected="${buildingId == b.id}">
+                            </option>
+                        </select>
+                    </div>
+                </form>
+
+                <!-- Khi đã chọn tòa nhà -->
+                <div th:if="${buildingId != null}">
+                    <h5 class="text-center text-success fw-bold mb-4">
+                        <i class="fas fa-bed me-2"></i>
+                        Phòng trống tầng <strong th:text="${student.floor}">1</strong> tại
+                        <span th:text="${selectedBuilding?.name}">C1</span>
+                    </h5>
+
+                    <form th:action="@{'/admin/students/' + ${student.id} + '/assign-room'}" method="post">
+                        <input type="hidden" name="buildingId" th:value="${buildingId}">
+
+                        <div class="mb-4">
+                            <select name="roomId" class="form-select form-select-lg shadow-sm" required>
+                                <option value="">-- Chọn phòng trống --</option>
+                                <option th:each="room : ${availableRooms}"
+                                        th:value="${room.id}"
+                                        th:text="${room.roomNumber} + ' → Còn ' + (${room.slot - room.currentOccupants}) + '/' + ${room.slot} + ' chỗ'">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Không có phòng trống -->
+                        <div th:if="${#lists.isEmpty(availableRooms)}"
+                             class="alert alert-warning text-center p-4 rounded">
+                            <i class="fas fa-exclamation-triangle fs-1 text-warning"></i>
+                            <h5 class="mt-3">Hiện không còn phòng trống ở tầng <strong th:text="${student.floor}">1</strong></h5>
+                            <p>Vui lòng chọn tòa nhà khác hoặc liên hệ quản lý ký túc xá.</p>
+                            <button type="button" class="btn btn-lg btn-outline-secondary px-5"
+                                    onclick="history.back()">
+                                Quay lại
+                            </button>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div th:if="${!#lists.isEmpty(availableRooms)}" class="text-end mt-4">
+                            <a th:href="@{'/admin/students/' + ${student.id}}"
+                               class="btn btn-lg btn-outline-secondary px-5 me-3">
+                                Hủy
+                            </a>
+                            <button type="submit" class="btn btn-lg btn-success px-5">
+                                Xác nhận phân phòng
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
