@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="studentSidebar(activePage)">
+    <div class="sidebar">
+        <div class="p-3">
+            <h4 class="text-white mb-4">
+                <i class="fas fa-user-graduate me-2"></i>DMS Student
+            </h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:classappend="${activePage == 'dashboard'} ? ' active' : ''"
+               th:href="@{/student/dashboard}">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'personal-info'} ? ' active' : ''"
+               th:href="@{/student/personal-info}">
+                <i class="fas fa-user me-2"></i>Thông tin cá nhân
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'register-personal-info'} ? ' active' : ''"
+               th:href="@{/student/register-personal-info}">
+                <i class="fas fa-user-edit me-2"></i>Gửi hồ sơ
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'room-info'} ? ' active' : ''"
+               th:href="@{/student/room-info}">
+                <i class="fas fa-home me-2"></i>Thông tin phòng
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'invoices'} ? ' active' : ''"
+               th:href="@{/student/invoices}">
+                <i class="fas fa-file-invoice me-2"></i>Danh sách hóa đơn
+            </a>
+        </nav>
+    </div>
+</div>
+
+<div th:fragment="adminSidebar(activePage)">
+    <div class="sidebar">
+        <div class="p-3">
+            <h4 class="text-white mb-4">
+                <i class="fas fa-university me-2"></i>DMS Admin
+            </h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" th:classappend="${activePage == 'dashboard'} ? ' active' : ''"
+               th:href="@{/admin/dashboard}">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'students'} ? ' active' : ''"
+               th:href="@{/admin/students}">
+                <i class="fas fa-users me-2"></i>Quản lý sinh viên
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'dormitories'} ? ' active' : ''"
+               th:href="@{/admin/dormitories}">
+                <i class="fas fa-building me-2"></i>Quản lý KTX
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'buildings'} ? ' active' : ''"
+               th:href="@{/admin/buildings}">
+                <i class="fas fa-city me-2"></i>Quản lý tòa nhà
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'rooms'} ? ' active' : ''"
+               th:href="@{/admin/rooms}">
+                <i class="fas fa-door-open me-2"></i>Quản lý phòng
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'invoices'} ? ' active' : ''"
+               th:href="@{/admin/invoices}">
+                <i class="fas fa-file-invoice me-2"></i>Quản lý hóa đơn
+            </a>
+            <a class="nav-link" th:classappend="${activePage == 'statistics'} ? ' active' : ''"
+               th:href="@{/admin/statistics}">
+                <i class="fas fa-chart-bar me-2"></i>Thống kê
+            </a>
+        </nav>
+    </div>
+</div>
+</body>
+</html>
+

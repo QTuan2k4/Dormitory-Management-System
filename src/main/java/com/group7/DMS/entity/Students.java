@@ -63,7 +63,10 @@ public class Students {
     private RegistrationStatus registrationStatus;
 
     public enum RegistrationStatus {
-        PENDING, APPROVED, REJECTED
+        PENDING,
+        APPROVED,
+        REJECTED,
+        NOT_SUBMITTED
     }
 
     public int getId() {
