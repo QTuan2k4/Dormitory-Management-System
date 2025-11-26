@@ -262,7 +262,7 @@
                         <th>Mã Sinh Viên</th>
                         <th>Họ và Tên</th>
                         <th>Lớp</th>
-                        <th>Số Điện Thoại</th>
+                        <th>Ngày Nộp</th>
                         <th>Trạng thái</th>
                         <th>Hành động</th>
                     </tr>
@@ -272,7 +272,7 @@
                         <td th:text="${student.studentId}"></td>
                         <td th:text="${student.fullName}"></td>
                         <td th:text="${student.address}"></td>
-                        <td th:text="${student.phone}"></td>
+                        <td th:text="${student.applicationDate != null ? #temporals.format(student.applicationDate, 'dd/MM/yyyy') : 'Chưa nộp'}"></td>
                         <td>
                             <span class="status-badge"
                                   th:classappend="${
@@ -310,6 +310,42 @@
                     </tr>
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div class="p-3 d-flex justify-content-between align-items-center" th:if="${totalPages > 1}">
+                <small class="text-muted">
+                    Hiển thị
+                    <span th:text="${(currentPage - 1) * pageSize + 1}">1</span>
+                    -
+                    <span th:text="${T(java.lang.Math).min(currentPage * pageSize, totalStudents)}">10</span>
+                    / <span th:text="${totalStudents}">0</span> hồ sơ
+                </small>
+                <nav aria-label="Student pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? ' disabled'">
+                            <a class="page-link"
+                               th:href="@{/admin/students(page=${currentPage > 1 ? currentPage - 1 : 1}, size=${pageSize}, search=${search}, status=${status})}">
+                                Trước
+                            </a>
+                        </li>
+                        <li class="page-item"
+                            th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
+                            th:classappend="${pageNum == currentPage} ? ' active'">
+                            <a class="page-link"
+                               th:text="${pageNum}"
+                               th:href="@{/admin/students(page=${pageNum}, size=${pageSize}, search=${search}, status=${status})}">
+                                1
+                            </a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? ' disabled'">
+                            <a class="page-link"
+                               th:href="@{/admin/students(page=${currentPage < totalPages ? currentPage + 1 : totalPages}, size=${pageSize}, search=${search}, status=${status})}">
+                                Sau
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
             <!-- Empty State -->
             <div th:if="${#lists.isEmpty(students)}" class="empty-state">
