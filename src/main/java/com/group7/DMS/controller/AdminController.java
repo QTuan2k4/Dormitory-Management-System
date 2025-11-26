@@ -210,23 +210,29 @@ public class AdminController {
 
     // ========== Approve/Reject Registration ==========
     @PostMapping("/students/{id}/approve")
-    public String approveRegistration(@PathVariable int id, Model model) {
+    public String approveRegistration(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
             studentService.approveRegistration(id);
-            model.addAttribute("success", "Duyệt hồ sơ thành công!");
+            redirectAttributes.addFlashAttribute("success", "Duyệt hồ sơ thành công!");
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi: " + e.getMessage());
+        	redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/students/" + id;
     }
 
     @PostMapping("/students/{id}/reject")
-    public String rejectRegistration(@PathVariable int id, Model model) {
+    public String rejectRegistration(
+            @PathVariable int id, 
+            @RequestParam("rejectionReason") String rejectionReason, //  THÊM tham số lý do từ form Modal
+            RedirectAttributes redirectAttributes) { //  Dùng RedirectAttributes thay vì Model
         try {
-            studentService.rejectRegistration(id);
-            model.addAttribute("success", "Từ chối hồ sơ thành công!");
+            // Gọi Service với ID và Lý do từ chối
+            studentService.rejectRegistration(id, rejectionReason); 
+            
+            // Dùng addFlashAttribute để thông báo hiển thị sau khi redirect
+            redirectAttributes.addFlashAttribute("success", "Từ chối hồ sơ thành công!");
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/students/" + id;
     }

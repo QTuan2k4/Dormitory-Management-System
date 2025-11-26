@@ -22,7 +22,7 @@ public interface StudentService {
     // FIX: Cập nhật phương thức để nhận course và major từ form đăng ký
     Students createStudent(Users user, String fullName, String studentId, String course, String major); 
     void approveRegistration(int studentId);
-    void rejectRegistration(int studentId);
+    void rejectRegistration(int studentId, String rejectionReason); //THÊM tham số String rejectionReason
     void updateRegistrationStatus(int studentId, Students.RegistrationStatus status);
     Students findByUsername(String username);
     Optional<Contracts> findActiveContractByUsername(String username);
