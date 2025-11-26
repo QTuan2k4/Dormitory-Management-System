@@ -6,7 +6,6 @@ import com.group7.DMS.entity.Payments;
 import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.entity.Students;
 import com.group7.DMS.entity.Users;
-import com.group7.DMS.repository.ContractRepository;
 import com.group7.DMS.service.BuildingService;
 import com.group7.DMS.service.InvoiceService;
 import com.group7.DMS.service.RoomService;
@@ -41,8 +40,6 @@ public class AdminController {
     @Autowired
     private RoomService roomService;
     
-    @Autowired
-    private ContractRepository contractRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication auth) {
@@ -104,6 +101,8 @@ public class AdminController {
     public String listStudents(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
             Model model,
             Authentication auth) {
 
@@ -137,10 +136,27 @@ public class AdminController {
                     .toList();
         }
 
-        // 4. Gửi dữ liệu ra view
-        model.addAttribute("students", students);
+        // 4. Xử lý phân trang đơn giản phía server
+        int pageSize = size > 0 ? size : 10;
+        int totalStudents = students.size();
+        int totalPages = (int) Math.ceil((double) totalStudents / pageSize);
+        if (totalPages == 0) {
+            totalPages = 1;
+        }
+
+        int currentPage = Math.max(1, Math.min(page, totalPages));
+        int fromIndex = (currentPage - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, totalStudents);
+        List<Students> pagedStudents = students.subList(fromIndex, toIndex);
+
+        // 5. Gửi dữ liệu ra view
+        model.addAttribute("students", pagedStudents);
         model.addAttribute("search", search);        // giữ từ khóa tìm kiếm
         model.addAttribute("status", status);        // giữ trạng thái đã chọn
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("totalStudents", totalStudents);
 
         // Username cho header
         if (auth != null) {
