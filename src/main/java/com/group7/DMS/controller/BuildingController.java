@@ -72,7 +72,7 @@ public class BuildingController {
     	Model model
     ) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("pageTitle", (building.getId() == 0 ? "Thêm Tòa Nhà Mới" : "Sửa Tòa Nhà (ID: " + building.getId() + ")"));
+            model.addAttribute("pageTitle", (building.getId() == 0 ? "Thêm Tòa Nhà Mới" : "Sửa Tòa Nhà"));
             return "admin/building-form"; 
         }
 
