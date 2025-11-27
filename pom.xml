@@ -87,8 +87,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
-		 
-    <dependency>
+		
+	
+	
+	
+		<dependency>
         <groupId>org.seleniumhq.selenium</groupId>
         <artifactId>selenium-java</artifactId>
         <version>4.20.0</version> </dependency>
@@ -110,7 +113,6 @@
     <artifactId>testng</artifactId>
     <version>7.8.0</version> <scope>test</scope>
 </dependency>
-
 	</dependencies>
 
 	<build>
@@ -144,4 +146,5 @@
 			</plugin>
 		</plugins>
 	</build>
+
 </project>

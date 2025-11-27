@@ -8,6 +8,7 @@ import com.group7.DMS.repository.ContractRepository;
 import com.group7.DMS.entity.Contracts;
 import com.group7.DMS.entity.Contracts.ContractStatus;
 import com.group7.DMS.entity.Rooms;
+import com.group7.DMS.entity.Notifications;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,9 @@ public class StudentServiceImpl implements StudentService {
     
     @Autowired
     private RoomService roomService;
+    
+    @Autowired 
+    private NotificationService notificationService;
 
     @Override
     @Transactional
@@ -167,11 +171,29 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public void rejectRegistration(int studentId) {
+    @Transactional
+    public void rejectRegistration(int studentId, String rejectionReason) {
         Students student = findById(studentId);
         if (student != null) {
+        	// 1. Cập nhật trạng thái và lưu lý do
             student.setRegistrationStatus(Students.RegistrationStatus.REJECTED);
+            student.setRejectionReason(rejectionReason); // <<< LƯU LÝ DO MỚI THÊM
             studentRepository.save(student);
+            
+         // 2. Gửi thông báo cho sinh viên (Đạt tiêu chí chấp nhận)
+            String title = "Hồ sơ đăng ký Ký túc xá bị Từ chối";
+            String message = String.format(
+                "Hồ sơ đăng ký của bạn đã bị từ chối. Lý do chi tiết: '%s'. Vui lòng kiểm tra lại thông tin cá nhân và giấy tờ đính kèm.",
+                rejectionReason
+            );
+            
+            notificationService.createNotification(
+                    student.getUser(), 
+                    title, 
+                    message, 
+                    Notifications.NotificationType.APPROVAL_STATUS, 
+                    Notifications.SentVia.BOTH
+                );
         }
     }
 

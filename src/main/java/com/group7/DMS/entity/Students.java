@@ -57,10 +57,20 @@ public class Students {
     @Column(name = "documents_path", columnDefinition = "TEXT")
     private String documentsPath;
     
-    @Enumerated(EnumType.ORDINAL)
+    public String getRejectionReason() {
+		return rejectionReason;
+	}
+
+	public void setRejectionReason(String rejectionReason) {
+		this.rejectionReason = rejectionReason;
+	}
+
+	@Enumerated(EnumType.ORDINAL)
     @Column(name = "registration_status")
-    
     private RegistrationStatus registrationStatus;
+    
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason; // Trường mới để lưu lý do từ chối
 
     public enum RegistrationStatus {
         PENDING,

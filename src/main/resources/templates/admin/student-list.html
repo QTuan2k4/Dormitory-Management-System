@@ -248,6 +248,17 @@
 						<option value="REJECTED"       th:selected="${status != null and status.toUpperCase() == 'REJECTED'}">Từ chối</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label for="specialCircumstanceFilter">Hoàn cảnh đặc biệt:</label>
+                    <select id="specialCircumstanceFilter" name="specialCircumstance">
+                        <option value="">Tất cả</option>
+                        <option value="difficultArea" th:selected="${specialCircumstance == 'difficultArea'}">Vùng đặc biệt khó khăn</option>
+                        <option value="congenitalDefect" th:selected="${specialCircumstance == 'congenitalDefect'}">Khiếm khuyết bẩm sinh</option>
+                        <option value="poorHousehold" th:selected="${specialCircumstance == 'poorHousehold'}">Sổ hộ nghèo/cận nghèo</option>
+                        <option value="revolutionaryFamily" th:selected="${specialCircumstance == 'revolutionaryFamily'}">Con nhà cách mạng</option>
+                        <option value="ethnicMinority" th:selected="${specialCircumstance == 'ethnicMinority'}">Dân tộc thiểu số</option>
+                    </select>
+                </div>
                 <button type="submit">
                     <i class="fas fa-search me-1"></i>Tìm kiếm
                 </button>
@@ -290,21 +301,30 @@
                         </td>
                         <td>
                             <div class="action-buttons">
+                                <!-- Nút Xem luôn hiện thị -->
                                 <a th:href="@{/admin/students/{id}(id=${student.id})}" class="btn btn-view">
                                     <i class="fas fa-eye me-1"></i>Xem
                                 </a>
-								<!-- Thay thế nút cũ -->
-								<a th:href="@{'/admin/students/' + ${student.id} + '/assign-room'}"
-								   class="btn btn-sm btn-success"
-								   th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}">
-								    Duyệt
+								
+                                <!-- Nút Duyệt chỉ hiện thị khi trạng thái là PENDING -->
+								<a th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}"
+                                   th:href="@{'/admin/students/' + ${student.id} + '/assign-room'}"
+								   class="btn btn-approve">
+								    <i class="fas fa-check me-1"></i>Duyệt
 								</a>
-								<span class="badge bg-success" th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED}">
-								    Đã duyệt
-								</span>
-                                <button th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}" type="button" class="btn btn-reject" onclick="rejectStudent(this)" th:data-id="${student.id}" th:attr="data-reject-url=@{/admin/students/{id}/reject(id=${student.id})}">
+                                
+                                <!-- Nút Từ Chối chỉ hiện thị khi trạng thái là PENDING và kích hoạt Modal -->
+                                <button th:if="${student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).PENDING}" 
+                                        type="button" 
+                                        class="btn btn-reject" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#rejectListModal" 
+                                        th:data-student-id="${student.id}"
+                                        th:data-student-name="${student.fullName}">
                                     <i class="fas fa-times me-1"></i>Từ chối
                                 </button>
+                                
+                                <!-- Xóa hiển thị trạng thái Đã Duyệt/Từ Chối khỏi cột Hành động -->
                             </div>
                         </td>
                     </tr>
@@ -324,7 +344,7 @@
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${currentPage == 1} ? ' disabled'">
                             <a class="page-link"
-                               th:href="@{/admin/students(page=${currentPage > 1 ? currentPage - 1 : 1}, size=${pageSize}, search=${search}, status=${status})}">
+                               th:href="@{/admin/students(page=${currentPage > 1 ? currentPage - 1 : 1}, size=${pageSize}, search=${search}, status=${status}, specialCircumstance=${specialCircumstance})}">
                                 Trước
                             </a>
                         </li>
@@ -333,13 +353,13 @@
                             th:classappend="${pageNum == currentPage} ? ' active'">
                             <a class="page-link"
                                th:text="${pageNum}"
-                               th:href="@{/admin/students(page=${pageNum}, size=${pageSize}, search=${search}, status=${status})}">
+                               th:href="@{/admin/students(page=${pageNum}, size=${pageSize}, search=${search}, status=${status}, specialCircumstance=${specialCircumstance})}">
                                 1
                             </a>
                         </li>
                         <li class="page-item" th:classappend="${currentPage == totalPages} ? ' disabled'">
                             <a class="page-link"
-                               th:href="@{/admin/students(page=${currentPage < totalPages ? currentPage + 1 : totalPages}, size=${pageSize}, search=${search}, status=${status})}">
+                               th:href="@{/admin/students(page=${currentPage < totalPages ? currentPage + 1 : totalPages}, size=${pageSize}, search=${search}, status=${status}, specialCircumstance=${specialCircumstance})}">
                                 Sau
                             </a>
                         </li>
@@ -355,24 +375,66 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function approveStudent(button) {
-            const url = button.getAttribute('data-approve-url');
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = url;
-            document.body.appendChild(form);
-            form.submit();
-        }
+    <!-- START: MODAL YÊU CẦU LÝ DO TỪ CHỐI (CHO DANH SÁCH) -->
+    <div class="modal fade" id="rejectListModal" tabindex="-1" aria-labelledby="rejectListModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="rejectListModalLabel"><i class="fas fa-trash-alt me-2"></i>Xác nhận Từ chối Hồ sơ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <!-- Form sẽ được cập nhật action bằng JavaScript -->
+                <form id="rejectListForm" method="post">
+                    <div class="modal-body">
+                        <p>Bạn có chắc chắn muốn từ chối hồ sơ đăng ký của sinh viên 
+                           <strong id="studentNamePlaceholder"></strong> không?
+                           <br>Vui lòng cung cấp lý do chi tiết.</p>
+                        
+                        <div class="mb-3 mt-3">
+                            <label for="rejectionReason" class="form-label fw-bold">Lý do từ chối:</label>
+                            <textarea class="form-control" id="rejectionReason" name="rejectionReason" rows="4" required 
+                                      placeholder="Ví dụ: Hồ sơ thiếu ảnh thẻ, thông tin không khớp với Căn cước công dân..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times me-1"></i> Xác nhận Từ chối
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- END: MODAL YÊU CẦU LÝ DO TỪ CHỐI -->
 
-        function rejectStudent(button) {
-            const url = button.getAttribute('data-reject-url');
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = url;
-            document.body.appendChild(form);
-            form.submit();
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        // Lấy Base URL từ Thymeleaf
+        const rejectBaseUrl = /*[[@{/admin/students/{id}/reject}]]*/ '/admin/students/{id}/reject';
+
+        const rejectListModal = document.getElementById('rejectListModal');
+        const rejectListForm = document.getElementById('rejectListForm');
+        const studentNamePlaceholder = document.getElementById('studentNamePlaceholder');
+
+        if (rejectListModal) {
+            rejectListModal.addEventListener('show.bs.modal', function (event) {
+                // Lấy nút (button) đã kích hoạt modal
+                const button = event.relatedTarget;
+                
+                // Lấy dữ liệu từ các thuộc tính data-* của nút
+                const studentId = button.getAttribute('data-student-id');
+                const studentName = button.getAttribute('data-student-name');
+                
+                // Cập nhật Action URL của form
+                // Thay thế {id} trong URL gốc bằng studentId thực tế
+                const actionUrl = rejectBaseUrl.replace('{id}', studentId);
+                rejectListForm.action = actionUrl;
+                
+                // Cập nhật tên sinh viên trong modal
+                studentNamePlaceholder.textContent = studentName;
+            });
         }
     </script>
 </body>
