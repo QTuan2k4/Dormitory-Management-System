@@ -248,6 +248,17 @@
 						<option value="REJECTED"       th:selected="${status != null and status.toUpperCase() == 'REJECTED'}">Từ chối</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label for="specialCircumstanceFilter">Hoàn cảnh đặc biệt:</label>
+                    <select id="specialCircumstanceFilter" name="specialCircumstance">
+                        <option value="">Tất cả</option>
+                        <option value="difficultArea" th:selected="${specialCircumstance == 'difficultArea'}">Vùng đặc biệt khó khăn</option>
+                        <option value="congenitalDefect" th:selected="${specialCircumstance == 'congenitalDefect'}">Khiếm khuyết bẩm sinh</option>
+                        <option value="poorHousehold" th:selected="${specialCircumstance == 'poorHousehold'}">Sổ hộ nghèo/cận nghèo</option>
+                        <option value="revolutionaryFamily" th:selected="${specialCircumstance == 'revolutionaryFamily'}">Con nhà cách mạng</option>
+                        <option value="ethnicMinority" th:selected="${specialCircumstance == 'ethnicMinority'}">Dân tộc thiểu số</option>
+                    </select>
+                </div>
                 <button type="submit">
                     <i class="fas fa-search me-1"></i>Tìm kiếm
                 </button>
@@ -324,7 +335,7 @@
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item" th:classappend="${currentPage == 1} ? ' disabled'">
                             <a class="page-link"
-                               th:href="@{/admin/students(page=${currentPage > 1 ? currentPage - 1 : 1}, size=${pageSize}, search=${search}, status=${status})}">
+                               th:href="@{/admin/students(page=${currentPage > 1 ? currentPage - 1 : 1}, size=${pageSize}, search=${search}, status=${status}, specialCircumstance=${specialCircumstance})}">
                                 Trước
                             </a>
                         </li>
@@ -333,13 +344,13 @@
                             th:classappend="${pageNum == currentPage} ? ' active'">
                             <a class="page-link"
                                th:text="${pageNum}"
-                               th:href="@{/admin/students(page=${pageNum}, size=${pageSize}, search=${search}, status=${status})}">
+                               th:href="@{/admin/students(page=${pageNum}, size=${pageSize}, search=${search}, status=${status}, specialCircumstance=${specialCircumstance})}">
                                 1
                             </a>
                         </li>
                         <li class="page-item" th:classappend="${currentPage == totalPages} ? ' disabled'">
                             <a class="page-link"
-                               th:href="@{/admin/students(page=${currentPage < totalPages ? currentPage + 1 : totalPages}, size=${pageSize}, search=${search}, status=${status})}">
+                               th:href="@{/admin/students(page=${currentPage < totalPages ? currentPage + 1 : totalPages}, size=${pageSize}, search=${search}, status=${status}, specialCircumstance=${specialCircumstance})}">
                                 Sau
                             </a>
                         </li>
