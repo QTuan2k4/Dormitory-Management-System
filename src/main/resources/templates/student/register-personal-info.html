@@ -211,7 +211,7 @@
         <div class="header d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="mb-0">
-                    <i class="fas fa-user me-2"></i>Xin chào, <span th:text="${user != null ? user.username : 'Admin'}">Admin</span>
+                    <i class="fas fa-user me-2"></i>Xin chào, <span th:text="${student != null && student.fullName != null ? student.fullName : (user != null ? user.username : 'Admin')}">Admin</span>
                 </h4>
                 <small class="text-muted">Sinh viên</small>
             </div>
@@ -273,11 +273,15 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Ngày Sinh:</label>
+                                <label class="form-label">
+                                    Ngày Sinh: <span class="text-danger">*</span>
+                                </label>
                                 <input type="date" 
                                        class="form-control" 
                                        name="birthDate"
-                                       th:value="${student != null && student.birthDate != null ? #temporals.format(student.birthDate, 'yyyy-MM-dd') : ''}">
+                                       th:value="${student != null && student.birthDate != null ? #temporals.format(student.birthDate, 'yyyy-MM-dd') : ''}" 
+                                       required>
+                                <div class="invalid-feedback">Vui lòng chọn ngày sinh.</div>
                             </div>
 
                             <div class="mb-3">
@@ -294,7 +298,13 @@
                                        class="form-control" 
                                        name="citizenId"
                                        th:value="${student != null ? student.citizenId : ''}"
-                                       placeholder="Nhập số căn cước công dân">
+                                       placeholder="Nhập 12 chữ số"
+                                       pattern="[0-9]{12}"
+                                       minlength="12"
+                                       maxlength="12"
+                                       inputmode="numeric"
+                                       required>
+                                <div class="invalid-feedback">Căn cước công dân phải gồm 12 chữ số.</div>
                             </div>
 
                             <div class="mb-3">
@@ -313,7 +323,7 @@
                                     <input type="file" 
                                            id="idCardFront" 
                                            name="idCardFront" 
-                                           accept=".png,.jpg,.jpeg"
+                                           accept=".png"
                                            th:required="${documentMap == null || !documentMap.containsKey('idCardFront')}">
                                     <span class="file-name" id="idCardFrontName"></span>
                                 </div>
@@ -334,7 +344,7 @@
                                     <input type="file" 
                                            id="idCardBack" 
                                            name="idCardBack" 
-                                           accept=".png,.jpg,.jpeg">
+                                           accept=".png">
                                     <span class="file-name" id="idCardBackName"></span>
                                 </div>
                                 <small class="text-muted">Dung lượng tối đa: 50MB</small>
@@ -437,7 +447,7 @@
                                         <input type="file" 
                                                id="congenitalDefectFile" 
                                                name="congenitalDefectFile" 
-                                               accept=".png,.jpg,.jpeg">
+                                               accept=".png">
                                         <span class="file-name" id="congenitalDefectFileName"></span>
                                         <small class="text-muted d-block mt-1" style="margin-left: 25px;">Dung lượng tối đa: 50MB</small>
                                     </div>
@@ -465,7 +475,7 @@
                                         <input type="file" 
                                                id="difficultAreaFile" 
                                                name="difficultAreaFile" 
-                                               accept=".png,.jpg,.jpeg">
+                                               accept=".png">
                                         <span class="file-name" id="difficultAreaFileName"></span>
                                         <small class="text-muted d-block mt-1" style="margin-left: 25px;">Dung lượng tối đa: 50MB</small>
                                     </div>
@@ -493,7 +503,7 @@
                                         <input type="file" 
                                                id="poorHouseholdFile" 
                                                name="poorHouseholdFile" 
-                                               accept=".png,.jpg,.jpeg">
+                                               accept=".png">
                                         <span class="file-name" id="poorHouseholdFileName"></span>
                                         <small class="text-muted d-block mt-1" style="margin-left: 25px;">Dung lượng tối đa: 50MB</small>
                                     </div>
@@ -523,7 +533,7 @@
                                         <input type="file" 
                                                id="revolutionaryFamilyFile" 
                                                name="revolutionaryFamilyFile" 
-                                               accept=".png,.jpg,.jpeg">
+                                               accept=".png">
                                         <span class="file-name" id="revolutionaryFamilyFileName"></span>
                                         <small class="text-muted d-block mt-1" style="margin-left: 25px;">Dung lượng tối đa: 50MB</small>
                                     </div>
@@ -551,7 +561,7 @@
                                         <input type="file" 
                                                id="ethnicMinorityFile" 
                                                name="ethnicMinorityFile" 
-                                               accept=".png,.jpg,.jpeg">
+                                               accept=".png">
                                         <span class="file-name" id="ethnicMinorityFileName"></span>
                                         <small class="text-muted d-block mt-1" style="margin-left: 25px;">Dung lượng tối đa: 50MB</small>
                                     </div>
