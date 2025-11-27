@@ -254,6 +254,11 @@
                          class="alert alert-danger" role="alert">
                         <i class="fas fa-times-circle me-2"></i>
                         Hồ sơ đã bị từ chối. Hãy cập nhật đầy đủ thông tin, bổ sung minh chứng và gửi lại để được xem xét.
+                        <div class="rejection-reason mt-3" 
+                             th:if="${student.rejectionReason != null and student.rejectionReason.trim().length() > 0}">
+                            <p class="mb-0 fw-bold text-danger">Lý do từ chối chi tiết:</p>
+                            <p class="mb-0 text-dark" th:text="${student.rejectionReason}">Nội dung lý do từ chối từ Admin sẽ được hiển thị ở đây.</p> 
+                        </div>
                     </div>
                     <div th:if="${student != null && student.registrationStatus == T(com.group7.DMS.entity.Students$RegistrationStatus).APPROVED}"
                          class="alert alert-success" role="alert">
