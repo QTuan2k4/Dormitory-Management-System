@@ -32,6 +32,18 @@ public class Buildings {
     @Min(value = 0, message = "Số tầng phải là số dương")
     @Column(name = "total_floors")
     
+
+    private int totalFloors = 0;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @NotBlank(message = "Trạng thái không được để trống")
+    @Column(name = "status", length = 50, nullable = false)
+    private String status;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
     public int getId() {
 		return id;
 	}
@@ -64,14 +76,6 @@ public class Buildings {
 		this.description = description;
 	}
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -88,19 +92,7 @@ public class Buildings {
 		this.rooms = rooms;
 	}
 
-	@Column(name = "total_floors")
-
-    private int totalFloors = 0;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @NotBlank(message = "Trạng thái không được để trống")
-    @Column(name = "status", length = 50, nullable = false)
-    private String status;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+	
 
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Rooms> rooms;

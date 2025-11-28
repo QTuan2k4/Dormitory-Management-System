@@ -23,11 +23,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Controller
 @RequestMapping("/student")
 public class StudentController {
+    private static final String CITIZEN_ID_REGEX = "\\d{12}";
+    private static final String PNG_EXTENSION = ".png";
+    private static final DateTimeFormatter DISPLAY_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter[] BIRTHDATE_FORMATTERS = new DateTimeFormatter[] {
+            DISPLAY_DATE_FORMATTER,
+            DateTimeFormatter.ISO_LOCAL_DATE
+    };
     
     @Autowired
     private UserService userService;
@@ -155,23 +164,24 @@ public class StudentController {
             Authentication auth,
             Model model) {
         
+        String username = auth.getName();
+        Users user = userService.findByUsername(username);
+        Students student = studentService.findByUserId(user.getId());
+        
+        if (student == null) {
+            model.addAttribute("error", "Không tìm thấy thông tin sinh viên!");
+            return "student/register-personal-info";
+        }
+        
         try {
-            String username = auth.getName();
-            Users user = userService.findByUsername(username);
-            Students student = studentService.findByUserId(user.getId());
+            String sanitizedCitizenId = citizenId != null ? citizenId.trim() : null;
+            validateCitizenId(sanitizedCitizenId);
+            student.setCitizenId(sanitizedCitizenId);
             
-            if (student == null) {
-                model.addAttribute("error", "Không tìm thấy thông tin sinh viên!");
-                return "student/register-personal-info";
-            }
-            
-            // Update student information
             if (fullName != null && !fullName.isEmpty()) {
                 student.setFullName(fullName);
             }
-            if (birthDate != null && !birthDate.isEmpty()) {
-                student.setBirthDate(LocalDate.parse(birthDate));
-            }
+            student.setBirthDate(parseBirthDate(birthDate));
             if (studentClass != null && !studentClass.isEmpty()) {
                 student.setStudentClass(studentClass);
             }
@@ -181,54 +191,52 @@ public class StudentController {
             if (gender != null && !gender.isEmpty()) {
                 student.setGender(gender);
             }
-            if (citizenId != null && !citizenId.isEmpty()) {
-                student.setCitizenId(citizenId);
-            }
             if (floor != null && !floor.isEmpty()) {
                 student.setFloor(floor);
             }
             
-            // Save uploaded files - merge with existing documents (replace if key exists)
             java.util.Map<String, String> documentMap = new java.util.HashMap<>();
-            
-            // Load existing documents into map
             if (student.getDocumentsPath() != null && !student.getDocumentsPath().isEmpty()) {
                 documentMap = parseDocumentsPath(student.getDocumentsPath());
             }
             
-            // ID Card files - replace if exists
             if (idCardFront != null && !idCardFront.isEmpty()) {
+                ensurePngFile(idCardFront, "Ảnh căn cước mặt trước");
                 String path = saveFile(idCardFront, "idcards");
                 documentMap.put("idCardFront", path);
             }
             if (idCardBack != null && !idCardBack.isEmpty()) {
+                ensurePngFile(idCardBack, "Ảnh căn cước mặt sau");
                 String path = saveFile(idCardBack, "idcards");
                 documentMap.put("idCardBack", path);
             }
             
-            // Discount policy files - replace if exists
             if (congenitalDefectFile != null && !congenitalDefectFile.isEmpty()) {
+                ensurePngFile(congenitalDefectFile, "File khiếm khuyết bẩm sinh");
                 String path = saveFile(congenitalDefectFile, "discounts");
                 documentMap.put("congenitalDefect", path);
             }
             if (difficultAreaFile != null && !difficultAreaFile.isEmpty()) {
+                ensurePngFile(difficultAreaFile, "File vùng đặc biệt khó khăn");
                 String path = saveFile(difficultAreaFile, "discounts");
                 documentMap.put("difficultArea", path);
             }
             if (poorHouseholdFile != null && !poorHouseholdFile.isEmpty()) {
+                ensurePngFile(poorHouseholdFile, "File hộ nghèo/cận nghèo");
                 String path = saveFile(poorHouseholdFile, "discounts");
                 documentMap.put("poorHousehold", path);
             }
             if (revolutionaryFamilyFile != null && !revolutionaryFamilyFile.isEmpty()) {
+                ensurePngFile(revolutionaryFamilyFile, "File con nhà cách mạng");
                 String path = saveFile(revolutionaryFamilyFile, "discounts");
                 documentMap.put("revolutionaryFamily", path);
             }
             if (ethnicMinorityFile != null && !ethnicMinorityFile.isEmpty()) {
+                ensurePngFile(ethnicMinorityFile, "File dân tộc thiểu số");
                 String path = saveFile(ethnicMinorityFile, "discounts");
                 documentMap.put("ethnicMinority", path);
             }
             
-            // Convert map back to string format: "key1:path1;key2:path2;..."
             if (!documentMap.isEmpty()) {
                 StringBuilder documentsPathBuilder = new StringBuilder();
                 for (java.util.Map.Entry<String, String> entry : documentMap.entrySet()) {
@@ -240,7 +248,6 @@ public class StudentController {
                 student.setDocumentsPath(documentsPathBuilder.toString());
             }
             
-            // Đánh dấu hồ sơ cần duyệt nếu đây là lần gửi đầu tiên hoặc sau khi bị từ chối
             if (student.getRegistrationStatus() == null ||
                 student.getRegistrationStatus().equals(Students.RegistrationStatus.NOT_SUBMITTED) ||
                 student.getRegistrationStatus().equals(Students.RegistrationStatus.REJECTED)) {
@@ -249,19 +256,19 @@ public class StudentController {
             }
             
             studentService.update(student);
-            
-            // Parse documents path to map
-            if (student.getDocumentsPath() != null) {
-                model.addAttribute("documentMap", parseDocumentsPath(student.getDocumentsPath()));
-            }
-            
             model.addAttribute("success", "Cập nhật thông tin thành công!");
-            model.addAttribute("user", user);
-            model.addAttribute("student", student);
             
+        } catch (IllegalArgumentException ex) {
+            model.addAttribute("error", ex.getMessage());
         } catch (Exception e) {
             model.addAttribute("error", "Lỗi: " + e.getMessage());
         }
+        
+        if (student.getDocumentsPath() != null) {
+            model.addAttribute("documentMap", parseDocumentsPath(student.getDocumentsPath()));
+        }
+        model.addAttribute("user", user);
+        model.addAttribute("student", student);
         
         return "student/register-personal-info";
     }
@@ -280,6 +287,37 @@ public class StudentController {
             model.addAttribute("error", "Kích thước file quá lớn! Vui lòng chọn file nhỏ hơn 50MB.");
         }
         return "student/register-personal-info";
+    }
+    
+    private LocalDate parseBirthDate(String birthDate) {
+        if (birthDate == null || birthDate.isBlank()) {
+            throw new IllegalArgumentException("Ngày sinh không được bỏ trống.");
+        }
+        String trimmed = birthDate.trim();
+        for (DateTimeFormatter formatter : BIRTHDATE_FORMATTERS) {
+            try {
+                return LocalDate.parse(trimmed, formatter);
+            } catch (DateTimeParseException ignored) {
+                // Try next formatter
+            }
+        }
+        throw new IllegalArgumentException("Ngày sinh không hợp lệ. Vui lòng nhập theo định dạng dd-MM-yyyy.");
+    }
+    
+    private void validateCitizenId(String citizenId) {
+        if (citizenId == null || !citizenId.matches(CITIZEN_ID_REGEX)) {
+            throw new IllegalArgumentException("Căn cước công dân phải gồm đúng 12 chữ số.");
+        }
+    }
+    
+    private void ensurePngFile(MultipartFile file, String fieldLabel) {
+        if (file == null || file.isEmpty()) {
+            return;
+        }
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(PNG_EXTENSION)) {
+            throw new IllegalArgumentException(fieldLabel + " phải là file PNG (.png).");
+        }
     }
     
     private String saveFile(MultipartFile file, String subfolder) throws IOException {

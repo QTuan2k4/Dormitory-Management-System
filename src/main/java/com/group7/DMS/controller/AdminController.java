@@ -101,6 +101,7 @@ public class AdminController {
     public String listStudents(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String specialCircumstance,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model,
@@ -121,7 +122,23 @@ public class AdminController {
             }
         }
 
-        // 3. LỌC THEO TỪ KHÓA TÌM KIẾM (nếu có nhập)
+        // 3. LỌC THEO HOÀN CẢNH ĐẶC BIỆT (nếu có chọn)
+        if (specialCircumstance != null && !specialCircumstance.isBlank()) {
+            final String circumstanceKey = specialCircumstance.trim();
+            students = students.stream()
+                    .filter(s -> {
+                        String documentsPath = s.getDocumentsPath();
+                        if (documentsPath == null || documentsPath.isEmpty()) {
+                            return false;
+                        }
+                        // Kiểm tra xem documents_path có chứa key này không
+                        // Format: "key1:path1;key2:path2;..."
+                        return documentsPath.contains(circumstanceKey + ":");
+                    })
+                    .toList();
+        }
+
+        // 4. LỌC THEO TỪ KHÓA TÌM KIẾM (nếu có nhập)
         if (search != null && !search.isBlank()) {
             String keyword = search.trim().toLowerCase();
             students = students.stream()
@@ -136,7 +153,7 @@ public class AdminController {
                     .toList();
         }
 
-        // 4. Xử lý phân trang đơn giản phía server
+        // 5. Xử lý phân trang đơn giản phía server
         int pageSize = size > 0 ? size : 10;
         int totalStudents = students.size();
         int totalPages = (int) Math.ceil((double) totalStudents / pageSize);
@@ -149,10 +166,11 @@ public class AdminController {
         int toIndex = Math.min(fromIndex + pageSize, totalStudents);
         List<Students> pagedStudents = students.subList(fromIndex, toIndex);
 
-        // 5. Gửi dữ liệu ra view
+        // 6. Gửi dữ liệu ra view
         model.addAttribute("students", pagedStudents);
         model.addAttribute("search", search);        // giữ từ khóa tìm kiếm
         model.addAttribute("status", status);        // giữ trạng thái đã chọn
+        model.addAttribute("specialCircumstance", specialCircumstance);  // giữ hoàn cảnh đặc biệt đã chọn
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("pageSize", pageSize);
@@ -210,23 +228,29 @@ public class AdminController {
 
     // ========== Approve/Reject Registration ==========
     @PostMapping("/students/{id}/approve")
-    public String approveRegistration(@PathVariable int id, Model model) {
+    public String approveRegistration(@PathVariable int id, RedirectAttributes redirectAttributes) {
         try {
             studentService.approveRegistration(id);
-            model.addAttribute("success", "Duyệt hồ sơ thành công!");
+            redirectAttributes.addFlashAttribute("success", "Duyệt hồ sơ thành công!");
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi: " + e.getMessage());
+        	redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/students/" + id;
     }
 
     @PostMapping("/students/{id}/reject")
-    public String rejectRegistration(@PathVariable int id, Model model) {
+    public String rejectRegistration(
+            @PathVariable int id, 
+            @RequestParam("rejectionReason") String rejectionReason, //  THÊM tham số lý do từ form Modal
+            RedirectAttributes redirectAttributes) { //  Dùng RedirectAttributes thay vì Model
         try {
-            studentService.rejectRegistration(id);
-            model.addAttribute("success", "Từ chối hồ sơ thành công!");
+            // Gọi Service với ID và Lý do từ chối
+            studentService.rejectRegistration(id, rejectionReason); 
+            
+            // Dùng addFlashAttribute để thông báo hiển thị sau khi redirect
+            redirectAttributes.addFlashAttribute("success", "Từ chối hồ sơ thành công!");
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
         return "redirect:/admin/students/" + id;
     }
