@@ -53,6 +53,11 @@ public class Rooms {
     @DecimalMin(value = "0.0", inclusive = true, message = "Giá thuê phải là số không âm")
     @Column(name = "price_per_year", precision = 10, scale = 2)
     private BigDecimal pricePerYear = BigDecimal.ZERO;
+    
+    @NotNull(message = "Diện tích không được để trống")
+    @DecimalMin(value = "0.1", inclusive = true, message = "Diện tích phải lớn hơn 0")
+    @Column(name = "area", precision = 10, scale = 2)
+    private BigDecimal area;
 
     public int getId() {
 		return id;
@@ -116,6 +121,14 @@ public class Rooms {
 
 	public void setPricePerYear(BigDecimal pricePerYear) {
 		this.pricePerYear = pricePerYear;
+	}
+	
+	public BigDecimal getArea() {
+		return area;
+	}
+
+	public void setArea(BigDecimal area) {
+		this.area = area;
 	}
 
 	public String getDescription() {

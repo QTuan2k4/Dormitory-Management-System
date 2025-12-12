@@ -3,13 +3,17 @@ package com.group7.DMS.controller;
 import com.group7.DMS.entity.Buildings;
 import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.service.RoomService;
-import com.group7.DMS.service.BuildingService; // Cần lấy danh sách Buildings cho Dropdown
+import com.group7.DMS.service.BuildingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,31 +30,37 @@ public class RoomController {
         this.buildingService = buildingService;
     }
 
-    // --- 1. GET: Hiển thị Danh sách Phòng ---
+    // --- 1. GET: Hiển thị Danh sách Phòng với Tìm kiếm, Lọc và Phân trang ---
     @GetMapping
     public String listRooms(Model model,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size,
         @RequestParam(required = false) String roomNumber,
-        @RequestParam(required = false) Integer buildingId) { 
+        @RequestParam(required = false) Integer buildingId,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) BigDecimal minPrice,
+        @RequestParam(required = false) BigDecimal maxPrice) { 
         
-        List<Rooms> rooms;
+        Pageable pageable = PageRequest.of(page - 1, size);
         
-        // --- LOGIC XỬ LÝ TÌM KIẾM ---
-        if (roomNumber != null && !roomNumber.isEmpty() && buildingId != null) {
-            rooms = roomService.searchRoomsByNumberAndBuildingId(roomNumber, buildingId);
-            model.addAttribute("searchBuildingId", buildingId);
+        // Sử dụng phương thức tìm kiếm nâng cao với phân trang
+        Page<Rooms> roomPage = roomService.searchAndFilterRooms(roomNumber, buildingId, status, minPrice, maxPrice, pageable);
 
-        } else if (roomNumber != null && !roomNumber.isEmpty()) {
-            rooms = roomService.searchRoomsByNumber(roomNumber);
-        } else if (buildingId != null) {
-            rooms = roomService.findRoomsByBuildingId(buildingId);
-            model.addAttribute("searchBuildingId", buildingId);    
-        } else {
-            rooms = roomService.findAllRooms();
-        }
-
-        model.addAttribute("roomList", rooms);
+        model.addAttribute("roomList", roomPage.getContent());
         model.addAttribute("buildingList", buildingService.findAllBuildings());
+        
+        // Thông tin phân trang
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", roomPage.getTotalPages());
+        model.addAttribute("totalItems", roomPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        
+        // Giữ lại giá trị tìm kiếm để hiển thị trên form
         model.addAttribute("searchRoomNumber", roomNumber);
+        model.addAttribute("searchBuildingId", buildingId);
+        model.addAttribute("searchStatus", status);
+        model.addAttribute("searchMinPrice", minPrice);
+        model.addAttribute("searchMaxPrice", maxPrice);
 
         return "admin/room-list";
     }

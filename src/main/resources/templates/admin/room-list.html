@@ -61,14 +61,14 @@
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <form th:action="@{/admin/rooms}" method="GET" class="d-flex align-items-center">
+                            <form th:action="@{/admin/rooms}" method="GET" class="d-flex align-items-center flex-wrap gap-2">
                                 
-                                <input type="text" name="roomNumber" class="form-control me-2" 
-                                       placeholder="Tìm kiếm theo Số Phòng" 
-                                       style="width: 200px;"
+                                <input type="text" name="roomNumber" class="form-control" 
+                                       placeholder="Tìm theo Số Phòng" 
+                                       style="width: 150px;"
                                        th:value="${searchRoomNumber}">
                                 
-                                <select name="buildingId" class="form-select me-2" style="width: 150px;">
+                                <select name="buildingId" class="form-select" style="width: 140px;">
                                     <option value="">-- Tòa Nhà --</option>
                                     <option th:each="b : ${buildingList}" 
                                             th:value="${b.id}" 
@@ -78,11 +78,31 @@
                                     </option>
                                 </select>
                                 
+                                <select name="status" class="form-select" style="width: 140px;">
+                                    <option value="">-- Trạng thái --</option>
+                                    <option value="AVAILABLE" th:selected="${searchStatus != null and searchStatus == 'AVAILABLE'}">Còn chỗ</option>
+                                    <option value="OCCUPIED" th:selected="${searchStatus != null and searchStatus == 'OCCUPIED'}">Đã đầy</option>
+                                    <option value="MAINTENANCE" th:selected="${searchStatus != null and searchStatus == 'MAINTENANCE'}">Bảo trì</option>
+                                </select>
+                                
+                                <input type="number" name="minPrice" class="form-control" 
+                                       placeholder="Giá từ" 
+                                       style="width: 120px;"
+                                       th:value="${searchMinPrice}"
+                                       min="0" step="100000">
+                                       
+                                <input type="number" name="maxPrice" class="form-control" 
+                                       placeholder="Giá đến" 
+                                       style="width: 120px;"
+                                       th:value="${searchMaxPrice}"
+                                       min="0" step="100000">
+                                
                                 <button type="submit" class="btn btn-secondary">
-                                    <i class="fas fa-search"></i> Tìm
+                                    <i class="fas fa-filter"></i> Lọc
                                 </button>
-                                <a th:href="@{/admin/rooms}" class="btn btn-outline-secondary ms-2" title="Xóa bộ lọc">
-                                    <i class="fas fa-times"></i>
+                                <a th:if="${searchRoomNumber != null || searchBuildingId != null || searchStatus != null || searchMinPrice != null || searchMaxPrice != null}" 
+                                   th:href="@{/admin/rooms}" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                                    <i class="fas fa-redo"></i>
                                 </a>
                             </form>
                             
@@ -98,6 +118,7 @@
                                         <th>Tòa Nhà</th>
                                         <th>Số Phòng</th>
                                         <th>Tầng</th>
+                                        <th>Diện Tích</th>
                                         <th>Số Chỗ</th>
                                         <th>Đã ở</th>
                                         <th>Giá (năm)</th>
@@ -110,34 +131,75 @@
                                         <td th:text="${room.building.name}">Tòa A</td>
                                         <td th:text="${room.roomNumber}">A101</td>
                                         <td th:text="${room.floor}">1</td>
+                                        <td th:text="${room.area != null ? #numbers.formatDecimal(room.area, 0, 'COMMA', 2, 'POINT') + ' m²' : 'N/A'}">25.00 m²</td>
                                         <td th:text="${room.slot}">4</td>
                                         <td th:text="${room.currentOccupants}">2</td>
                                         <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">12,000,000 VNĐ</td>
                                         <td>
                                             <span th:switch="${room.status}">
-                                                <span th:case="'AVAILABLE'" class="badge bg-success">Phòng Trống</span>
-                                                <span th:case="'OCCUPIED'" class="badge bg-danger">Đã Đầy</span>
-                                                <span th:case="'MAINTENANCE'" class="badge bg-warning">Bảo Trì</span>
+                                                <span th:case="'AVAILABLE'" class="badge bg-success">Còn chỗ</span>
+                                                <span th:case="'OCCUPIED'" class="badge bg-danger">Đã đầy</span>
+                                                <span th:case="'MAINTENANCE'" class="badge bg-warning">Bảo trì</span>
                                                 <span th:case="*" class="badge bg-secondary" th:text="${room.status}"></span>
                                             </span>
                                         </td>
                                         <td>
-                                            <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-sm btn-info me-2" title="Sửa">
+                                            <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-sm btn-info me-1" title="Sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" 
                                                onclick="return confirm('Bạn có chắc chắn muốn xóa phòng này không?')" 
-                                               class="btn btn-sm btn-danger" title="Xóa">
+                                               class="btn btn-sm btn-danger" title="Xóa"
+                                               th:classappend="${room.currentOccupants > 0 ? 'disabled' : ''}"
+                                               th:onclick="${room.currentOccupants > 0 ? 'alert(\'Không thể xóa phòng đang có sinh viên ở!\'); return false;' : 'return confirm(\'Bạn có chắc chắn muốn xóa phòng này không?\')'}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </td>
                                     </tr>
                                     <tr th:if="${roomList.empty}">
-                                        <td colspan="9" class="text-center">Chưa có phòng nào được thêm vào hệ thống.</td>
+                                        <td colspan="9" class="text-center text-muted">
+                                            <i class="fas fa-search me-2"></i>
+                                            <span th:if="${searchRoomNumber != null || searchBuildingId != null || searchStatus != null || searchMinPrice != null || searchMaxPrice != null}">
+                                                Không tìm thấy phòng nào phù hợp với tiêu chí tìm kiếm.
+                                            </span>
+                                            <span th:unless="${searchRoomNumber != null || searchBuildingId != null || searchStatus != null || searchMinPrice != null || searchMaxPrice != null}">
+                                                Chưa có phòng nào được thêm vào hệ thống.
+                                            </span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                        
+                        <!-- Phân trang -->
+                        <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/rooms(page=${currentPage - 1}, size=${pageSize}, roomNumber=${searchRoomNumber}, buildingId=${searchBuildingId}, status=${searchStatus}, minPrice=${searchMinPrice}, maxPrice=${searchMaxPrice})}">
+                                       <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                                
+                                <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" 
+                                    th:classappend="${i == currentPage ? 'active' : ''}">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/rooms(page=${i}, size=${pageSize}, roomNumber=${searchRoomNumber}, buildingId=${searchBuildingId}, status=${searchStatus}, minPrice=${searchMinPrice}, maxPrice=${searchMaxPrice})}" 
+                                       th:text="${i}">1</a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                                    <a class="page-link" 
+                                       th:href="@{/admin/rooms(page=${currentPage + 1}, size=${pageSize}, roomNumber=${searchRoomNumber}, buildingId=${searchBuildingId}, status=${searchStatus}, minPrice=${searchMinPrice}, maxPrice=${searchMaxPrice})}">
+                                       <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                            <small class="text-muted text-center d-block">
+                                Hiển thị <span th:text="${roomList.size()}"></span> phòng trên trang này, 
+                                tổng cộng <span th:text="${totalItems}"></span> phòng.
+                            </small>
+                        </nav>
                     </div>
                 </div>
             </div>

@@ -31,4 +31,35 @@ public interface RoomRepository extends JpaRepository<Rooms, Integer> {
     
     boolean existsByBuildingIdAndRoomNumberIgnoreCase(Integer buildingId, String roomNumber);
     boolean existsByBuildingIdAndRoomNumberIgnoreCaseAndIdNot(Integer buildingId, String roomNumber, Integer id);
+    
+    // Tìm kiếm và lọc nâng cao (không phân trang)
+    @Query("SELECT r FROM Rooms r WHERE " +
+           "(:roomNumber IS NULL OR r.roomNumber LIKE %:roomNumber%) AND " +
+           "(:buildingId IS NULL OR r.building.id = :buildingId) AND " +
+           "(:status IS NULL OR r.status = :status) AND " +
+           "(:minPrice IS NULL OR r.pricePerYear >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR r.pricePerYear <= :maxPrice)")
+    List<Rooms> searchAndFilter(
+        @Param("roomNumber") String roomNumber,
+        @Param("buildingId") Integer buildingId,
+        @Param("status") Rooms.RoomStatus status,
+        @Param("minPrice") java.math.BigDecimal minPrice,
+        @Param("maxPrice") java.math.BigDecimal maxPrice
+    );
+    
+    // Tìm kiếm và lọc nâng cao với phân trang
+    @Query("SELECT r FROM Rooms r WHERE " +
+           "(:roomNumber IS NULL OR r.roomNumber LIKE %:roomNumber%) AND " +
+           "(:buildingId IS NULL OR r.building.id = :buildingId) AND " +
+           "(:status IS NULL OR r.status = :status) AND " +
+           "(:minPrice IS NULL OR r.pricePerYear >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR r.pricePerYear <= :maxPrice)")
+    org.springframework.data.domain.Page<Rooms> searchAndFilterPaged(
+        @Param("roomNumber") String roomNumber,
+        @Param("buildingId") Integer buildingId,
+        @Param("status") Rooms.RoomStatus status,
+        @Param("minPrice") java.math.BigDecimal minPrice,
+        @Param("maxPrice") java.math.BigDecimal maxPrice,
+        org.springframework.data.domain.Pageable pageable
+    );
 }

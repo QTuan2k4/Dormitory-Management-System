@@ -33,11 +33,36 @@ public class RoomServiceImpl implements RoomService {
         Optional<Buildings> existingBuilding = buildingRepository.findById(buildingId);
 
         if (!existingBuilding.isPresent()) {
-            throw new RuntimeException("Building with ID " + buildingId + " not found.");
+            throw new RuntimeException("Không tìm thấy tòa nhà với ID " + buildingId);
         }
         
         if (room.getFloor() > existingBuilding.get().getTotalFloors()) {
-             throw new RuntimeException("Floor number " + room.getFloor() + " exceeds total floors of the building.");
+             throw new RuntimeException("Số tầng " + room.getFloor() + " vượt quá tổng số tầng của tòa nhà.");
+        }
+        
+        // Validate mã phòng trùng trong cùng tòa nhà
+        String trimmedRoomNumber = room.getRoomNumber().trim();
+        if (room.getId() == 0) {
+            // Thêm mới: kiểm tra trùng
+            if (roomRepository.existsByBuildingIdAndRoomNumberIgnoreCase(buildingId, trimmedRoomNumber)) {
+                throw new RuntimeException("Số phòng '" + trimmedRoomNumber + "' đã tồn tại trong tòa nhà này.");
+            }
+        } else {
+            // Cập nhật: kiểm tra trùng với phòng khác
+            if (roomRepository.existsByBuildingIdAndRoomNumberIgnoreCaseAndIdNot(buildingId, trimmedRoomNumber, room.getId())) {
+                throw new RuntimeException("Số phòng '" + trimmedRoomNumber + "' đã tồn tại trong tòa nhà này.");
+            }
+        }
+        room.setRoomNumber(trimmedRoomNumber);
+        
+        // Validate giá thuê
+        if (room.getPricePerYear() != null && room.getPricePerYear().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Giá thuê phải là số không âm.");
+        }
+        
+        // Validate diện tích
+        if (room.getArea() == null || room.getArea().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Diện tích phải lớn hơn 0.");
         }
 
         return roomRepository.save(room);
@@ -56,6 +81,14 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public void deleteRoom(int id) {
+        Optional<Rooms> roomOpt = roomRepository.findById(id);
+        if (roomOpt.isPresent()) {
+            Rooms room = roomOpt.get();
+            // Ngăn xóa phòng đang có sinh viên ở (OCCUPIED hoặc currentOccupants > 0)
+            if (room.getStatus() == Rooms.RoomStatus.OCCUPIED || room.getCurrentOccupants() > 0) {
+                throw new RuntimeException("Không thể xóa phòng đang có sinh viên ở. Vui lòng chuyển sinh viên sang phòng khác trước.");
+            }
+        }
         roomRepository.deleteById(id); 
     }
 
@@ -101,6 +134,47 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<Rooms> searchRoomsByNumberAndBuildingId(String roomNumber, int buildingId) {
         return roomRepository.findByRoomNumberContainingIgnoreCaseAndBuildingId(roomNumber, buildingId);
+    }
+    
+    @Override
+    public List<Rooms> searchAndFilterRooms(String roomNumber, Integer buildingId, String status,
+                                             java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice) {
+        Rooms.RoomStatus roomStatus = parseRoomStatus(status);
+        
+        return roomRepository.searchAndFilter(
+            (roomNumber != null && !roomNumber.isEmpty()) ? roomNumber : null,
+            buildingId,
+            roomStatus,
+            minPrice,
+            maxPrice
+        );
+    }
+    
+    @Override
+    public org.springframework.data.domain.Page<Rooms> searchAndFilterRooms(String roomNumber, Integer buildingId, String status,
+                                             java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice,
+                                             org.springframework.data.domain.Pageable pageable) {
+        Rooms.RoomStatus roomStatus = parseRoomStatus(status);
+        
+        return roomRepository.searchAndFilterPaged(
+            (roomNumber != null && !roomNumber.isEmpty()) ? roomNumber : null,
+            buildingId,
+            roomStatus,
+            minPrice,
+            maxPrice,
+            pageable
+        );
+    }
+    
+    private Rooms.RoomStatus parseRoomStatus(String status) {
+        if (status != null && !status.isEmpty()) {
+            try {
+                return Rooms.RoomStatus.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                // Bỏ qua nếu status không hợp lệ
+            }
+        }
+        return null;
     }
 
     // --- Logic Nghiệp vụ Phức tạp ---

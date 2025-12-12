@@ -19,6 +19,15 @@ public interface RoomService {
 
     List<Rooms> searchRoomsByNumber(String roomNumber);
     List<Rooms> searchRoomsByNumberAndBuildingId(String roomNumber, int buildingId);
+    
+    // Tìm kiếm và lọc nâng cao (không phân trang - giữ lại cho tương thích)
+    List<Rooms> searchAndFilterRooms(String roomNumber, Integer buildingId, String status, 
+                                      java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice);
+    
+    // Tìm kiếm và lọc nâng cao với phân trang
+    org.springframework.data.domain.Page<Rooms> searchAndFilterRooms(String roomNumber, Integer buildingId, String status, 
+                                      java.math.BigDecimal minPrice, java.math.BigDecimal maxPrice,
+                                      org.springframework.data.domain.Pageable pageable);
 
     Rooms updateOccupancy(int roomId, int changeInOccupants);
  // ← BỔ SUNG: gom nhóm theo tầng để hiển thị đẹp
