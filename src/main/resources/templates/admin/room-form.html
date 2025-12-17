@@ -62,18 +62,24 @@
 
                             <div class="mb-3">
     							<label for="building" class="form-label">Tòa Nhà <span class="text-danger">*</span></label>
-    							<select name="building.id" id="building" class="form-select" required>
+    							<select name="building.id" id="building" class="form-select" required
+    							        th:disabled="${room.id != 0}">
         							<option value="">-- Chọn Tòa Nhà --</option>
         							<option th:each="b : ${buildingList}" 
                 					th:value="${b.id}" 
                 					th:text="${b.name}"
                 					th:selected="${room.building != null and b.id == room.building.id}">Tòa A</option>
     							</select>
+    							<!-- Hidden field để gửi giá trị khi disabled -->
+    							<input th:if="${room.id != 0}" type="hidden" name="building.id" th:value="${room.building.id}" />
+    							<small th:if="${room.id != 0}" class="text-muted">Không thể thay đổi tòa nhà khi chỉnh sửa phòng.</small>
 							</div>
 
                             <div class="mb-3">
                                 <label for="roomNumber" class="form-label">Số Phòng <span class="text-danger">*</span></label>
-                                <input type="text" th:field="*{roomNumber}" id="roomNumber" class="form-control" required maxlength="20">
+                                <input type="text" th:field="*{roomNumber}" id="roomNumber" class="form-control" required maxlength="20"
+                                       th:readonly="${room.id != 0}">
+                                <small th:if="${room.id != 0}" class="text-muted">Không thể thay đổi số phòng khi chỉnh sửa.</small>
                             </div>
 
                             <div class="mb-3">
@@ -83,22 +89,29 @@
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="slot" class="form-label">Số Chỗ Tối Đa</label>
-                                    <input type="number" th:field="*{slot}" id="slot" class="form-control" min="1" value="4">
+                                    <label for="slot" class="form-label">Số Chỗ Tối Đa <span class="text-danger">*</span></label>
+                                    <input type="number" th:field="*{slot}" id="slot" class="form-control" min="1" value="4" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="pricePerYear" class="form-label">Giá Thuê (VNĐ/Năm)</label>
-                                    <input type="number" th:field="*{pricePerYear}" id="pricePerYear" class="form-control" min="0" step="0.01">
+                                    <label for="area" class="form-label">Diện Tích (m²) <span class="text-danger">*</span></label>
+                                    <input type="number" th:field="*{area}" id="area" class="form-control" min="0.1" step="0.01" required>
                                 </div>
                             </div>
                             
-                            <div class="mb-3" th:if="${room.id != 0}">
-                                <label for="status" class="form-label">Trạng Thái Phòng</label>
-                                <select th:field="*{status}" id="status" class="form-select">
-                                    <option th:each="s : ${T(com.group7.DMS.entity.Rooms.RoomStatus).values()}"
-                                            th:value="${s}"
-                                            th:text="${s.name()}">AVAILABLE</option>
-                                </select>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="pricePerYear" class="form-label">Giá Thuê (VNĐ/Năm) <span class="text-danger">*</span></label>
+                                    <input type="number" th:field="*{pricePerYear}" id="pricePerYear" class="form-control" min="0" step="1000" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="status" class="form-label">Trạng Thái Phòng <span class="text-danger">*</span></label>
+                                    <select th:field="*{status}" id="status" class="form-select" required>
+                                        <option value="">-- Chọn Trạng Thái --</option>
+                                        <option value="AVAILABLE" th:selected="${room.status != null and room.status.name() == 'AVAILABLE'}">Còn chỗ</option>
+                                        <option value="OCCUPIED" th:selected="${room.status != null and room.status.name() == 'OCCUPIED'}">Đã đầy</option>
+                                        <option value="MAINTENANCE" th:selected="${room.status != null and room.status.name() == 'MAINTENANCE'}">Bảo trì</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="mb-3">

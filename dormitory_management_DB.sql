@@ -32,6 +32,7 @@ CREATE TABLE `buildings` (
   `name` varchar(100) NOT NULL,
   `total_floors` int(11) DEFAULT 0,
   `description` text DEFAULT NULL,
+  `status` varchar(50) DEFAULT 'ACTIVE',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -157,8 +158,9 @@ CREATE TABLE `rooms` (
   `floor` int(11) NOT NULL,
   `slot` int(11) DEFAULT 4,
   `current_occupants` int(11) DEFAULT 0,
-  `status` enum('available','occupied','maintenance') DEFAULT 'available',
+  `status` enum('AVAILABLE','OCCUPIED','MAINTENANCE') DEFAULT 'AVAILABLE',
   `price_per_year` decimal(10,2) DEFAULT 0.00,
+  `area` decimal(10,2) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

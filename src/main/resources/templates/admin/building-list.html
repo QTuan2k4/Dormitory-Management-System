@@ -126,7 +126,15 @@
                                         </td>
                                     </tr>
                                     <tr th:if="${buildingList.empty}">
-                                        <td colspan="5" class="text-center">Chưa có tòa nhà nào được tìm thấy hoặc thêm vào hệ thống.</td>
+                                        <td colspan="5" class="text-center text-muted">
+                                            <i class="fas fa-search me-2"></i>
+                                            <span th:if="${searchName != null || searchStatus != null}">
+                                                Không tìm thấy tòa nhà nào phù hợp với tiêu chí tìm kiếm.
+                                            </span>
+                                            <span th:unless="${searchName != null || searchStatus != null}">
+                                                Chưa có tòa nhà nào được thêm vào hệ thống.
+                                            </span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
