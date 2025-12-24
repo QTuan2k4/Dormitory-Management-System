@@ -25,7 +25,22 @@ public class RoomServiceImpl implements RoomService {
         this.roomRepository = roomRepository;
         this.buildingRepository = buildingRepository;
     }
+    // Method update for edit room
+    @Override
+    @Transactional
+    public Rooms updateRoomLimited(int roomId, Rooms formRoom) {
 
+        Rooms dbRoom = roomRepository.findById(roomId)
+            .orElseThrow(() -> new RuntimeException("Room not found"));
+
+        dbRoom.setRoomNumber(formRoom.getRoomNumber());
+        dbRoom.setSlot(formRoom.getSlot());
+        dbRoom.setDescription(formRoom.getDescription());
+        dbRoom.setStatus(formRoom.getStatus());
+
+        return roomRepository.save(dbRoom);
+    }
+    
     @Override
     @Transactional 
     public Rooms saveRoom(Rooms room) {

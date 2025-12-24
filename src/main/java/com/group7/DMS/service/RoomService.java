@@ -32,4 +32,5 @@ public interface RoomService {
     Rooms updateOccupancy(int roomId, int changeInOccupants);
  // ← BỔ SUNG: gom nhóm theo tầng để hiển thị đẹp
     Map<Integer, List<Rooms>> getRoomsGroupedByFloor(int buildingId);
+    Rooms updateRoomLimited(int roomId, Rooms room);
 }
