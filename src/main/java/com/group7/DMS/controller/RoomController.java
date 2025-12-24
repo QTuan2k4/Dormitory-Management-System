@@ -85,7 +85,7 @@ public class RoomController {
         model.addAttribute("pageTitle", "Chỉnh Sửa Phòng: " + room.getRoomNumber());
         model.addAttribute("buildingList", buildingService.findAllBuildings());
         
-        return "admin/room-form";
+        return "admin/room-form-edit";
     }
 
     // --- 4. POST: Xử lý Lưu (Thêm mới hoặc Cập nhật) ---
@@ -93,18 +93,24 @@ public class RoomController {
     @PostMapping("/save")
     public String saveRoom(@ModelAttribute("room") Rooms room, RedirectAttributes ra) {
         try {
-            roomService.saveRoom(room);
-            ra.addFlashAttribute("message", "Phòng đã được lưu thành công!");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
             if (room.getId() == 0) {
-                 return "redirect:/admin/rooms/new";
+                roomService.saveRoom(room);
+                ra.addFlashAttribute("message", "Thêm phòng thành công!");
             } else {
-                 return "redirect:/admin/rooms/edit/" + room.getId();
+                // Giới hạn field
+                roomService.updateRoomLimited(room.getId(), room);
+                ra.addFlashAttribute("message", "Cập nhật phòng thành công!");
             }
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return room.getId() == 0
+                    ? "redirect:/admin/rooms/new"
+                    : "redirect:/admin/rooms/edit/" + room.getId();
         }
-        return "redirect:/admin/rooms"; 
+
+        return "redirect:/admin/rooms";
     }
+
     
     // --- 5. GET: Xóa Phòng ---
     @GetMapping("/delete/{id}")

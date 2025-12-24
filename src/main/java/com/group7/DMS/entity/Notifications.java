@@ -31,7 +31,71 @@ public class Notifications {
     @Column(nullable = false)
     private NotificationType type;
 
-    @Column(name = "is_read")
+    public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public Users getUser() {
+		return user;
+	}
+
+	public void setUser(Users user) {
+		this.user = user;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public NotificationType getType() {
+		return type;
+	}
+
+	public void setType(NotificationType type) {
+		this.type = type;
+	}
+
+	public boolean isRead() {
+		return isRead;
+	}
+
+	public void setRead(boolean isRead) {
+		this.isRead = isRead;
+	}
+
+	public SentVia getSentVia() {
+		return sentVia;
+	}
+
+	public void setSentVia(SentVia sentVia) {
+		this.sentVia = sentVia;
+	}
+
+	public LocalDateTime getSentAt() {
+		return sentAt;
+	}
+
+	public void setSentAt(LocalDateTime sentAt) {
+		this.sentAt = sentAt;
+	}
+
+	@Column(name = "is_read")
     private boolean isRead = false;
 
     @Enumerated(EnumType.STRING)
