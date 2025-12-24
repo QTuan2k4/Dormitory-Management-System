@@ -22,7 +22,17 @@ public class Buildings {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotBlank(message = "Tên tòa nhà không được để trống") 
+    public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+
+
+	@NotBlank(message = "Tên tòa nhà không được để trống") 
     @Size(min = 2, max = 100, message = "Tên tòa nhà phải từ 2 đến 100 ký tự")
     @Column(nullable = false, length = 100, unique = true)
     private String name;
