@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán Hóa Đơn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+        .sidebar .nav-link { color: white; padding: 12px 20px; border-radius: 8px; margin: 5px 10px; transition: all 0.3s; }
+        .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateX(5px); }
+        .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
+        .main-content { margin-left: 250px; padding: 20px; }
+        .header { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
+        .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
+        .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
+        .btn-logout:hover { background: #c82333; color: white; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/sidebar :: adminSidebar('invoices')}"></div>
+
+    <div class="main-content">
+        <div class="header d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0"><i class="fas fa-money-check me-2"></i>Thanh Toán Hóa Đơn</h4>
+                <small class="text-muted">Thông tin thanh toán hóa đơn cho sinh viên</small>
+            </div>
+            <a href="#" th:href="@{/logout}" class="btn btn-logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Thanh Toán Hóa Đơn - <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="@{/admin/invoices/{id}/payment(id=${invoice.id})}">
+                            <div class="alert alert-info">
+                                <h5>Thông Tin Hóa Đơn</h5>
+                                <p><strong>Mã HĐ:</strong> <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></p>
+                                <p><strong>Sinh Viên:</strong> <span th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span></p>
+                                <p><strong>Tổng Tiền:</strong> <strong th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">1,500,000 VNĐ</strong></p>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phương Thức Thanh Toán (*)</label>
+                                <select class="form-select" name="paymentMethod" required>
+                                    <option value="">-- Chọn phương thức --</option>
+                                    <option value="CASH">Tiền Mặt</option>
+                                    <option value="BANK_TRANSFER">Chuyển Khoản</option>
+                                    <option value="CARD">Thẻ</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mã Giao Dịch / Ghi Chú (*)</label>
+                                <input type="text" class="form-control" name="transactionId"
+                                       placeholder="VD: TXN123456 hoặc Tiền mặt - Thu ngày 01/01/2024" required>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a th:href="@{/admin/invoices/{id}(id=${invoice.id})}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Hủy
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Xác Nhận Thanh Toán
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -18,11 +18,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Buildings {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
 
-    public String getStatus() {
+	public String getStatus() {
 		return status;
 	}
 
@@ -30,31 +30,28 @@ public class Buildings {
 		this.status = status;
 	}
 
+	@NotBlank(message = "Tên tòa nhà không được để trống")
+	@Size(min = 2, max = 100, message = "Tên tòa nhà phải từ 2 đến 100 ký tự")
+	@Column(nullable = false, length = 100, unique = true)
+	private String name;
 
+	@NotNull(message = "Số tầng không được để trống")
+	@Min(value = 0, message = "Số tầng phải là số dương")
+	@Column(name = "total_floors")
 
-	@NotBlank(message = "Tên tòa nhà không được để trống") 
-    @Size(min = 2, max = 100, message = "Tên tòa nhà phải từ 2 đến 100 ký tự")
-    @Column(nullable = false, length = 100, unique = true)
-    private String name;
+	private int totalFloors = 0;
 
+	@Column(columnDefinition = "TEXT")
+	private String description;
 
-    @NotNull(message = "Số tầng không được để trống")
-    @Min(value = 0, message = "Số tầng phải là số dương")
-    @Column(name = "total_floors")
-    
+	@NotBlank(message = "Trạng thái không được để trống")
+	@Column(name = "status", length = 50, nullable = false)
+	private String status;
 
-    private int totalFloors = 0;
+	@Column(name = "created_at")
+	private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @NotBlank(message = "Trạng thái không được để trống")
-    @Column(name = "status", length = 50, nullable = false)
-    private String status;
-    
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-    public int getId() {
+	public int getId() {
 		return id;
 	}
 
@@ -102,15 +99,13 @@ public class Buildings {
 		this.rooms = rooms;
 	}
 
-	
+	@OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Rooms> rooms;
 
-    @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Rooms> rooms;
-    
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
+	@PrePersist
+	protected void onCreate() {
+		if (createdAt == null) {
+			createdAt = LocalDateTime.now();
+		}
+	}
 }
