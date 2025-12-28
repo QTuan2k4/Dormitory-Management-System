@@ -118,7 +118,6 @@
                                         <th>Tòa Nhà</th>
                                         <th>Số Phòng</th>
                                         <th>Tầng</th>
-                                        <th>Diện Tích</th>
                                         <th>Số Chỗ</th>
                                         <th>Đã ở</th>
                                         <th>Giá (năm)</th>
@@ -131,7 +130,6 @@
                                         <td th:text="${room.building.name}">Tòa A</td>
                                         <td th:text="${room.roomNumber}">A101</td>
                                         <td th:text="${room.floor}">1</td>
-                                        <td th:text="${room.area != null ? #numbers.formatDecimal(room.area, 0, 'COMMA', 2, 'POINT') + ' m²' : 'N/A'}">25.00 m²</td>
                                         <td th:text="${room.slot}">4</td>
                                         <td th:text="${room.currentOccupants}">2</td>
                                         <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">12,000,000 VNĐ</td>
@@ -147,13 +145,25 @@
                                             <a th:href="@{/admin/rooms/edit/{id}(id=${room.id})}" class="btn btn-sm btn-info me-1" title="Sửa">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" 
-                                               onclick="return confirm('Bạn có chắc chắn muốn xóa phòng này không?')" 
-                                               class="btn btn-sm btn-danger" title="Xóa"
-                                               th:classappend="${room.currentOccupants > 0 ? 'disabled' : ''}"
-                                               th:onclick="${room.currentOccupants > 0 ? 'alert(\'Không thể xóa phòng đang có sinh viên ở!\'); return false;' : 'return confirm(\'Bạn có chắc chắn muốn xóa phòng này không?\')'}">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
+											<a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}"
+											   class="btn btn-sm btn-danger"
+											   th:classappend="${room.currentOccupants > 0 ? ' disabled' : ''}"
+											   th:data-occupied="${room.currentOccupants > 0}"
+											   onclick="return confirmDelete(this)"
+											   title="Xóa">
+											  <i class="fas fa-trash-alt"></i>
+											</a>
+											
+											<script>
+											  function confirmDelete(el) {
+											    const occupied = el.dataset.occupied === 'true';
+											    if (occupied) {
+											      alert('Không thể xóa phòng đang có sinh viên ở!');
+											      return false;
+											    }
+											    return confirm('Bạn có chắc chắn muốn xóa phòng này không?');
+											  }
+											</script>
                                         </td>
                                     </tr>
                                     <tr th:if="${roomList.empty}">
