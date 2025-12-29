@@ -69,6 +69,11 @@
                th:href="@{/admin/statistics}">
                 <i class="fas fa-chart-bar me-2"></i>Thống kê
             </a>
+            <a class="nav-link" th:classappend="${activePage == 'contracts'} ? ' active' : ''"
+			   th:href="@{/admin/contracts}">
+			    <i class="fas fa-file-contract me-2"></i>Quản lý hợp đồng
+			</a>
+            
         </nav>
     </div>
 </div>

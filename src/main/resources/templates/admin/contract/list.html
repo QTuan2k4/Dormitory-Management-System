@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="${pageTitle}">Quản lý hợp đồng</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body { background-color: #f8f9fa; }
+    .sidebar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh; position: fixed; top: 0; left: 0;
+      width: 250px; z-index: 1000;
+    }
+    .sidebar .nav-link { color: white; padding: 12px 20px; border-radius: 8px; margin: 5px 10px; transition: all 0.3s; }
+    .sidebar .nav-link:hover { background-color: rgba(255,255,255,0.1); transform: translateX(5px); }
+    .sidebar .nav-link.active { background-color: rgba(255,255,255,0.2); }
+
+    .main-content { margin-left: 250px; padding: 20px; }
+    .header {
+      background: white; padding: 15px 20px; border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;
+    }
+    .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+    .card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; border-radius: 15px 15px 0 0 !important;
+    }
+    .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
+    .btn-logout:hover { background: #c82333; color: white; }
+    .table td, .table th { vertical-align: middle; }
+  </style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div th:replace="~{fragments/sidebar :: adminSidebar('contracts')}"></div>
+
+  <div class="main-content">
+    <div class="header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h4 class="mb-0">Quản lý Hợp đồng</h4>
+        <small class="text-muted">Danh sách hợp đồng + bộ lọc + phân trang</small>
+      </div>
+      <a th:href="@{/logout}" class="btn btn-logout">
+        <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+      </a>
+    </div>
+
+    <!-- Flash -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Danh sách hợp đồng</h5>
+        <a class="btn btn-light btn-sm" th:href="@{/admin/contracts/expired}">
+          <i class="fas fa-clock me-1"></i>Hợp đồng hết hạn
+        </a>
+      </div>
+
+      <div class="card-body">
+        <!-- Filters -->
+        <form class="row g-2 align-items-end mb-3" th:action="@{/admin/contracts}" method="get">
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Sinh viên</label>
+            <select class="form-select" name="studentId">
+              <option value="">-- Tất cả --</option>
+              <option th:each="s : ${students}"
+                      th:value="${s.id}"
+                      th:selected="${studentId != null and s.id == studentId}"
+                      th:text="${(s.studentId != null ? s.studentId : ('ID ' + s.id)) + ' - ' + (s.fullName != null ? s.fullName : '')}">
+                SV01 - Nguyễn Văn A
+              </option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label class="form-label mb-1">Phòng</label>
+            <select class="form-select" name="roomId">
+              <option value="">-- Tất cả --</option>
+              <option th:each="r : ${rooms}"
+                      th:value="${r.id}"
+                      th:selected="${roomId != null and r.id == roomId}"
+                      th:text="${(r.building != null ? r.building.name : 'Tòa ?') + ' - ' + r.roomNumber}">
+                Tòa A - A101
+              </option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label class="form-label mb-1">Trạng thái</label>
+            <select class="form-select" name="status">
+              <option value="">-- Tất cả --</option>
+              <option th:each="st : ${statuses}"
+                      th:value="${st}"
+                      th:selected="${status != null and status.toUpperCase() == st.name()}"
+                      th:text="${st.name()}">ACTIVE</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-md-1 d-grid">
+            <button class="btn btn-secondary" type="submit" title="Lọc">
+              <i class="fas fa-filter"></i>
+            </button>
+          </div>
+
+          <!-- giữ size khi lọc -->
+          <input type="hidden" name="size" th:value="${pageSize != null ? pageSize : 10}">
+        </form>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/contracts}">
+            <i class="fas fa-rotate-left me-1"></i>Xóa lọc
+          </a>
+
+          <!-- chọn page size (tuỳ thích) -->
+          <form class="d-flex align-items-center gap-2" th:action="@{/admin/contracts}" method="get">
+            <input type="hidden" name="studentId" th:value="${studentId}">
+            <input type="hidden" name="roomId" th:value="${roomId}">
+            <input type="hidden" name="status" th:value="${status}">
+            <label class="text-muted small mb-0">Hiển thị</label>
+            <select class="form-select form-select-sm" name="size" style="width: 110px;" onchange="this.form.submit()">
+              <option value="5"  th:selected="${pageSize != null and pageSize == 5}">5 / trang</option>
+              <option value="10" th:selected="${pageSize == null or pageSize == 10}">10 / trang</option>
+              <option value="20" th:selected="${pageSize != null and pageSize == 20}">20 / trang</option>
+              <option value="50" th:selected="${pageSize != null and pageSize == 50}">50 / trang</option>
+            </select>
+            <input type="hidden" name="page" value="1">
+          </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Sinh viên</th>
+                <th>Phòng</th>
+                <th>Bắt đầu</th>
+                <th>Kết thúc</th>
+                <th>Phí (manual)</th>
+                <th>Trạng thái</th>
+                <th class="text-end">Thao tác</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr th:each="c : ${contracts}">
+                <td th:text="${c.id}">1</td>
+
+                <td>
+                  <div class="fw-semibold"
+                       th:text="${c.student != null ? (c.student.fullName != null ? c.student.fullName : ('ID ' + c.student.id)) : 'N/A'}">
+                    Nguyễn Văn A
+                  </div>
+                  <small class="text-muted"
+                         th:text="${c.student != null ? (c.student.studentId != null ? c.student.studentId : ('ID ' + c.student.id)) : ''}">
+                    SV001
+                  </small>
+                </td>
+
+                <td th:text="${c.room != null ? ((c.room.building != null ? c.room.building.name : 'Tòa ?') + ' - ' + c.room.roomNumber) : 'N/A'}">
+                  Tòa A - A101
+                </td>
+
+                <td th:text="${c.startDate != null ? #temporals.format(c.startDate, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                <td th:text="${c.endDate != null ? #temporals.format(c.endDate, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+
+                <td th:text="${c.manualFee != null ? (#numbers.formatDecimal(c.manualFee, 0, 'COMMA', 0, 'POINT') + ' VNĐ') : '0 VNĐ'}">
+                  0 VNĐ
+                </td>
+
+                <td>
+                  <span th:switch="${c.status}">
+                    <span th:case="'ACTIVE'" class="badge bg-success">ACTIVE</span>
+                    <span th:case="'INACTIVE'" class="badge bg-secondary">INACTIVE</span>
+                    <span th:case="'TERMINATED'" class="badge bg-danger">TERMINATED</span>
+                    <span th:case="*" class="badge bg-dark" th:text="${c.status}">UNKNOWN</span>
+                  </span>
+                </td>
+
+                <td class="text-end">
+                  <a class="btn btn-sm btn-primary"
+                     th:href="@{/admin/contracts/{id}(id=${c.id})}" title="Chi tiết">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a class="btn btn-sm btn-info text-white"
+                     th:href="@{/admin/contracts/edit/{id}(id=${c.id})}" title="Sửa">
+                    <i class="fas fa-edit"></i>
+                  </a>
+
+                  <form class="d-inline"
+                        th:action="@{/admin/contracts/delete/{id}(id=${c.id})}"
+                        method="post"
+                        onsubmit="return confirm('Xóa hợp đồng này?');">
+                    <button class="btn btn-sm btn-danger" type="submit" title="Xóa">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+
+              <tr th:if="${contracts == null or #lists.isEmpty(contracts)}">
+                <td colspan="8" class="text-center text-muted py-4">
+                  <i class="fas fa-search me-2"></i>Không có hợp đồng nào.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages != null and totalPages > 1}" aria-label="Page navigation" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+              <a class="page-link"
+                 th:href="@{/admin/contracts(page=${currentPage - 1}, size=${pageSize}, studentId=${studentId}, roomId=${roomId}, status=${status})}">
+                <i class="fas fa-angle-left"></i>
+              </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage ? 'active' : ''}">
+              <a class="page-link"
+                 th:href="@{/admin/contracts(page=${i}, size=${pageSize}, studentId=${studentId}, roomId=${roomId}, status=${status})}"
+                 th:text="${i}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+              <a class="page-link"
+                 th:href="@{/admin/contracts(page=${currentPage + 1}, size=${pageSize}, studentId=${studentId}, roomId=${roomId}, status=${status})}">
+                <i class="fas fa-angle-right"></i>
+              </a>
+            </li>
+          </ul>
+
+          <small class="text-muted text-center d-block">
+            Hiển thị <span th:text="${contracts != null ? #lists.size(contracts) : 0}">0</span> hợp đồng trên trang này,
+            tổng cộng <span th:text="${totalItems != null ? totalItems : (contracts != null ? #lists.size(contracts) : 0)}">0</span> hợp đồng.
+          </small>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
