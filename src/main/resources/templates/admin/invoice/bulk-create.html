@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Hóa Đơn Hàng Loạt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+        .sidebar .nav-link { color: white; padding: 12px 20px; border-radius: 8px; margin: 5px 10px; transition: all 0.3s; }
+        .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateX(5px); }
+        .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
+        .main-content { margin-left: 250px; padding: 20px; }
+        .header { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
+        .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
+        .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
+        .btn-logout:hover { background: #c82333; color: white; }
+        .building-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .building-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-5px);
+        }
+        .building-card.selected {
+            border-color: #667eea;
+            background-color: #e7f3ff;
+        }
+        .building-card input[type="radio"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/sidebar :: adminSidebar('invoices')}"></div>
+
+    <div class="main-content">
+        <div class="header d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0"><i class="fas fa-layer-group me-2"></i>Tạo Hóa Đơn Hàng Loạt</h4>
+                <small class="text-muted">Tạo hóa đơn cho tất cả phòng trong tòa</small>
+            </div>
+            <a href="#" th:href="@{/logout}" class="btn btn-logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-magic me-2"></i>Tạo Hóa Đơn Tự Động</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Messages -->
+                        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i><span th:text="${message}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Cách hoạt động:</h6>
+                            <ul class="mb-0">
+                                <li>Chọn <strong>tòa nhà</strong> và <strong>tháng/năm</strong></li>
+                                <li>Hệ thống sẽ tạo hóa đơn cho <strong>TẤT CẢ phòng</strong> trong tòa</li>
+                                <li>Số điện và số nước mặc định = <strong>0</strong></li>
+                                <li>Admin có thể <strong>cập nhật sau</strong> cho từng phòng</li>
+                                <li>Hóa đơn <strong>tự động tạo mã</strong> và tính phí internet</li>
+                            </ul>
+                        </div>
+
+                        <form method="post" th:action="@{/admin/invoices/bulk-create}">
+                            <!-- Select Building -->
+                            <h6 class="mb-3"><i class="fas fa-city me-2"></i>Bước 1: Chọn Tòa Nhà (*)</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-3" th:each="building : ${buildings}">
+                                    <label class="building-card">
+                                        <input type="radio" name="buildingId" th:value="${building.id}" required>
+                                        <i class="fas fa-building fa-3x mb-3 text-primary"></i>
+                                        <h5 th:text="${building.name}">Tòa A</h5>
+                                        <p class="mb-0 text-muted small">
+                                            <i class="fas fa-door-open me-1"></i>
+                                            <span th:text="${building.name}">Nhiều phòng</span>
+                                        </p>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Select Month/Year -->
+                            <h6 class="mb-3"><i class="fas fa-calendar-alt me-2"></i>Bước 2: Chọn Tháng/Năm (*)</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label">Tháng (*)</label>
+                                    <select class="form-select" name="month" required>
+                                        <option value="">-- Chọn tháng --</option>
+                                        <option th:each="m : ${#numbers.sequence(1, 12)}"
+                                                th:value="${m}"
+                                                th:text="'Tháng ' + ${m}"
+                                                th:selected="${m == currentMonth}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Năm (*)</label>
+                                    <select class="form-select" name="year" required>
+                                        <option value="">-- Chọn năm --</option>
+                                        <option th:each="y : ${#numbers.sequence(2024, 2026)}"
+                                                th:value="${y}"
+                                                th:text="${y}"
+                                                th:selected="${y == currentYear}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <div class="alert alert-warning mb-0 w-100">
+                                        <small>
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Kiểm tra kỹ tháng/năm trước khi tạo!
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Preview -->
+                            <h6 class="mb-3"><i class="fas fa-eye me-2"></i>Bước 3: Xem Trước & Xác Nhận</h6>
+                            <div class="alert alert-success">
+                                <h6 class="mb-3">Hệ thống sẽ:</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ul class="mb-0">
+                                            <li>Tạo hóa đơn cho <strong>tất cả phòng</strong></li>
+                                            <li>Số điện: <strong>0 kWh</strong></li>
+                                            <li>Số nước: <strong>0 m³</strong></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ul class="mb-0">
+                                            <li>Tiền điện: <strong>0 VNĐ</strong></li>
+                                            <li>Tiền nước: <strong>0 VNĐ</strong></li>
+                                            <li>Phí internet: <strong>100,000 VNĐ</strong></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <hr>
+                                <p class="mb-0">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    <strong>Tổng mỗi phòng: 100,000 VNĐ</strong> (chỉ internet, chưa có điện/nước)
+                                </p>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmCheck" required>
+                                    <label class="form-check-label" for="confirmCheck">
+                                        <strong>Tôi xác nhận đã kiểm tra kỹ tòa nhà và tháng/năm</strong>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-flex justify-content-between mt-4">
+                                <a th:href="@{/admin/invoices}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>Hủy
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-magic me-1"></i>Tạo Hàng Loạt
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="alert alert-light mt-4">
+                    <h6><i class="fas fa-lightbulb me-2"></i>Mẹo sử dụng:</h6>
+                    <ul class="mb-0">
+                        <li>Sau khi tạo hàng loạt, vào danh sách hóa đơn để cập nhật số điện/nước cho từng phòng</li>
+                        <li>Có thể lọc theo tòa và tháng/năm để xem các hóa đơn vừa tạo</li>
+                        <li>Hóa đơn đã tồn tại sẽ bị bỏ qua (không tạo trùng)</li>
+                        <li>Nên tạo hàng loạt vào đầu tháng để tiện quản lý</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add selected class to building card when clicked
+        document.querySelectorAll('.building-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.building-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

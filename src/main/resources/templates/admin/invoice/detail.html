@@ -22,286 +22,234 @@
         .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
         .main-content { margin-left: 250px; padding: 20px; }
         .header { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); margin-bottom: 20px; }
         .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
         .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
         .btn-logout:hover { background: #c82333; color: white; }
-        .badge-active { background-color: #198754; color: white; }
-        .badge-maintenance { background-color: #ffc107; color: #343a40; }
+        .fee-row { padding: 12px 0; border-bottom: 1px solid #dee2e6; }
+        .fee-row:last-child { border-bottom: none; }
+        .info-card { background: #f8f9fa; }
+        @media print {
+            .no-print { display: none !important; }
+            .sidebar { display: none !important; }
+            .main-content { margin-left: 0 !important; }
+        }
     </style>
 </head>
 <body>
     <div th:replace="~{fragments/sidebar :: adminSidebar('invoices')}"></div>
 
     <div class="main-content">
-        <div class="header d-flex justify-content-between align-items-center">
+        <div class="header d-flex justify-content-between align-items-center no-print">
             <div>
-                <h4 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Chi Tiết Hóa Đơn</h4>
-                <small class="text-muted">Thông tin chi tiết về hóa đơn</small>
+                <h4 class="mb-0">Chi Tiết Hóa Đơn</h4>
+                <small class="text-muted">Thông tin chi tiết phí sinh hoạt</small>
             </div>
             <a href="#" th:href="@{/logout}" class="btn btn-logout">
-                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                Đăng xuất
             </a>
         </div>
 
+        <!-- Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show no-print" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show no-print" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
         <div class="row">
-            <div class="col-md-12">
+            <!-- Left Column: Invoice Details -->
+            <div class="col-md-8">
+                <!-- Invoice Header -->
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Hóa Đơn <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></h5>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">HÓA ĐƠN PHÍ SINH HOẠT</h5>
+                            <small th:text="${invoice.invoiceNumber}">PSH20241201</small>
+                        </div>
+                        <span class="badge fs-5"
+                              th:classappend="${invoice.status.name() == 'PAID'} ? 'bg-success' :
+                                             (${invoice.status.name() == 'UNPAID'} ? 'bg-warning text-dark' : 'bg-danger')">
+                            <span th:text="${invoice.status.name() == 'PAID'} ? 'ĐÃ THANH TOÁN' :
+                                           (${invoice.status.name() == 'UNPAID'} ? 'CHƯA THANH TOÁN' : 'QUÁ HẠN')"></span>
+                        </span>
                     </div>
                     <div class="card-body">
-                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-
-                        <!-- Invoice Header -->
-                        <div class="invoice-header mb-4">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h2 class="mb-2">
-                                        <i class="fas fa-file-invoice"></i> HÓA ĐƠN TIỀN PHÒNG
-                                    </h2>
-                                    <h4 th:text="${invoice.invoiceNumber}">INV-2024-001</h4>
-                                </div>
-                                <div class="col-md-4 text-md-end">
-                                    <span class="badge fs-5"
-                                          th:classappend="${invoice.status.name() == 'PAID'} ? 'bg-success' :
-                                                         (${invoice.status.name() == 'UNPAID'} ? 'bg-warning' : 'bg-danger')">
-                                        <span th:text="${invoice.status.name() == 'PAID'} ? 'ĐÃ THANH TOÁN' :
-                                                       (${invoice.status.name() == 'UNPAID'} ? 'CHƯA THANH TOÁN' : 'QUÁ HẠN')"></span>
-                                    </span>
-                                </div>
+                        <!-- Room & Student Info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Thông tin phòng</h6>
+                                <p class="mb-1">
+                                    <strong>Tòa nhà:</strong> <span th:text="${invoice.room.building.name}">Tòa A</span>
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Phòng:</strong> <span th:text="${invoice.room.roomNumber}">101</span>
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Tầng:</strong> <span th:text="${invoice.room.floor}">1</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6" th:if="${invoice.contract != null}">
+                                <h6 class="text-primary">Thông tin sinh viên</h6>
+                                <p class="mb-1">
+                                    <strong>Họ tên:</strong> <span th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span>
+                                </p>
+                                <p class="mb-1">
+                                    <strong>MSSV:</strong> <span th:text="${invoice.contract.student.studentId}">20210001</span>
+                                </p>
+                                <p class="mb-0" th:if="${invoice.contract.student.phone}">
+                                    <strong>SĐT:</strong> <span th:text="${invoice.contract.student.phone}">0123456789</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6" th:if="${invoice.contract == null}">
+                                <h6 class="text-muted">Chưa có sinh viên</h6>
+                                <p class="text-muted fst-italic">Phòng này chưa có hợp đồng nào</p>
                             </div>
                         </div>
 
-                        <!-- Invoice Details -->
-                        <div class="row">
-                            <!-- Left Column: Invoice Details -->
-                            <div class="col-md-8">
-                                <div class="card info-card mb-4">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="fas fa-user-graduate text-primary"></i> Thông tin sinh viên
-                                        </h5>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <p class="mb-2">
-                                                    <strong>Họ và tên:</strong><br>
-                                                    <span th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span>
-                                                </p>
-                                                <p class="mb-2">
-                                                    <strong>MSSV:</strong><br>
-                                                    <span th:text="${invoice.contract.student.studentId}">20210001</span>
-                                                </p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <p class="mb-2">
-                                                    <strong>Phòng:</strong><br>
-                                                    <span th:text="${invoice.contract.room.building.name + ' - Phòng ' + invoice.contract.room.roomNumber}">Tòa A - Phòng 101</span>
-                                                </p>
-                                                <p class="mb-2">
-                                                    <strong>Số điện thoại:</strong><br>
-                                                    <span th:text="${invoice.contract.student.phone}">0123456789</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <hr>
 
-                                <!-- Invoice Fee Details -->
-                                <div class="card mb-4">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="fas fa-receipt text-primary"></i> Chi tiết hóa đơn
-                                        </h5>
+                        <!-- Fee Details -->
+                        <h6 class="text-primary mb-3">Chi tiết các khoản phí</h6>
 
-                                        <div class="fee-row">
-                                            <div class="d-flex justify-content-between">
-                                                <span><i class="fas fa-home text-muted"></i> Phí phòng</span>
-                                                <strong th:text="${#numbers.formatDecimal(invoice.roomFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">3,000,000 VNĐ</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="fee-row">
-                                            <div class="d-flex justify-content-between">
-                                                <span><i class="fas fa-bolt text-warning"></i> Phí điện</span>
-                                                <strong th:text="${#numbers.formatDecimal(invoice.electricityFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">500,000 VNĐ</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="fee-row">
-                                            <div class="d-flex justify-content-between">
-                                                <span><i class="fas fa-tint text-info"></i> Phí nước</span>
-                                                <strong th:text="${#numbers.formatDecimal(invoice.waterFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">200,000 VNĐ</strong>
-                                            </div>
-                                        </div>
-
-                                        <div class="fee-row">
-                                            <div class="d-flex justify-content-between">
-                                                <span><i class="fas fa-wifi text-success"></i> Phí internet</span>
-                                                <strong th:text="${#numbers.formatDecimal(invoice.internetFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100,000 VNĐ</strong>
-                                            </div>
-                                        </div>
-
-                                        <hr>
-
-                                        <div class="d-flex justify-content-between fs-4">
-                                            <strong class="text-primary">TỔNG CỘNG:</strong>
-                                            <strong class="text-primary" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">3,800,000 VNĐ</strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Payment History -->
-                                <div class="card" th:if="${payments != null and !payments.isEmpty()}">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">
-                                            <i class="fas fa-history text-primary"></i> Lịch sử thanh toán
-                                        </h5>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Ngày thanh toán</th>
-                                                        <th>Số tiền</th>
-                                                        <th>Phương thức</th>
-                                                        <th>Mã giao dịch</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr th:each="payment : ${payments}">
-                                                        <td th:text="${#temporals.format(payment.paymentDate, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</td>
-                                                        <td th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">3,800,000 VNĐ</td>
-                                                        <td>
-                                                            <span th:text="${payment.paymentMethod.name() == 'CASH'} ? 'Tiền mặt' :
-                                                                           (${payment.paymentMethod.name() == 'BANK_TRANSFER'} ? 'Chuyển khoản' : 'Thẻ')">
-                                                                Chuyển khoản
-                                                            </span>
-                                                        </td>
-                                                        <td><code th:text="${payment.transactionId}">TXN-123456</code></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Right Column: Actions & Info -->
-                            <div class="col-md-4">
-                                <!-- Date Information -->
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            <i class="fas fa-calendar-alt"></i> Thông tin thời gian
-                                        </h6>
-                                        <p class="mb-2">
-                                            <small class="text-muted">Ngày xuất:</small><br>
-                                            <span th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}">01/01/2024</span>
-                                        </p>
-                                        <p class="mb-0">
-                                            <small class="text-muted">Hạn thanh toán:</small><br>
-                                            <span class="fw-bold"
-                                                  th:classappend="${invoice.status.name() == 'OVERDUE'} ? 'text-danger' : ''"
-                                                  th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">15/01/2024</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Actions -->
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            <i class="fas fa-cog"></i> Thao tác
-                                        </h6>
-
-                                        <!-- Pay Button -->
-                                        <a th:if="${invoice.status.name() != 'PAID'}"
-                                           th:href="@{/admin/invoices/{id}/pay(id=${invoice.id})}"
-                                           class="btn btn-success w-100 mb-2">
-                                            <i class="fas fa-money-bill-wave"></i> Thanh toán
-                                        </a>
-
-                                        <!-- Edit Button -->
-                                        <a th:if="${invoice.status.name() != 'PAID'}"
-                                           th:href="@{/admin/invoices/{id}/edit(id=${invoice.id})}"
-                                           class="btn btn-warning w-100 mb-2">
-                                            <i class="fas fa-edit"></i> Chỉnh sửa
-                                        </a>
-
-                                        <!-- Print Button -->
-                                        <a th:href="@{/admin/invoices/{id}/print(id=${invoice.id})}"
-                                           class="btn btn-secondary w-100 mb-2" target="_blank">
-                                            <i class="fas fa-print"></i> In hóa đơn
-                                        </a>
-
-                                        <!-- Send Email Button -->
-                                        <form th:action="@{/admin/invoices/{id}/send-email(id=${invoice.id})}"
-                                              method="post" class="mb-2">
-                                            <button type="submit" class="btn btn-info w-100">
-                                                <i class="fas fa-envelope"></i> Gửi Email
-                                            </button>
-                                        </form>
-
-                                        <!-- Mark as Overdue -->
-                                        <form th:if="${invoice.status.name() == 'UNPAID'}"
-                                              th:action="@{/admin/invoices/{id}/mark-overdue(id=${invoice.id})}"
-                                              method="post" class="mb-2">
-                                            <button type="submit" class="btn btn-outline-danger w-100"
-                                                    onclick="return confirm('Xác nhận đánh dấu hóa đơn quá hạn?')">
-                                                <i class="fas fa-exclamation-triangle"></i> Đánh dấu quá hạn
-                                            </button>
-                                        </form>
-
-                                        <hr>
-
-                                        <!-- Delete Button -->
-                                        <form th:if="${invoice.status.name() != 'PAID'}"
-                                              th:action="@{/admin/invoices/{id}/delete(id=${invoice.id})}"
-                                              method="post">
-                                            <button type="submit" class="btn btn-outline-danger w-100"
-                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa hóa đơn này?')">
-                                                <i class="fas fa-trash"></i> Xóa hóa đơn
-                                            </button>
-                                        </form>
-
-                                        <a th:href="@{/admin/invoices}" class="btn btn-outline-primary w-100 mt-2">
-                                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
-                                        </a>
-                                    </div>
-                                </div>
-
-                                <!-- Contract Info -->
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            <i class="fas fa-file-contract"></i> Thông tin hợp đồng
-                                        </h6>
-                                        <p class="mb-2">
-                                            <small class="text-muted">Mã hợp đồng:</small><br>
-                                            <span th:text="${invoice.contract.id}">1</span>
-                                        </p>
-                                        <p class="mb-2">
-                                            <small class="text-muted">Thời gian:</small><br>
-                                            <span th:text="${#temporals.format(invoice.contract.startDate, 'dd/MM/yyyy')} + ' - ' +
-                                                           ${#temporals.format(invoice.contract.endDate, 'dd/MM/yyyy')}">
-                                                01/01/2024 - 31/12/2024
-                                            </span>
-                                        </p>
-                                        <p class="mb-0">
-                                            <small class="text-muted">Trạng thái hợp đồng:</small><br>
-                                            <span class="badge bg-info" th:text="${invoice.contract.status}">ACTIVE</span>
-                                        </p>
-                                    </div>
-                                </div>
+                        <div class="fee-row">
+                            <div class="d-flex justify-content-between">
+                                <span>Tiền điện</span>
+                                <strong th:text="${#numbers.formatDecimal(invoice.electricityFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    350,000 VNĐ
+                                </strong>
                             </div>
                         </div>
+
+                        <div class="fee-row">
+                            <div class="d-flex justify-content-between">
+                                <span>Tiền nước</span>
+                                <strong th:text="${#numbers.formatDecimal(invoice.waterFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    160,000 VNĐ
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="fee-row">
+                            <div class="d-flex justify-content-between">
+                                <span>Phí internet</span>
+                                <strong th:text="${#numbers.formatDecimal(invoice.internetFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    100,000 VNĐ
+                                </strong>
+                            </div>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="d-flex justify-content-between fs-4">
+                            <strong class="text-primary">TỔNG CỘNG:</strong>
+                            <strong class="text-primary"
+                                    th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                785,000 VNĐ
+                            </strong>
+                        </div>
+
+                        <div class="alert alert-info mt-3 mb-0">
+                            <small>
+                                <strong>Lưu ý:</strong> Hóa đơn này chỉ bao gồm phí sinh hoạt.
+                                Tiền phòng đóng riêng theo năm.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Actions & Time Info -->
+            <div class="col-md-4">
+                <!-- Date Information -->
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Thông tin thời gian</h6>
+                        <p class="mb-2">
+                            <small class="text-muted">Tháng/Năm:</small><br>
+                            <strong th:text="${#temporals.format(invoice.issueDate, 'MM/yyyy')}">12/2024</strong>
+                        </p>
+                        <p class="mb-2">
+                            <small class="text-muted">Ngày xuất:</small><br>
+                            <span th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}">01/12/2024</span>
+                        </p>
+                        <p class="mb-0">
+                            <small class="text-muted">Hạn thanh toán:</small><br>
+                            <span class="fw-bold"
+                                  th:classappend="${invoice.status.name() == 'OVERDUE'} ? 'text-danger' : 'text-success'"
+                                  th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">31/12/2024</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card no-print">
+                    <div class="card-body">
+                        <h6 class="card-title">Thao tác</h6>
+
+                        <!-- Pay Button -->
+                        <form th:if="${invoice.status.name() != 'PAID'}"
+                              th:action="@{/admin/invoices/{id}/pay(id=${invoice.id})}"
+                              method="post" class="mb-2">
+                            <button type="submit" class="btn btn-success w-100"
+                                    onclick="return confirm('Xác nhận đã nhận tiền thanh toán?')">
+                                Đánh dấu Đã TT
+                            </button>
+                        </form>
+
+                        <!-- Edit Button -->
+                        <a th:if="${invoice.status.name() != 'PAID'}"
+                           th:href="@{/admin/invoices/{id}/edit(id=${invoice.id})}"
+                           class="btn btn-warning w-100 mb-2">Chỉnh sửa</a>
+
+                        <!-- Print Button -->
+                        <button onclick="window.print()" class="btn btn-secondary w-100 mb-2">
+                            In hóa đơn
+                        </button>
+
+                        <hr>
+
+                        <!-- Delete Button -->
+                        <form th:if="${invoice.status.name() == 'UNPAID'}"
+                              th:action="@{/admin/invoices/{id}/delete(id=${invoice.id})}"
+                              method="post" class="mb-2">
+                            <button type="submit" class="btn btn-outline-danger w-100"
+                                    onclick="return confirm('Bạn có chắc chắn muốn xóa hóa đơn này?')">
+                                Xóa hóa đơn
+                            </button>
+                        </form>
+
+                        <a th:href="@{/admin/invoices}" class="btn btn-outline-primary w-100">
+                            Quay lại danh sách
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Contract Info (if exists) -->
+                <div class="card" th:if="${invoice.contract != null}">
+                    <div class="card-body">
+                        <h6 class="card-title">Hợp đồng</h6>
+                        <p class="mb-2">
+                            <small class="text-muted">Mã HĐ:</small><br>
+                            <span th:text="${invoice.contract.id}">1</span>
+                        </p>
+                        <p class="mb-2">
+                            <small class="text-muted">Thời gian:</small><br>
+                            <span th:text="${#temporals.format(invoice.contract.startDate, 'dd/MM/yyyy')} + ' - ' +
+                                           ${#temporals.format(invoice.contract.endDate, 'dd/MM/yyyy')}">
+                                01/01/2024 - 31/12/2024
+                            </span>
+                        </p>
+                        <p class="mb-0">
+                            <small class="text-muted">Trạng thái:</small><br>
+                            <span class="badge"
+                                  th:classappend="${invoice.contract.status.name() == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'">
+                                  ACTIVE
+                            </span>
+                        </p>
                     </div>
                 </div>
             </div>

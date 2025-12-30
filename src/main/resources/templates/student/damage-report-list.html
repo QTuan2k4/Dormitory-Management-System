@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Báo cáo hư hỏng</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h3>Báo cáo hư hỏng / phá hoại</h3>
+
+    <!-- Flash message -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <a th:href="@{/damage-reports/student/new}" class="btn btn-primary mb-3">
+        + Gửi báo cáo mới
+    </a>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Phòng</th>
+            <th>Tiêu đề</th>
+            <th>Trạng thái</th>
+            <th>Ngày báo cáo</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${reportList}">
+            <td th:text="${r.id}"></td>
+            <td th:text="${r.room.building.name + ' - ' + r.room.roomNumber}"></td>
+            <td th:text="${r.title}"></td>
+            <td>
+                <span class="badge bg-secondary"
+                      th:text="${r.status}"></span>
+            </td>
+            <td th:text="${#temporals.format(r.reportedAt, 'dd/MM/yyyy HH:mm')}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/damage-reports/student(page=${currentPage-1})}">«</a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/damage-reports/student(page=${i})}"
+                   th:text="${i}"></a>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/damage-reports/student(page=${currentPage+1})}">»</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+</body>
+</html>

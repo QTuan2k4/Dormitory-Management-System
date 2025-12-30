@@ -26,91 +26,151 @@
         .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
         .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
         .btn-logout:hover { background: #c82333; color: white; }
+        .current-info { background: #e7f3ff; border-left: 4px solid #0d6efd; padding: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
     <div th:replace="~{fragments/sidebar :: adminSidebar('invoices')}"></div>
 
     <div class="main-content">
-        <div class="header d-flex justify-content-between align-items-center">
+        <div class="header d-flex justify-content-between align-items-center no-print">
             <div>
-                <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Chỉnh Sửa Hóa Đơn</h4>
-                <small class="text-muted">Chỉnh sửa thông tin hóa đơn</small>
+                <h4 class="mb-0">Chỉnh Sửa Hóa Đơn</h4>
+                <small class="text-muted">Cập nhật số điện và số nước</small>
             </div>
             <a href="#" th:href="@{/logout}" class="btn btn-logout">
-                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                Đăng xuất
             </a>
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-8 mx-auto">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Chỉnh Sửa Hóa Đơn - <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></h5>
+                        <h5 class="mb-0">
+                            Hóa Đơn
+                            <span th:text="${invoice.invoiceNumber}">PSH20241201</span>
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="@{/admin/invoices/{id}/edit(id=${invoice.id})}">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Hợp Đồng (*)</label>
-                                    <select class="form-select" name="contractId" required>
-                                        <option value="">-- Chọn hợp đồng --</option>
-                                        <option th:each="contract : ${contracts}" th:value="${contract.id}"
-                                                th:text="${contract.student.fullName} + ' - ' + ${contract.room.building.name} + ' ' + ${contract.room.roomNumber}"
-                                                th:selected="${contract.id == invoice.contract.id}"></option>
-                                    </select>
-                                </div>
+                        <!-- Error Message -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
 
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Mã Hóa Đơn (*)</label>
-                                    <input type="text" class="form-control" name="invoiceNumber" th:value="${invoice.invoiceNumber}" required readonly>
+
+
+                        <!-- Current Information -->
+                        <div class="current-info mb-4">
+                            <h6>Thông tin hiện tại</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <strong>Phòng:</strong>
+                                        <span th:text="${invoice.room.building.name + ' - ' + invoice.room.roomNumber}">Tòa A - 101</span>
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Tháng/Năm:</strong>
+                                        <span th:text="${#temporals.format(invoice.issueDate, 'MM/yyyy')}">12/2024</span>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Trạng thái:</strong>
+                                        <span class="badge"
+                                              th:classappend="${invoice.status.name() == 'UNPAID'} ? 'bg-warning text-dark' : 'bg-danger'"
+                                              th:text="${invoice.status.name() == 'UNPAID'} ? 'Chưa thanh toán' : 'Quá hạn'">
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1">
+                                        <strong>Tiền điện hiện tại:</strong>
+                                        <span th:text="${#numbers.formatDecimal(invoice.electricityFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">350,000 VNĐ</span>
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Tiền nước hiện tại:</strong>
+                                        <span th:text="${#numbers.formatDecimal(invoice.waterFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">160,000 VNĐ</span>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong>Tổng hiện tại:</strong>
+                                        <span class="text-primary fw-bold" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                            785,000 VNĐ
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Edit Form -->
+                        <form method="post" th:action="@{/admin/invoices/{id}/edit(id=${invoice.id})}" id="editForm">
+                            <h6 class="mb-3">Cập nhật số liệu mới</h6>
+
+                            <!-- Electricity Usage -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Số Điện Mới (kWh) (*)</label>
+                                    <input type="number" class="form-control" name="electricityUsage"
+                                           id="electricityUsage" min="0" required>
+                                    <small class="form-text text-muted">Giá: 3,500 VNĐ/kWh</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tiền Điện Mới</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="electricityFee" readonly>
+                                        <span class="input-group-text">VNĐ</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Ngày Phát Hành (*)</label>
-                                    <input type="date" class="form-control" name="issueDate" th:value="${invoice.issueDate}" required>
+                            <!-- Water Usage -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Số Nước Mới (m³) (*)</label>
+                                    <input type="number" class="form-control" name="waterUsage"
+                                           id="waterUsage" min="0" required>
+                                    <small class="form-text text-muted">Giá: 20,000 VNĐ/m³</small>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Hạn Thanh Toán (*)</label>
-                                    <input type="date" class="form-control" name="dueDate" th:value="${invoice.dueDate}" required>
-                                </div>
-                            </div>
-
-                            <h5 class="mt-4 mb-3">Chi Tiết Các Khoản Phí</h5>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tiền Phòng (VNĐ) (*)</label>
-                                    <input type="number" class="form-control" name="roomFee" th:value="${invoice.roomFee}" min="0" required>
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tiền Điện (VNĐ)</label>
-                                    <input type="number" class="form-control" name="electricityFee" th:value="${invoice.electricityFee}" min="0">
+                                <div class="col-md-6">
+                                    <label class="form-label">Tiền Nước Mới</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="waterFee" readonly>
+                                        <span class="input-group-text">VNĐ</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tiền Nước (VNĐ)</label>
-                                    <input type="number" class="form-control" name="waterFee" th:value="${invoice.waterFee}" min="0">
+                            <!-- Internet Fee (readonly) -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Phí Internet</label>
+                                    <input type="text" class="form-control" value="100,000 VNĐ (không đổi)" readonly>
                                 </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Tiền Internet (VNĐ)</label>
-                                    <input type="number" class="form-control" name="internetFee" th:value="${invoice.internetFee}" min="0">
+                                <div class="col-md-6">
+                                    <label class="form-label">Phí Internet</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="100,000" readonly>
+                                        <span class="input-group-text">VNĐ</span>
+                                    </div>
                                 </div>
                             </div>
 
+                            <hr>
+
+                            <!-- New Total -->
+                            <div class="alert alert-success">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">TỔNG MỚI:</h5>
+                                    <h3 class="mb-0" id="totalAmount">0 VNĐ</h3>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
                             <div class="d-flex justify-content-between mt-4">
-                                <a href="/DMS/admin/invoices" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Hủy
+                                <a th:href="@{/admin/invoices/{id}(id=${invoice.id})}" class="btn btn-secondary">
+                                    Hủy
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Cập Nhật Hóa Đơn
+                                    Cập Nhật
                                 </button>
                             </div>
                         </form>
@@ -121,5 +181,34 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Tính toán tự động
+        const ELECTRICITY_PRICE = 3500;
+        const WATER_PRICE = 20000;
+        const INTERNET_FEE = 100000;
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function calculateTotal() {
+            const electricity = parseInt(document.getElementById('electricityUsage').value) || 0;
+            const water = parseInt(document.getElementById('waterUsage').value) || 0;
+
+            const electricityFee = electricity * ELECTRICITY_PRICE;
+            const waterFee = water * WATER_PRICE;
+            const total = electricityFee + waterFee + INTERNET_FEE;
+
+            document.getElementById('electricityFee').value = formatNumber(electricityFee);
+            document.getElementById('waterFee').value = formatNumber(waterFee);
+            document.getElementById('totalAmount').textContent = formatNumber(total) + ' VNĐ';
+        }
+
+        document.getElementById('electricityUsage').addEventListener('input', calculateTotal);
+        document.getElementById('waterUsage').addEventListener('input', calculateTotal);
+
+        // Tính toán ban đầu
+        calculateTotal();
+    </script>
 </body>
 </html>

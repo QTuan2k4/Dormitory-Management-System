@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Gửi báo cáo hư hỏng</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h3 th:text="${pageTitle}"></h3>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/damage-reports/student/save}"
+          method="post"
+          enctype="multipart/form-data">
+
+        <div class="mb-3">
+            <label class="form-label">ID Phòng</label>
+            <input type="number" name="roomId" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Tiêu đề</label>
+            <input type="text" name="title" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả chi tiết</label>
+            <textarea name="description" class="form-control" rows="4" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ảnh minh họa</label>
+            <input type="file" name="images" multiple class="form-control">
+            <small class="text-muted">Có thể chọn nhiều ảnh</small>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            Gửi báo cáo
+        </button>
+
+        <a th:href="@{/damage-reports/student}" class="btn btn-secondary">
+            Quay lại
+        </a>
+    </form>
+</div>
+
+</body>
+</html>
