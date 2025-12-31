@@ -1,6 +1,8 @@
 package com.group7.DMS.repository;
 
 import com.group7.DMS.entity.Contracts;
+import com.group7.DMS.entity.Contracts.ContractStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +19,8 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 	List<Contracts> findByRoomId(int roomId);
 
 	List<Contracts> findByStatus(Contracts.ContractStatus status);
+
+	Contracts findByStudentIdAndStatus(int studentId, ContractStatus status);
 
 	@Query("SELECT c FROM Contracts c WHERE c.student.id = :studentId AND c.status = com.group7.DMS.entity.Contracts$ContractStatus.ACTIVE")
 	List<Contracts> findActiveContractsByStudent(@Param("studentId") int studentId);

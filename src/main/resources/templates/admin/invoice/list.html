@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Hóa Đơn - DMS Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Quản lý Phí Sinh Hoạt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f8f9fa; }
         .sidebar {
@@ -22,12 +22,13 @@
         .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
         .main-content { margin-left: 250px; padding: 20px; }
         .header { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); margin-bottom: 20px; }
         .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
         .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
         .btn-logout:hover { background: #c82333; color: white; }
-        .badge-active { background-color: #198754; color: white; }
-        .badge-maintenance { background-color: #ffc107; color: #343a40; }
+        .stat-card { border-left: 4px solid; transition: transform 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .badge { padding: 6px 12px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -36,148 +37,274 @@
     <div class="main-content">
         <div class="header d-flex justify-content-between align-items-center">
             <div>
-                <h4 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Quản lý Hóa Đơn</h4>
-                <small class="text-muted">Danh sách các hóa đơn trong hệ thống</small>
+                <h4 class="mb-0">Quản lý Phí Sinh Hoạt</h4>
+                <small class="text-muted">Điện, nước, internet hàng tháng</small>
             </div>
             <a href="#" th:href="@{/logout}" class="btn btn-logout">
                 <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
             </a>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Danh sách Hóa Đơn</h5>
-                    </div>
+        <!-- Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mb-4" th:if="${summary != null}">
+            <div class="col-md-3">
+                <div class="card stat-card border-success">
                     <div class="card-body">
-                        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <span th:text="${message}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Đã Thu</h6>
+                                <h4 class="mb-0 text-success"
+                                    th:text="${#numbers.formatDecimal(summary.totalPaidAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
+                                <small class="text-muted" th:text="${summary.countPaid} + ' hóa đơn'">0 hóa đơn</small>
+                            </div>
+                            <i class="fas fa-check-circle fa-3x text-success opacity-25"></i>
                         </div>
-                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <span th:text="${errorMessage}"></span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card border-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Chưa Thu</h6>
+                                <h4 class="mb-0 text-warning"
+                                    th:text="${#numbers.formatDecimal(summary.totalUnpaidAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
+                                <small class="text-muted" th:text="${summary.countUnpaid} + ' hóa đơn'">0 hóa đơn</small>
+                            </div>
+                            <i class="fas fa-clock fa-3x text-warning opacity-25"></i>
                         </div>
-
-                        <!-- Filter Form -->
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <form th:action="@{/admin/invoices}" method="GET" class="d-flex align-items-center">
-    <input type="hidden" name="page" th:value="${currentPage}">
-    <input type="hidden" name="size" th:value="${pageSize}">
-
-    <!-- Search -->
-    <input type="text" name="search" class="form-control me-2" placeholder="Tìm kiếm theo Tên Sinh Viên, Mã Hóa Đơn..." th:value="${search}" style="width: 250px;">
-
-    <!-- Status Filter -->
-    <select name="status" class="form-select me-2" style="width: 180px;">
-        <option value="">-- Tất cả Trạng thái --</option>
-        <option value="PAID" th:selected="${status == 'PAID'}">Đã thanh toán</option>
-        <option value="UNPAID" th:selected="${status == 'UNPAID'}">Chưa thanh toán</option>
-        <option value="OVERDUE" th:selected="${status == 'OVERDUE'}">Quá hạn</option>
-    </select>
-
-    <!-- Date Range Filter -->
-    <input type="month" name="monthYear" class="form-control me-2" th:value="${month != null ? year + '-' + (month < 10 ? '0' + month : month) : ''}" style="width: 200px;" />
-
-    <!-- Submit Filter Button -->
-    <button type="submit" class="btn btn-secondary">
-        <i class="fas fa-filter me-1"></i> Lọc
-    </button>
-
-    <!-- Reset Filters -->
-    <a th:if="${search != null || status != null || month != null}" th:href="@{/admin/invoices}" class="btn btn-outline-secondary ms-2">
-         <i class="fas fa-redo"></i>
-    </a>
-</form>
-
-
-                            <!-- Create New Invoice Button -->
-                            <a th:href="@{/admin/invoices/create}" class="btn btn-success">
-                                <i class="fas fa-plus me-1"></i> Tạo Hóa Đơn Mới
-                            </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card border-danger">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Quá Hạn</h6>
+                                <h4 class="mb-0 text-danger"
+                                    th:text="${#numbers.formatDecimal(summary.totalOverdueAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
+                                <small class="text-muted" th:text="${summary.countOverdue} + ' hóa đơn'">0 hóa đơn</small>
+                            </div>
+                            <i class="fas fa-exclamation-triangle fa-3x text-danger opacity-25"></i>
                         </div>
-
-                        <!-- Invoice Table -->
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Mã Hóa Đơn</th>
-                                        <th>Sinh Viên</th>
-                                        <th>Phòng</th>
-                                        <th>Ngày Phát Hành</th>
-                                        <th>Hạn Thanh Toán</th>
-                                        <th>Tổng Tiền</th>
-                                        <th>Trạng Thái</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="invoice : ${invoices}">
-                                        <td th:text="${invoice.invoiceNumber}">INV001</td>
-                                        <td th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</td>
-                                        <td th:text="${invoice.contract.room.building.name + ' - ' + invoice.contract.room.roomNumber}">Tòa A - Phòng 101</td>
-                                        <td th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}">01/01/2024</td>
-                                        <td th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">31/01/2024</td>
-                                        <td th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">1,500,000 VNĐ</td>
-                                        <td>
-                                            <span th:if="${invoice.status == 'PAID'}" class="badge badge-success">Đã Thanh Toán</span>
-                                            <span th:if="${invoice.status == 'UNPAID'}" class="badge badge-warning">Chưa Thanh Toán</span>
-                                            <span th:if="${invoice.status == 'OVERDUE'}" class="badge badge-danger">Quá Hạn</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a th:href="@{/admin/invoices/{id}(id=${invoice.id})}" class="btn btn-info" title="Xem Chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a th:href="@{/admin/invoices/{id}/edit(id=${invoice.id})}" class="btn btn-warning" title="Chỉnh sửa">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a th:href="@{/admin/invoices/{id}/payment(id=${invoice.id})}" class="btn btn-success" title="Thanh toán">
-                                                    <i class="fas fa-money-bill-wave"></i>
-                                                </a>
-                                                <a th:href="@{/admin/invoices/{id}/print(id=${invoice.id})}" class="btn btn-secondary" title="In hóa đơn" target="_blank">
-                                                    <i class="fas fa-print"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(invoices)}">
-                                        <td colspan="8" class="text-center text-muted">
-                                            <i class="fas fa-search me-2"></i> Không tìm thấy hóa đơn nào
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card border-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Tổng Số HĐ</h6>
+                                <h4 class="mb-0 text-info" th:text="${summary.totalInvoices}">0</h4>
+                                <small class="text-muted">hóa đơn</small>
+                            </div>
+                            <i class="fas fa-file-invoice fa-3x text-info opacity-25"></i>
                         </div>
-
-                        <!-- Pagination -->
-                        <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                                    <a class="page-link" th:href="@{/admin/invoices(page=${currentPage - 1}, size=${pageSize}, search=${search}, status=${status}, month=${month})}">
-                                       <i class="fas fa-angle-left"></i>
-                                    </a>
-                                </li>
-
-                                <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage ? 'active' : ''}">
-                                    <a class="page-link" th:href="@{/admin/invoices(page=${i}, size=${pageSize}, search=${search}, status=${status}, month=${month})}" th:text="${i}">1</a>
-                                </li>
-
-                                <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                                    <a class="page-link" th:href="@{/admin/invoices(page=${currentPage + 1}, size=${pageSize}, search=${search}, status=${status}, month=${month})}">
-                                       <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Main Card -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách Hóa Đơn</h5>
+                    <div>
+                        <a th:href="@{/admin/invoices/select-room}" class="btn btn-success btn-sm me-2">
+                            <i class="fas fa-plus me-1"></i>Tạo Hóa Đơn
+                        </a>
+                        <a th:href="@{/admin/invoices/bulk-create}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-layer-group me-1"></i>Tạo Hàng Loạt
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filter Form -->
+                <form th:action="@{/admin/invoices}" method="GET" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label class="form-label small">Tòa nhà</label>
+                            <select name="buildingId" class="form-select form-select-sm">
+                                <option value="">Tất cả</option>
+                                <option th:each="building : ${buildings}"
+                                        th:value="${building.id}"
+                                        th:text="${building.name}"
+                                        th:selected="${buildingId != null && buildingId == building.id}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Số phòng</label>
+                            <input type="text" name="roomNumber" class="form-select form-select-sm"
+                                   th:value="${roomNumber}" placeholder="VD: 101">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Trạng thái</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="">Tất cả</option>
+                                <option value="PAID" th:selected="${status != null && status.name() == 'PAID'}">Đã TT</option>
+                                <option value="UNPAID" th:selected="${status != null && status.name() == 'UNPAID'}">Chưa TT</option>
+                                <option value="OVERDUE" th:selected="${status != null && status.name() == 'OVERDUE'}">Quá hạn</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Tháng</label>
+                            <select name="month" class="form-select form-select-sm">
+                                <option value="">Tất cả</option>
+                                <option th:each="m : ${#numbers.sequence(1, 12)}"
+                                        th:value="${m}"
+                                        th:text="${m}"
+                                        th:selected="${month != null && month == m}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small">Năm</label>
+                            <select name="year" class="form-select form-select-sm">
+                                <option value="">Tất cả</option>
+                                <option th:each="y : ${#numbers.sequence(2024, 2025)}"
+                                        th:value="${y}"
+                                        th:text="${y}"
+                                        th:selected="${year != null && year == y}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-secondary btn-sm w-100">
+                                <i class="fas fa-filter me-1"></i>Lọc
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Invoice Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 10%">Mã HĐ</th>
+                                <th style="width: 15%">Phòng</th>
+                                <th style="width: 15%">Sinh Viên</th>
+                                <th style="width: 10%">Tháng/Năm</th>
+                                <th style="width: 10%">Ngày Xuất</th>
+                                <th style="width: 10%">Hạn TT</th>
+                                <th style="width: 12%" class="text-end">Tổng Tiền</th>
+                                <th style="width: 10%" class="text-center">Trạng Thái</th>
+                                <th style="width: 8%" class="text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="invoice : ${invoices}">
+                                <td>
+                                    <small class="text-muted" th:text="${invoice.invoiceNumber}">PSH20241201</small>
+                                </td>
+                                <td>
+                                    <strong th:text="${invoice.room.building.name + ' - ' + invoice.room.roomNumber}">Tòa A - 101</strong>
+                                </td>
+                                <td>
+                                    <span th:if="${invoice.contract != null}" th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span>
+                                    <span th:if="${invoice.contract == null}" class="text-muted fst-italic">Chưa có HĐ</span>
+                                </td>
+                                <td>
+                                    <span th:text="${#temporals.format(invoice.issueDate, 'MM/yyyy')}">12/2024</span>
+                                </td>
+                                <td>
+                                    <small th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}">01/12/2024</small>
+                                </td>
+                                <td>
+                                    <small th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}"
+                                           th:classappend="${invoice.status.name() == 'OVERDUE'} ? 'text-danger fw-bold' : ''">
+                                        31/12/2024
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <strong th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        785,000đ
+                                    </strong>
+                                </td>
+                                <td class="text-center">
+                                    <span th:if="${invoice.status.name() == 'PAID'}" class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>Đã TT
+                                    </span>
+                                    <span th:if="${invoice.status.name() == 'UNPAID'}" class="badge bg-warning text-dark">
+                                        <i class="fas fa-clock me-1"></i>Chưa TT
+                                    </span>
+                                    <span th:if="${invoice.status.name() == 'OVERDUE'}" class="badge bg-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Quá hạn
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/invoices/{id}(id=${invoice.id})}"
+                                           class="btn btn-info btn-sm" title="Chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a th:if="${invoice.status.name() != 'PAID'}"
+                                           th:href="@{/admin/invoices/{id}/edit(id=${invoice.id})}"
+                                           class="btn btn-warning btn-sm" title="Sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(invoices)}">
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                    <h5>Không có hóa đơn nào</h5>
+                                    <p>Thử thay đổi bộ lọc hoặc tạo hóa đơn mới</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav th:if="${totalPages > 1}" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/admin/invoices(page=${currentPage - 1}, size=${pageSize}, buildingId=${buildingId}, roomNumber=${roomNumber}, status=${status}, month=${month}, year=${year})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage ? 'active' : ''}">
+                            <a class="page-link"
+                               th:href="@{/admin/invoices(page=${i}, size=${pageSize}, buildingId=${buildingId}, roomNumber=${roomNumber}, status=${status}, month=${month}, year=${year})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/admin/invoices(page=${currentPage + 1}, size=${pageSize}, buildingId=${buildingId}, roomNumber=${roomNumber}, status=${status}, month=${month}, year=${year})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="text-center text-muted mt-2">
+                        Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+                        - Tổng <strong th:text="${totalItems}">0</strong> hóa đơn
+                    </p>
+                </nav>
+            </div>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+xóa hết các thẻ <i> để loại bỏ icon
