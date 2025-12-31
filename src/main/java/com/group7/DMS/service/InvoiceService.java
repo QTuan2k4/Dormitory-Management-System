@@ -1,53 +1,91 @@
 package com.group7.DMS.service;
 
 import com.group7.DMS.entity.Invoices;
-import com.group7.DMS.entity.Payments;
+import com.group7.DMS.entity.Invoices.InvoiceStatus;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface InvoiceService {
 
-	// Các phương thức CRUD
-	Invoices save(Invoices invoice);
+	/**
+	 * Tạo hóa đơn phí sinh hoạt cho PHÒNG (cách mới)
+	 */
+	Invoices createInvoiceForRoom(int roomId, int month, int year, int electricityUsage, int waterUsage);
 
-	void delete(int id);
+	/**
+	 * Tạo hóa đơn theo hợp đồng (cách cũ - giữ lại cho tương thích)
+	 */
+	Invoices createInvoiceForContract(int contractId, String invoiceNumber, LocalDate issueDate, LocalDate dueDate,
+			int electricityUsage, int waterUsage);
 
-	Invoices update(Invoices invoice);
+	/**
+	 * Tạo hóa đơn hàng loạt cho nhiều phòng
+	 */
+	Map<String, Object> createBulkInvoices(List<Integer> roomIds, int month, int year);
 
-	Invoices findById(int id);
+	/**
+	 * Cập nhật hóa đơn
+	 */
+	Invoices updateInvoice(int invoiceId, Integer electricityUsage, Integer waterUsage);
 
-	Invoices findByInvoiceNumber(String invoiceNumber);
+	/**
+	 * Đánh dấu đã thanh toán
+	 */
+	Invoices markAsPaid(int invoiceId);
 
-	List<Invoices> findAll();
+	/**
+	 * Cập nhật trạng thái hóa đơn
+	 */
+	Invoices updateInvoiceStatus(int invoiceId, InvoiceStatus status);
 
-	List<Invoices> findByStudentId(int studentId);
+	/**
+	 * Xóa hóa đơn
+	 */
+	void deleteInvoice(int invoiceId);
 
-	// Tìm hóa đơn theo trạng thái với phân trang và lọc
-	Page<Invoices> findInvoicesWithFilters(String search, Invoices.InvoiceStatus status, LocalDate fromDate,
-			LocalDate toDate, Pageable pageable);
+	/**
+	 * Lấy chi tiết hóa đơn
+	 */
+	Invoices getInvoiceById(int invoiceId);
 
-	// Phương thức tạo hóa đơn mới
-	Invoices createInvoice(int contractId, String invoiceNumber, LocalDate issueDate, LocalDate dueDate,
-			BigDecimal roomFee, BigDecimal electricityFee, BigDecimal waterFee, BigDecimal internetFee);
+	/**
+	 * Lấy tất cả hóa đơn
+	 */
+	List<Invoices> getAllInvoices();
 
-	// Phương thức thanh toán
-	Payments processPayment(int invoiceId, BigDecimal amount, Payments.PaymentMethod method, String transactionId);
+	/**
+	 * Lấy hóa đơn của phòng
+	 */
+	List<Invoices> getInvoicesByRoom(int roomId);
 
-	// Các phương thức hỗ trợ tính toán
-	BigDecimal calculateTotalAmount(BigDecimal roomFee, BigDecimal electricityFee, BigDecimal waterFee,
-			BigDecimal internetFee);
+	/**
+	 * Lấy hóa đơn theo hợp đồng
+	 */
+	List<Invoices> getInvoicesByContract(int contractId);
 
-	// Tính tổng tiền đã thanh toán hoặc chưa thanh toán cho sinh viên
-	BigDecimal calculateTotalPaidAmount(int studentId);
+	/**
+	 * Tìm kiếm hóa đơn
+	 */
+	Page<Invoices> searchInvoices(Integer buildingId, String roomNumber, InvoiceStatus status, Integer month,
+			Integer year, int page, int size);
 
-	BigDecimal calculateTotalUnpaidAmount(int studentId);
+	/**
+	 * Thống kê tổng hợp
+	 */
+	Map<String, Object> getInvoiceSummary();
 
-	// Phương thức lấy các khoản thanh toán gần đây của sinh viên
-	List<Payments> findRecentPaymentsByStudent(int studentId, int limit);
+	/**
+	 * Cập nhật hóa đơn quá hạn
+	 */
+	int updateOverdueInvoices();
 
-	List<Invoices> findByDateRange(LocalDate startDate, LocalDate endDate);
+	/**
+	 * Lấy hóa đơn theo tháng/năm
+	 */
+	List<Invoices> getInvoicesByMonthAndYear(int month, int year);
+
 }

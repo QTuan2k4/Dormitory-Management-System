@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn Phòng Tạo Hóa Đơn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+        }
+        .sidebar .nav-link { color: white; padding: 12px 20px; border-radius: 8px; margin: 5px 10px; transition: all 0.3s; }
+        .sidebar .nav-link:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateX(5px); }
+        .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
+        .main-content { margin-left: 250px; padding: 20px; }
+        .header { background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
+        .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
+        .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
+        .btn-logout:hover { background: #c82333; color: white; }
+        .room-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            height: 100%;
+        }
+        .room-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-5px);
+        }
+        .room-card.occupied {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+        }
+        .room-card.available {
+            background-color: #d1e7dd;
+            border-color: #198754;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/sidebar :: adminSidebar('invoices')}"></div>
+
+    <div class="main-content">
+        <div class="header d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0"></i>Chọn Phòng Để Tạo Hóa Đơn</h4>
+                <small class="text-muted">Bước 1: Chọn tòa nhà → Bước 2: Chọn phòng</small>
+            </div>
+            <a href="#" th:href="@{/logout}" class="btn btn-logout">
+                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+            </a>
+        </div>
+
+        <!-- Chọn tòa nhà -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"></i>Bước 1: Chọn Tòa Nhà</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3" th:each="building : ${buildings}">
+                        <a th:href="@{/admin/invoices/select-room(buildingId=${building.id})}"
+                           class="text-decoration-none">
+                            <div class="card text-center mb-3"
+                                 th:classappend="${selectedBuildingId != null && selectedBuildingId == building.id} ? 'border-primary' : ''">
+                                <div class="card-body">
+                                    <i class="fas fa-building fa-3x mb-3"
+                                       th:classappend="${selectedBuildingId != null && selectedBuildingId == building.id} ? 'text-primary' : 'text-secondary'"></i>
+                                    <h5 th:text="${building.name}">Tòa A</h5>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-door-open me-1"></i>
+                                        <span th:text="${building.name}"></span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách phòng (hiển thị khi đã chọn tòa) -->
+        <div class="card" th:if="${rooms != null}">
+            <div class="card-header">
+                <h5 class="mb-0"></i>Bước 2: Chọn Phòng</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 mb-3" th:each="room : ${rooms}">
+                        <a th:href="@{/admin/invoices/create(roomId=${room.id})}"
+                           class="text-decoration-none text-dark">
+                            <div class="room-card"
+                                 th:classappend="${room.currentOccupants > 0} ? 'occupied' : 'available'">
+                                <i class="fas fa-home fa-2x mb-2"></i>
+                                <h5 class="mb-2" th:text="${room.roomNumber}">101</h5>
+                                <p class="mb-1 small">
+                                    <i class="fas fa-users me-1"></i>
+                                    <span th:text="${room.currentOccupants} + '/' + ${room.slot}">2/4</span>
+                                </p>
+                                <p class="mb-0 small">
+                                    <i class="fas fa-layer-group me-1"></i>
+                                    Tầng <span th:text="${room.floor}">1</span>
+                                </p>
+                                <span class="badge mt-2"
+                                      th:classappend="${room.currentOccupants > 0} ? 'bg-warning text-dark' : 'bg-success'">
+                                    <span th:text="${room.currentOccupants > 0} ? 'Có người ở' : 'Trống'"></span>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(rooms)}" class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Không có phòng nào trong tòa này</h5>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="mt-4">
+            <a th:href="@{/admin/invoices}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại
+            </a>
+            <a th:href="@{/admin/invoices/bulk-create}" class="btn btn-primary">
+                <i class="fas fa-layer-group me-1"></i>Tạo hàng loạt cho cả tòa
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

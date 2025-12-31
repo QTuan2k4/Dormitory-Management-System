@@ -26,6 +26,21 @@
         .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0 !important; }
         .btn-logout { background: #dc3545; border: none; color: white; padding: 8px 15px; border-radius: 8px; }
         .btn-logout:hover { background: #c82333; color: white; }
+        .payment-method-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .payment-method-card:hover {
+            border-color: #667eea;
+            background-color: #f8f9fa;
+        }
+        .payment-method-card input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background-color: #e7f3ff;
+        }
     </style>
 </head>
 <body>
@@ -35,7 +50,7 @@
         <div class="header d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="mb-0"><i class="fas fa-money-check me-2"></i>Thanh Toán Hóa Đơn</h4>
-                <small class="text-muted">Thông tin thanh toán hóa đơn cho sinh viên</small>
+                <small class="text-muted">Xác nhận thanh toán hóa đơn cho sinh viên</small>
             </div>
             <a href="#" th:href="@{/logout}" class="btn btn-logout">
                 <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
@@ -43,42 +58,110 @@
         </div>
 
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-8 mx-auto">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Thanh Toán Hóa Đơn - <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-invoice me-2"></i>Thanh Toán Hóa Đơn -
+                            <span th:text="${invoice.invoiceNumber}">INV-2024-001</span>
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="@{/admin/invoices/{id}/payment(id=${invoice.id})}">
-                            <div class="alert alert-info">
-                                <h5>Thông Tin Hóa Đơn</h5>
-                                <p><strong>Mã HĐ:</strong> <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></p>
-                                <p><strong>Sinh Viên:</strong> <span th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span></p>
-                                <p><strong>Tổng Tiền:</strong> <strong th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">1,500,000 VNĐ</strong></p>
+                        <!-- Error Message -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <!-- Invoice Summary -->
+                        <div class="alert alert-info mb-4">
+                            <h5><i class="fas fa-info-circle me-2"></i>Thông Tin Hóa Đơn</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-2"><strong>Mã HĐ:</strong> <span th:text="${invoice.invoiceNumber}">INV-2024-001</span></p>
+                                    <p class="mb-2"><strong>Sinh Viên:</strong> <span th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span></p>
+                                    <p class="mb-2"><strong>MSSV:</strong> <span th:text="${invoice.contract.student.studentId}">20210001</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-2"><strong>Phòng:</strong>
+                                        <span th:text="${invoice.contract.room.building.name + ' - ' + invoice.contract.room.roomNumber}">Tòa A - 101</span>
+                                    </p>
+                                    <p class="mb-2"><strong>Ngày xuất:</strong> <span th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}">01/01/2024</span></p>
+                                    <p class="mb-2"><strong>Hạn thanh toán:</strong> <span th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">31/01/2024</span></p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">Tổng Tiền:</h4>
+                                <h3 class="mb-0 text-success">
+                                    <strong th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                        3,800,000 VNĐ
+                                    </strong>
+                                </h3>
+                            </div>
+                        </div>
+
+                        <!-- Payment Form -->
+                        <form method="post" th:action="@{/admin/invoices/{id}/payment(id=${invoice.id})}">
+                            <h6 class="mb-3"><i class="fas fa-credit-card me-2"></i>Phương Thức Thanh Toán (*)</h6>
+
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="paymentMethod" value="CASH" id="cash" required>
+                                    <label class="payment-method-card w-100 text-center" for="cash">
+                                        <i class="fas fa-money-bill-wave fa-3x mb-2 text-success"></i>
+                                        <h6>Tiền Mặt</h6>
+                                        <small class="text-muted">Thanh toán trực tiếp</small>
+                                    </label>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="paymentMethod" value="BANK_TRANSFER" id="bank">
+                                    <label class="payment-method-card w-100 text-center" for="bank">
+                                        <i class="fas fa-university fa-3x mb-2 text-primary"></i>
+                                        <h6>Chuyển Khoản</h6>
+                                        <small class="text-muted">Qua ngân hàng</small>
+                                    </label>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input type="radio" class="btn-check" name="paymentMethod" value="CARD" id="card">
+                                    <label class="payment-method-card w-100 text-center" for="card">
+                                        <i class="fas fa-credit-card fa-3x mb-2 text-warning"></i>
+                                        <h6>Thẻ</h6>
+                                        <small class="text-muted">ATM/Credit Card</small>
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Phương Thức Thanh Toán (*)</label>
-                                <select class="form-select" name="paymentMethod" required>
-                                    <option value="">-- Chọn phương thức --</option>
-                                    <option value="CASH">Tiền Mặt</option>
-                                    <option value="BANK_TRANSFER">Chuyển Khoản</option>
-                                    <option value="CARD">Thẻ</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Mã Giao Dịch / Ghi Chú (*)</label>
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-receipt me-2"></i>Mã Giao Dịch / Ghi Chú (*)
+                                </label>
                                 <input type="text" class="form-control" name="transactionId"
                                        placeholder="VD: TXN123456 hoặc Tiền mặt - Thu ngày 01/01/2024" required>
+                                <small class="form-text text-muted">
+                                    Nhập mã giao dịch (nếu chuyển khoản) hoặc ghi chú thanh toán
+                                </small>
                             </div>
 
+                            <!-- Confirmation -->
+                            <div class="alert alert-warning">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirmPayment" required>
+                                    <label class="form-check-label" for="confirmPayment">
+                                        <strong>Tôi xác nhận đã nhận đủ số tiền thanh toán từ sinh viên</strong>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
                             <div class="d-flex justify-content-between mt-4">
                                 <a th:href="@{/admin/invoices/{id}(id=${invoice.id})}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Hủy
+                                    <i class="fas fa-arrow-left me-1"></i>Hủy
                                 </a>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-check"></i> Xác Nhận Thanh Toán
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-check-circle me-1"></i>Xác Nhận Thanh Toán
                                 </button>
                             </div>
                         </form>
@@ -89,5 +172,21 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add visual feedback for payment method selection
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
+            input.addEventListener('change', function() {
+                document.querySelectorAll('.payment-method-card').forEach(card => {
+                    card.style.borderColor = '#dee2e6';
+                    card.style.backgroundColor = 'white';
+                });
+                if (this.checked) {
+                    const label = document.querySelector(`label[for="${this.id}"]`);
+                    label.style.borderColor = '#667eea';
+                    label.style.backgroundColor = '#e7f3ff';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
