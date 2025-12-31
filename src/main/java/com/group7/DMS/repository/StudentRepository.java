@@ -1,6 +1,8 @@
 package com.group7.DMS.repository;
 
 import com.group7.DMS.entity.Students;
+import com.group7.DMS.entity.Users;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

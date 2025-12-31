@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,6 +36,9 @@ public class StudentServiceImpl implements StudentService {
     
     @Autowired 
     private NotificationService notificationService;
+    
+    @Autowired
+    private MailService mailService;
 
     @Override
     @Transactional
@@ -100,7 +103,47 @@ public class StudentServiceImpl implements StudentService {
 
         // 9. Duyệt hồ sơ sinh viên
         student.setRegistrationStatus(Students.RegistrationStatus.APPROVED);
-        studentRepository.save(student);
+        studentRepository.save(student); 
+        
+        // 10. Gửi mial thông báo
+        try {
+            String to = null;
+
+            if (student.getUser() != null) {
+                to = student.getUser().getEmail();
+            }
+
+            if (to != null && !to.isBlank()) {
+                String subject = "Thông báo duyệt hồ sơ & phân phòng KTX";
+
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+                String buildingName = (room.getBuilding() != null && room.getBuilding().getName() != null)
+                        ? room.getBuilding().getName()
+                        : "N/A";
+
+                String body =
+                        "Xin chào " + (student.getFullName() != null ? student.getFullName() : "bạn") + ",\n\n" +
+                        "Hồ sơ đăng ký ký túc xá của bạn đã được DUYỆT.\n" +
+                        "Bạn đã được phân phòng như sau:\n" +
+                        "- Tòa: " + buildingName + "\n" +
+                        "- Phòng: " + room.getRoomNumber() + "\n" +
+                        "- Tầng: " + room.getFloor() + "\n" +
+                        "- Thời hạn hợp đồng: " + contract.getStartDate().format(fmt) +
+                        " đến " + contract.getEndDate().format(fmt) + "\n" +
+                        "- Phí (theo tầng): " + manualFee.toPlainString() + " VNĐ\n\n" +
+                        "Vui lòng đăng nhập hệ thống để xem chi tiết hợp đồng.\n\n" +
+                        "Trân trọng.";
+
+                mailService.send(to, subject, body);
+            } else {
+                // không có email thì bỏ qua
+                System.out.println("[MAIL] Student has no email, skip sending. studentId=" + studentId);
+            }
+        } catch (Exception ex) {
+            // IMPORTANT: không throw để tránh rollback duyệt hồ sơ vì lỗi mail
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -210,7 +253,6 @@ public class StudentServiceImpl implements StudentService {
     public Students findByUsername(String username) {
         return studentRepository.findByUsername(username).orElse(null); 
     }
-    
     @Override
     public Optional<Contracts> findActiveContractByUsername(String username) {
         // 1. Tìm đối tượng Student
