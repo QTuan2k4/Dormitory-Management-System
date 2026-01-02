@@ -33,4 +33,8 @@ public interface RoomService {
  // ← BỔ SUNG: gom nhóm theo tầng để hiển thị đẹp
     Map<Integer, List<Rooms>> getRoomsGroupedByFloor(int buildingId);
     Rooms updateRoomLimited(int roomId, Rooms room);
+    
+    // Thống kê
+    long countAllRooms();
+    long countOccupiedRooms();
 }

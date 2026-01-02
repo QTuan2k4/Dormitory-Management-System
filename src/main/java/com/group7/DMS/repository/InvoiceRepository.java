@@ -52,4 +52,12 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Integer> {
 
 	List<Invoices> findByMonthAndYear(int month, int year);
 
+	// Tìm hóa đơn theo student ID (thông qua contract) - chỉ lấy invoice có room hợp lệ
+	@Query("SELECT i FROM Invoices i WHERE i.contract.student.id = :studentId AND i.room.id > 0")
+	List<Invoices> findByStudentId(@Param("studentId") int studentId);
+
+	// Tìm hóa đơn theo student ID và status - chỉ lấy invoice có room hợp lệ
+	@Query("SELECT i FROM Invoices i WHERE i.contract.student.id = :studentId AND i.status = :status AND i.room.id > 0")
+	List<Invoices> findByStudentIdAndStatus(@Param("studentId") int studentId, @Param("status") InvoiceStatus status);
+
 }

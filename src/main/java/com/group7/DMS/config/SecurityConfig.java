@@ -47,9 +47,13 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                // Payment callbacks - cần permitAll vì được gọi từ payment gateway
+                .requestMatchers("/payment/vnpay/callback", "/payment/momo/callback", "/payment/momo/ipn", 
+                                "/payment/zalopay/callback", "/payment/zalopay/result").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/staff/**").hasAnyRole("ADMIN", "STAFF")
                 .requestMatchers("/student/**").hasAnyRole("ADMIN", "STAFF", "STUDENT")
+                .requestMatchers("/payment/**").hasAnyRole("ADMIN", "STAFF", "STUDENT")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

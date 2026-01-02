@@ -26,11 +26,11 @@ public class Payments {
     private PaymentStatus status;
 
     public enum PaymentMethod {
-        CASH, CARD, BANK_TRANSFER // Add more as needed based on your app
+        CASH, CARD, BANK_TRANSFER, VNPAY, MOMO, ZALOPAY
     }
 
     public enum PaymentStatus {
-        SUCCESS, FAILED // Add more as needed
+        PENDING, SUCCESS, FAILED, CANCELLED
     }
 
     public int getId() {

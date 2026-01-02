@@ -225,5 +225,15 @@ public class RoomServiceImpl implements RoomService {
         
         return roomRepository.save(room);
     }
+
+    @Override
+    public long countAllRooms() {
+        return roomRepository.count();
+    }
+
+    @Override
+    public long countOccupiedRooms() {
+        return roomRepository.countByStatus(Rooms.RoomStatus.OCCUPIED);
+    }
     
 }

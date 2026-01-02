@@ -40,6 +40,12 @@ public class AdminController {
 	@Autowired
 	private RoomService roomService;
 
+	@Autowired
+	private com.group7.DMS.service.ContractService contractService;
+
+	@Autowired
+	private com.group7.DMS.service.PaymentService paymentService;
+
 	@GetMapping("/dashboard")
 	public String dashboard(Model model, Authentication auth) {
 		String username = auth.getName();
@@ -48,9 +54,71 @@ public class AdminController {
 			model.addAttribute("user", user);
 			model.addAttribute("username", user.getUsername());
 		} else {
-			// Fallback for in-memory users or users not present in DB
 			model.addAttribute("username", username);
 		}
+
+		// Thống kê sinh viên
+		List<Students> allStudents = studentService.findAll();
+		long totalStudents = allStudents.size();
+		long pendingStudents = allStudents.stream()
+				.filter(s -> s.getRegistrationStatus() == Students.RegistrationStatus.PENDING).count();
+		long approvedStudents = allStudents.stream()
+				.filter(s -> s.getRegistrationStatus() == Students.RegistrationStatus.APPROVED).count();
+
+		// Thống kê tòa nhà và phòng
+		List<Buildings> buildings = buildingService.getAllBuildings();
+		long totalBuildings = buildings.size();
+		long totalRooms = roomService.countAllRooms();
+		long occupiedRooms = roomService.countOccupiedRooms();
+		long availableRooms = totalRooms - occupiedRooms;
+
+		// Thống kê hóa đơn
+		Map<String, Object> invoiceSummary = invoiceService.getInvoiceSummary();
+		long totalInvoices = (long) invoiceSummary.getOrDefault("totalInvoices", 0L);
+		long paidInvoices = (long) invoiceSummary.getOrDefault("countPaid", 0L);
+		long unpaidInvoices = (long) invoiceSummary.getOrDefault("countUnpaid", 0L);
+		long overdueInvoices = (long) invoiceSummary.getOrDefault("countOverdue", 0L);
+		
+		java.math.BigDecimal totalPaidAmount = (java.math.BigDecimal) invoiceSummary.getOrDefault("totalPaidAmount", java.math.BigDecimal.ZERO);
+		java.math.BigDecimal totalUnpaidAmount = (java.math.BigDecimal) invoiceSummary.getOrDefault("totalUnpaidAmount", java.math.BigDecimal.ZERO);
+		java.math.BigDecimal totalOverdueAmount = (java.math.BigDecimal) invoiceSummary.getOrDefault("totalOverdueAmount", java.math.BigDecimal.ZERO);
+
+		// Lấy 10 hóa đơn gần nhất
+		List<Invoices> recentInvoices = invoiceService.getAllInvoices().stream()
+				.sorted((a, b) -> b.getIssueDate().compareTo(a.getIssueDate()))
+				.limit(10)
+				.toList();
+
+		// Lấy 10 thanh toán gần nhất
+		List<Payments> recentPayments = paymentService.findAll().stream()
+				.sorted((a, b) -> b.getPaymentDate().compareTo(a.getPaymentDate()))
+				.limit(10)
+				.toList();
+
+		// Thống kê hợp đồng
+		List<com.group7.DMS.entity.Contracts> allContracts = contractService.findAll();
+		long activeContracts = allContracts.stream()
+				.filter(c -> c.getStatus() == com.group7.DMS.entity.Contracts.ContractStatus.ACTIVE).count();
+
+		// Gửi dữ liệu ra view
+		model.addAttribute("totalStudents", totalStudents);
+		model.addAttribute("pendingStudents", pendingStudents);
+		model.addAttribute("approvedStudents", approvedStudents);
+		model.addAttribute("totalBuildings", totalBuildings);
+		model.addAttribute("totalRooms", totalRooms);
+		model.addAttribute("occupiedRooms", occupiedRooms);
+		model.addAttribute("availableRooms", availableRooms);
+		model.addAttribute("totalInvoices", totalInvoices);
+		model.addAttribute("paidInvoices", paidInvoices);
+		model.addAttribute("unpaidInvoices", unpaidInvoices);
+		model.addAttribute("overdueInvoices", overdueInvoices);
+		model.addAttribute("totalPaidAmount", totalPaidAmount != null ? totalPaidAmount : java.math.BigDecimal.ZERO);
+		model.addAttribute("totalUnpaidAmount", totalUnpaidAmount != null ? totalUnpaidAmount : java.math.BigDecimal.ZERO);
+		model.addAttribute("totalOverdueAmount", totalOverdueAmount != null ? totalOverdueAmount : java.math.BigDecimal.ZERO);
+		model.addAttribute("recentInvoices", recentInvoices);
+		model.addAttribute("recentPayments", recentPayments);
+		model.addAttribute("activeContracts", activeContracts);
+
 		return "admin/dashboard";
 	}
 
