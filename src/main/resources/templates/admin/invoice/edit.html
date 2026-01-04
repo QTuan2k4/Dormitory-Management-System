@@ -93,7 +93,7 @@
                                     </p>
                                     <p class="mb-0">
                                         <strong>Tổng hiện tại:</strong>
-                                        <span class="text-primary fw-bold" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                        <span class="text-primary fw-bold" th:text="${#numbers.formatDecimal(invoice.livingTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                                             785,000 VNĐ
                                         </span>
                                     </p>
@@ -102,16 +102,19 @@
                         </div>
 
                         <!-- Edit Form -->
-                        <form method="post" th:action="@{/admin/invoices/{id}/edit(id=${invoice.id})}" id="editForm">
+                        <form method="post" th:action="@{/admin/invoices/{id}/edit(id=${invoice.id})}"
+                        		id="invoiceForm"
+                        		th:data-electricity-price="${electricityPrice}"
+                        		th:data-water-price="${waterPrice}"
+                        		th:data-internet-fee="${internetFee}">
                             <h6 class="mb-3">Cập nhật số liệu mới</h6>
 
                             <!-- Electricity Usage -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Số Điện Mới (kWh) (*)</label>
+                                    <label class="form-label">Số Điện Mới (kWh)</label>
                                     <input type="number" class="form-control" name="electricityUsage"
                                            id="electricityUsage" min="0" required>
-                                    <small class="form-text text-muted">Giá: 3,500 VNĐ/kWh</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tiền Điện Mới</label>
@@ -125,10 +128,9 @@
                             <!-- Water Usage -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Số Nước Mới (m³) (*)</label>
+                                    <label class="form-label">Số Nước Mới (m³)</label>
                                     <input type="number" class="form-control" name="waterUsage"
                                            id="waterUsage" min="0" required>
-                                    <small class="form-text text-muted">Giá: 20,000 VNĐ/m³</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tiền Nước Mới</label>
@@ -143,14 +145,7 @@
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label">Phí Internet</label>
-                                    <input type="text" class="form-control" value="100,000 VNĐ (không đổi)" readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Phí Internet</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" value="100,000" readonly>
-                                        <span class="input-group-text">VNĐ</span>
-                                    </div>
+                                    <input type="text" class="form-control" id="internetFeeText" readonly>
                                 </div>
                             </div>
 
@@ -181,34 +176,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Tính toán tự động
-        const ELECTRICITY_PRICE = 3500;
-        const WATER_PRICE = 20000;
-        const INTERNET_FEE = 100000;
+    <script th:src="@{/js/invoice-living.js}"></script>
 
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        function calculateTotal() {
-            const electricity = parseInt(document.getElementById('electricityUsage').value) || 0;
-            const water = parseInt(document.getElementById('waterUsage').value) || 0;
-
-            const electricityFee = electricity * ELECTRICITY_PRICE;
-            const waterFee = water * WATER_PRICE;
-            const total = electricityFee + waterFee + INTERNET_FEE;
-
-            document.getElementById('electricityFee').value = formatNumber(electricityFee);
-            document.getElementById('waterFee').value = formatNumber(waterFee);
-            document.getElementById('totalAmount').textContent = formatNumber(total) + ' VNĐ';
-        }
-
-        document.getElementById('electricityUsage').addEventListener('input', calculateTotal);
-        document.getElementById('waterUsage').addEventListener('input', calculateTotal);
-
-        // Tính toán ban đầu
-        calculateTotal();
-    </script>
 </body>
 </html>

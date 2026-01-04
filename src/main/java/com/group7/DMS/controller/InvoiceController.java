@@ -7,6 +7,7 @@ import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.repository.BuildingRepository;
 import com.group7.DMS.repository.RoomRepository;
 import com.group7.DMS.service.InvoiceService;
+import com.group7.DMS.config.InvoicePricingConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -31,6 +32,9 @@ public class InvoiceController {
 
 	@Autowired
 	private RoomRepository roomRepository;
+
+	@Autowired
+	private InvoicePricingConfig pricingConfig;
 
 	/**
 	 * Trang chủ: Chọn tòa nhà GET /admin/invoices
@@ -99,6 +103,10 @@ public class InvoiceController {
 		model.addAttribute("room", room);
 		model.addAttribute("currentMonth", currentMonth.getMonthValue());
 		model.addAttribute("currentYear", currentMonth.getYear());
+
+		model.addAttribute("electricityPrice", pricingConfig.getElectricityPricePerKwh());
+		model.addAttribute("waterPrice", pricingConfig.getWaterPricePerM3());
+		model.addAttribute("internetFee", pricingConfig.getInternetFeePerMonth());
 
 		return "admin/invoice/form";
 	}
@@ -193,6 +201,11 @@ public class InvoiceController {
 			}
 
 			model.addAttribute("invoice", invoice);
+
+			model.addAttribute("electricityPrice", pricingConfig.getElectricityPricePerKwh());
+			model.addAttribute("waterPrice", pricingConfig.getWaterPricePerM3());
+			model.addAttribute("internetFee", pricingConfig.getInternetFeePerMonth());
+
 			return "admin/invoice/edit";
 		} catch (Exception e) {
 			model.addAttribute("errorMessage", e.getMessage());
