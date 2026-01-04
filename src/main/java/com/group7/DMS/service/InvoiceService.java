@@ -88,4 +88,25 @@ public interface InvoiceService {
 	 */
 	List<Invoices> getInvoicesByMonthAndYear(int month, int year);
 
+	/**
+	 * Lấy hóa đơn theo student ID
+	 */
+	List<Invoices> findByStudentId(int studentId);
+
+	/**
+	 * Tìm hóa đơn theo ID
+	 */
+	Invoices findById(int id);
+
+	/**
+	 * Tính tổng tiền chưa thanh toán của sinh viên
+	 */
+	BigDecimal calculateTotalUnpaidAmount(int studentId);
+
+	/**
+	 * Xử lý thanh toán
+	 */
+	com.group7.DMS.entity.Payments processPayment(int invoiceId, BigDecimal amount, 
+			com.group7.DMS.entity.Payments.PaymentMethod method, String transactionId);
+
 }

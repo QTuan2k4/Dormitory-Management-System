@@ -62,4 +62,7 @@ public interface RoomRepository extends JpaRepository<Rooms, Integer> {
         @Param("maxPrice") java.math.BigDecimal maxPrice,
         org.springframework.data.domain.Pageable pageable
     );
+
+    // Đếm phòng theo trạng thái
+    long countByStatus(Rooms.RoomStatus status);
 }

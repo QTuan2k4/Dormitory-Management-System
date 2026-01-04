@@ -395,3 +395,73 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+-- =====================================================
+-- DỮ LIỆU MẪU CHO HỆ THỐNG QUẢN LÝ KÝ TÚC XÁ
+-- =====================================================
+
+-- Thêm cột version cho Optimistic Locking (nếu chưa có)
+ALTER TABLE `invoices` ADD COLUMN IF NOT EXISTS `version` BIGINT DEFAULT 0;
+
+-- Dữ liệu mẫu cho Buildings
+INSERT INTO `buildings` (`id`, `name`, `total_floors`, `description`, `status`) VALUES
+(1, 'Tòa A - Nam', 5, 'Ký túc xá nam sinh viên', 'ACTIVE'),
+(2, 'Tòa B - Nữ', 5, 'Ký túc xá nữ sinh viên', 'ACTIVE'),
+(3, 'Tòa C - Hỗn hợp', 4, 'Ký túc xá hỗn hợp', 'ACTIVE');
+
+-- Dữ liệu mẫu cho Rooms
+INSERT INTO `rooms` (`id`, `building_id`, `room_number`, `floor`, `slot`, `current_occupants`, `status`, `price_per_year`, `area`, `description`) VALUES
+(1, 1, 'A101', 1, 4, 2, 'AVAILABLE', 3600000.00, 25.00, 'Phòng 4 người, có điều hòa'),
+(2, 1, 'A102', 1, 4, 4, 'OCCUPIED', 3600000.00, 25.00, 'Phòng 4 người, có điều hòa'),
+(3, 1, 'A201', 2, 6, 3, 'AVAILABLE', 3000000.00, 30.00, 'Phòng 6 người'),
+(4, 2, 'B101', 1, 4, 2, 'AVAILABLE', 4000000.00, 25.00, 'Phòng 4 người, có điều hòa, WC riêng'),
+(5, 2, 'B201', 2, 4, 4, 'OCCUPIED', 4000000.00, 25.00, 'Phòng 4 người, có điều hòa, WC riêng');
+
+-- Dữ liệu mẫu cho Users
+INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `is_active`) VALUES
+(1, 'admin', 'admin@ktx.edu.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQb9tLGjPsZf8/X3JZmPpTvN3Cmu', 'admin', 1),
+(2, 'staff01', 'staff01@ktx.edu.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQb9tLGjPsZf8/X3JZmPpTvN3Cmu', 'staff', 1),
+(3, 'sv001', 'nguyenvana@student.edu.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQb9tLGjPsZf8/X3JZmPpTvN3Cmu', 'student', 1),
+(4, 'sv002', 'tranthib@student.edu.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQb9tLGjPsZf8/X3JZmPpTvN3Cmu', 'student', 1),
+(5, 'sv003', 'levanc@student.edu.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQb9tLGjPsZf8/X3JZmPpTvN3Cmu', 'student', 1),
+(6, 'sv004', 'phamthid@student.edu.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQb9tLGjPsZf8/X3JZmPpTvN3Cmu', 'student', 1);
+-- Password mẫu: 123456
+
+-- Dữ liệu mẫu cho Students
+INSERT INTO `students` (`id`, `user_id`, `full_name`, `student_id`, `phone`, `address`, `birth_date`, `registration_status`) VALUES
+(1, 3, 'Nguyễn Văn An', '20210001', '0901234567', 'Hà Nội', '2002-05-15', 'approved'),
+(2, 4, 'Trần Thị Bình', '20210002', '0912345678', 'Hải Phòng', '2002-08-20', 'approved'),
+(3, 5, 'Lê Văn Cường', '20210003', '0923456789', 'Nam Định', '2002-12-10', 'approved'),
+(4, 6, 'Phạm Thị Dung', '20210004', '0934567890', 'Thái Bình', '2002-03-25', 'pending');
+
+-- Dữ liệu mẫu cho Contracts (status: 0=ACTIVE, 1=INACTIVE, 2=TERMINATED)
+INSERT INTO `contracts` (`id`, `student_id`, `room_id`, `start_date`, `end_date`, `manual_fee`, `status`) VALUES
+(1, 1, 1, '2024-09-01', '2025-06-30', 3600000.00, 0),
+(2, 2, 4, '2024-09-01', '2025-06-30', 4000000.00, 0),
+(3, 3, 2, '2024-09-01', '2025-06-30', 3600000.00, 0);
+
+-- Dữ liệu mẫu cho Invoices (Hóa đơn)
+-- Lưu ý: status là enum số (0=UNPAID, 1=PAID, 2=OVERDUE) theo thứ tự trong Java enum
+INSERT INTO `invoices` (`id`, `contract_id`, `invoice_number`, `issue_date`, `due_date`, `room_fee`, `electricity_fee`, `water_fee`, `internet_fee`, `status`, `version`) VALUES
+(1, 1, 'INV-2024-001', '2024-10-01', '2024-10-15', 300000.00, 150000.00, 50000.00, 100000.00, 1, 1),
+(2, 1, 'INV-2024-002', '2024-11-01', '2024-11-15', 300000.00, 180000.00, 55000.00, 100000.00, 1, 1),
+(3, 1, 'INV-2024-003', '2024-12-01', '2024-12-15', 300000.00, 200000.00, 60000.00, 100000.00, 0, 0),
+(4, 2, 'INV-2024-004', '2024-10-01', '2024-10-15', 333333.00, 120000.00, 45000.00, 100000.00, 1, 1),
+(5, 2, 'INV-2024-005', '2024-11-01', '2024-11-15', 333333.00, 140000.00, 50000.00, 100000.00, 0, 0),
+(6, 2, 'INV-2024-006', '2024-12-01', '2024-12-15', 333333.00, 160000.00, 55000.00, 100000.00, 0, 0),
+(7, 3, 'INV-2024-007', '2024-10-01', '2024-10-15', 300000.00, 130000.00, 48000.00, 100000.00, 2, 0),
+(8, 3, 'INV-2024-008', '2024-11-01', '2024-11-15', 300000.00, 145000.00, 52000.00, 100000.00, 0, 0);
+
+-- Dữ liệu mẫu cho Payments (Thanh toán)
+INSERT INTO `payments` (`id`, `invoice_id`, `amount`, `payment_method`, `transaction_id`, `payment_date`, `status`) VALUES
+(1, 1, 600000.00, 'bank_transfer', 'TXN-2024-10-001', '2024-10-10 10:30:00', 'success'),
+(2, 2, 635000.00, 'qr_bank', 'TXN-2024-11-001', '2024-11-12 14:20:00', 'success'),
+(3, 4, 598333.00, 'bank_transfer', 'TXN-2024-10-002', '2024-10-08 09:15:00', 'success');
+
+-- Dữ liệu mẫu cho Notifications
+INSERT INTO `notifications` (`id`, `user_id`, `title`, `message`, `type`, `is_read`, `sent_via`) VALUES
+(1, 3, 'Hóa đơn mới', 'Bạn có hóa đơn tháng 12/2024 cần thanh toán. Hạn: 15/12/2024', 'reminder_payment', 0, 'both'),
+(2, 4, 'Hóa đơn mới', 'Bạn có hóa đơn tháng 11/2024 cần thanh toán. Hạn: 15/11/2024', 'reminder_payment', 0, 'both'),
+(3, 5, 'Nhắc nhở thanh toán', 'Hóa đơn tháng 10/2024 đã quá hạn. Vui lòng thanh toán ngay!', 'reminder_payment', 0, 'email');
+

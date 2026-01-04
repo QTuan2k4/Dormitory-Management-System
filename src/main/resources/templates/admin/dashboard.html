@@ -7,15 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+        body { background-color: #f8f9fa; }
         .sidebar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 250px;
             z-index: 1000;
         }
@@ -30,13 +27,8 @@
             background-color: rgba(255, 255, 255, 0.1);
             transform: translateX(5px);
         }
-        .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
+        .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
+        .main-content { margin-left: 250px; padding: 20px; }
         .header {
             background: white;
             padding: 15px 20px;
@@ -48,7 +40,9 @@
             border: none;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
         }
+        .card:hover { transform: translateY(-3px); }
         .card-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -61,17 +55,46 @@
             padding: 8px 15px;
             border-radius: 8px;
         }
-        .btn-logout:hover {
-            background: #c82333;
+        .btn-logout:hover { background: #c82333; color: white; }
+        .stat-card {
+            border-radius: 15px;
+            padding: 25px;
             color: white;
+            position: relative;
+            overflow: hidden;
         }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(30deg);
+        }
+        .stat-card.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-card.success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .stat-card.danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+        .stat-card.warning { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+        .stat-card.info { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); }
+        .stat-card.dark { background: linear-gradient(135deg, #343a40 0%, #212529 100%); }
+        .stat-card h2 { font-size: 2.5rem; font-weight: bold; margin: 0; }
+        .stat-card p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
+        .stat-card i { font-size: 3.5rem; opacity: 0.3; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+        .summary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        .summary-card h3 { color: #333; margin-bottom: 5px; }
+        .summary-card p { color: #666; margin: 0; }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div th:replace="~{fragments/sidebar :: adminSidebar('dashboard')}"></div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <!-- Header -->
         <div class="header d-flex justify-content-between align-items-center">
@@ -79,92 +102,175 @@
                 <h4 class="mb-0">Xin chào, <span th:text="${username}">Admin</span></h4>
                 <small class="text-muted">Quản trị viên hệ thống</small>
             </div>
-            <a href="#" th:href="@{/logout}" class="btn btn-logout">
+            <a th:href="@{/logout}" class="btn btn-logout">
                 <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
             </a>
         </div>
 
-        <!-- Dashboard Content -->
-        <div class="row">
+        <!-- Statistics Row 1: Students & Rooms -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card primary">
+                    <h2 th:text="${totalStudents}">0</h2>
+                    <p>Tổng sinh viên</p>
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card warning">
+                    <h2 th:text="${pendingStudents}">0</h2>
+                    <p>Chờ duyệt hồ sơ</p>
+                    <i class="fas fa-user-clock"></i>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card success">
+                    <h2 th:text="${totalRooms}">0</h2>
+                    <p>Tổng số phòng</p>
+                    <i class="fas fa-door-open"></i>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card info">
+                    <h2 th:text="${availableRooms}">0</h2>
+                    <p>Phòng còn trống</p>
+                    <i class="fas fa-bed"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Row 2: Invoices -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="stat-card dark">
+                    <h2 th:text="${totalInvoices}">0</h2>
+                    <p>Tổng hóa đơn</p>
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card success">
+                    <h2 th:text="${paidInvoices}">0</h2>
+                    <p>Đã thanh toán</p>
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card danger">
+                    <h2 th:text="${unpaidInvoices}">0</h2>
+                    <p>Chưa thanh toán</p>
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stat-card warning">
+                    <h2 th:text="${overdueInvoices}">0</h2>
+                    <p>Quá hạn</p>
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="summary-card card">
+                    <i class="fas fa-wallet fa-2x text-success mb-2"></i>
+                    <h3 class="text-success" th:text="${#numbers.formatDecimal(totalPaidAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</h3>
+                    <p>Đã thu</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="summary-card card">
+                    <i class="fas fa-money-bill-wave fa-2x text-danger mb-2"></i>
+                    <h3 class="text-danger" th:text="${#numbers.formatDecimal(totalUnpaidAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</h3>
+                    <p>Chưa thu</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="summary-card card">
+                    <i class="fas fa-exclamation-circle fa-2x text-warning mb-2"></i>
+                    <h3 class="text-warning" th:text="${#numbers.formatDecimal(totalOverdueAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">0 VNĐ</h3>
+                    <p>Nợ quá hạn</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-file-invoice me-2"></i>Danh sách hóa đơn
-                        </h5>
-                    </div>
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <button class="btn btn-success me-2">
-                                    <i class="fas fa-file-excel me-1"></i>Xuất file Excel
-                                </button>
-                                <button class="btn btn-info">
-                                    <i class="fas fa-file-import me-1"></i>Nhập file Excel
-                                </button>
+                        <h5 class="mb-3"><i class="fas fa-bolt me-2"></i>Thao tác nhanh</h5>
+                        <div class="row">
+                            <div class="col-md-2 mb-2">
+                                <a th:href="@{/admin/students}" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-users me-1"></i>Sinh viên
+                                </a>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <a th:href="@{/admin/dormitories}" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-building me-1"></i>Ký túc xá
+                                </a>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <a th:href="@{/admin/invoices}" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-file-invoice me-1"></i>Hóa đơn
+                                </a>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <a th:href="@{/admin/contracts}" class="btn btn-outline-info w-100">
+                                    <i class="fas fa-file-contract me-1"></i>Hợp đồng
+                                </a>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <a th:href="@{/admin/invoices/create}" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-plus me-1"></i>Tạo hóa đơn
+                                </a>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <a th:href="@{/admin/students?status=PENDING}" class="btn btn-warning w-100">
+                                    <i class="fas fa-user-clock me-1"></i>Duyệt hồ sơ
+                                </a>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-striped">
+        <div class="row">
+            <!-- Recent Invoices -->
+            <div class="col-md-7 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Hóa đơn gần đây</h5>
+                        <a th:href="@{/admin/invoices}" class="btn btn-sm btn-light">Xem tất cả</a>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${recentInvoices == null or recentInvoices.isEmpty()}" class="text-center text-muted py-3">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>Chưa có hóa đơn nào</p>
+                        </div>
+                        <div th:if="${recentInvoices != null and !recentInvoices.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
-                                        <th>MÃ HÓA ĐƠN</th>
-                                        <th>LOẠI PHÍ</th>
-                                        <th>SỐ TIỀN</th>
-                                        <th>TRẠNG THÁI</th>
-                                        <th>NGÀY TẠO</th>
-                                        <th>NGÀY THANH TOÁN</th>
-                                        <th>HOẠT ĐỘNG</th>
+                                        <th>Mã HĐ</th>
+                                        <th>Phòng</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>HD001</td>
-                                        <td>Điện</td>
-                                        <td>100.000 Đ</td>
-                                        <td><span class="badge bg-success">ĐÃ THANH TOÁN</span></td>
-                                        <td>01/10/2025</td>
-                                        <td>01/10/2025</td>
+                                    <tr th:each="inv : ${recentInvoices}">
+                                        <td th:text="${inv.invoiceNumber}"></td>
+                                        <td th:text="${inv.room?.roomNumber ?: 'N/A'}"></td>
+                                        <td th:text="${#numbers.formatDecimal(inv.totalAmount, 0, 'COMMA', 0, 'POINT')}"></td>
                                         <td>
-                                            <button class="btn btn-sm btn-success">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>HD002</td>
-                                        <td>Nước</td>
-                                        <td>50.000 Đ</td>
-                                        <td><span class="badge bg-warning">CHƯA THANH TOÁN</span></td>
-                                        <td>01/10/2025</td>
-                                        <td>-</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary">THANH TOÁN</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>HD003</td>
-                                        <td>Mạng</td>
-                                        <td>80.000 Đ</td>
-                                        <td><span class="badge bg-success">ĐÃ THANH TOÁN</span></td>
-                                        <td>01/10/2025</td>
-                                        <td>02/10/2025</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>HD004</td>
-                                        <td>Sửa chữa</td>
-                                        <td>120.000 Đ</td>
-                                        <td><span class="badge bg-warning">CHƯA THANH TOÁN</span></td>
-                                        <td>01/10/2025</td>
-                                        <td>-</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary">THANH TOÁN</button>
+                                            <span th:if="${inv.status.name() == 'PAID'}" class="badge bg-success">Đã TT</span>
+                                            <span th:if="${inv.status.name() == 'UNPAID'}" class="badge bg-danger">Chưa TT</span>
+                                            <span th:if="${inv.status.name() == 'OVERDUE'}" class="badge bg-warning">Quá hạn</span>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -173,40 +279,60 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Payment History -->
-        <div class="row mt-4">
-            <div class="col-md-12">
+            <!-- Recent Payments -->
+            <div class="col-md-5 mb-4">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history me-2"></i>Lịch sử thanh toán
-                        </h5>
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Thanh toán gần đây</h5>
                     </div>
                     <div class="card-body">
-                        <div class="list-group">
-                            <div class="list-group-item">
+                        <div th:if="${recentPayments == null or recentPayments.isEmpty()}" class="text-center text-muted py-3">
+                            <i class="fas fa-credit-card fa-2x mb-2"></i>
+                            <p>Chưa có thanh toán nào</p>
+                        </div>
+                        <div th:if="${recentPayments != null and !recentPayments.isEmpty()}" class="list-group list-group-flush">
+                            <div class="list-group-item px-0" th:each="payment : ${recentPayments}">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>Hóa đơn HD001</strong> - ĐÃ THANH TOÁN VÀO 01/10/25 18:20
+                                        <strong th:text="${payment.invoice?.invoiceNumber ?: 'N/A'}"></strong>
+                                        <br>
+                                        <small class="text-muted">
+                                            <span th:text="${payment.paymentMethod}"></span> - 
+                                            <span th:text="${#temporals.format(payment.paymentDate, 'dd/MM HH:mm')}"></span>
+                                        </small>
                                     </div>
-                                    <small class="text-muted">100.000 Đ</small>
-                                </div>
-                            </div>
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Hóa đơn HD003</strong> - ĐÃ THANH TOÁN VÀO 02/10/25 14:30
-                                    </div>
-                                    <small class="text-muted">80.000 Đ</small>
+                                    <span class="text-success fw-bold" th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT') + ' đ'}"></span>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3">
-                            <button class="btn btn-success">
-                                <i class="fas fa-sync me-1"></i>Cập nhật lịch sử
-                            </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h5 th:text="${totalBuildings}">0</h5>
+                                <small class="text-muted">Tòa nhà</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 th:text="${activeContracts}">0</h5>
+                                <small class="text-muted">Hợp đồng đang hoạt động</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 th:text="${occupiedRooms}">0</h5>
+                                <small class="text-muted">Phòng đã đầy</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5 th:text="${approvedStudents}">0</h5>
+                                <small class="text-muted">SV đã duyệt</small>
+                            </div>
                         </div>
                     </div>
                 </div>
