@@ -50,7 +50,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 15px 15px 0 0 !important;
         }
@@ -87,12 +87,12 @@
                     <i class="fas fa-file-invoice me-2"></i>Danh sách Hóa đơn
                 </h5>
             </div>
-            
+
             <div class="card-body">
                 <div th:if="${invoices.isEmpty()}" class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle me-2"></i>Không tìm thấy hóa đơn nào trong hồ sơ của bạn.
                 </div>
-                
+
                 <div class="table-responsive" th:unless="${invoices.isEmpty()}">
                     <table class="table table-striped">
                         <thead>
@@ -109,19 +109,19 @@
                             <tr th:each="invoice : ${invoices}">
                                 <td th:text="${invoice.invoiceNumber}">HD001</td>
                                 <td th:text="${invoice.contract.room.roomNumber}">P101</td>
-                                
+
                                 <td th:with="totalAmount=${invoice.getTotalAmount()}"
                                     th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">100.000 Đ</td>
-                                
+
                                 <td th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}">01/10/25</td>
-                                
-                                <td th:classappend="${invoice.dueDate.isBefore(#temporals.createToday()) and invoice.status != 0 ? 'text-danger fw-bold' : ''}" 
+
+                                <td th:classappend="${invoice.dueDate.isBefore(#temporals.createToday()) and invoice.status != 0 ? 'text-danger fw-bold' : ''}"
                                     th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">15/10/25</td>
-                                
+
                                 <td>
-                                    <span th:switch="${invoice.status.name()}">
-                                        <span th:case="'PAID'" class="badge bg-success">ĐÃ THANH TOÁN</span>
-                                        <span th:case="'OVERDUE'" class="badge bg-danger">QUÁ HẠN</span>
+                                    <span th:switch="${invoice.status}">
+                                        <span th:case="${T(com.group7.DMS.entity.Invoices$InvoiceStatus).PAID}" class="badge bg-success">ĐÃ THANH TOÁN</span>
+                                        <span th:case="${T(com.group7.DMS.entity.Invoices$InvoiceStatus).OVERDUE}" class="badge bg-danger">QUÁ HẠN </span>
                                         <span th:case="*" class="badge bg-warning">CHƯA THANH TOÁN</span>
                                     </span>
                                 </td>

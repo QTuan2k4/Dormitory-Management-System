@@ -9,10 +9,35 @@
     <style>
         .details-card { margin-top: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .rooms-table th, .rooms-table td { vertical-align: middle; }
-        .card-header { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            border-radius: 10px 10px 0 0 !important; 
+        .rooms-status-cell {text-align: center;}
+        .room-status-cell .badge{
+    		display: inline-flex;          /* quan trọng */
+   			align-items: center;           /* căn giữa theo chiều dọc */
+    		justify-content: center;
+    		padding: 6px 12px;
+    		font-size: 0.85rem;
+    		line-height: 1;
+    		border-radius: 999px;
+    		min-width: 80px;               /* cho badge đều nhau */
+		}
+		.room-action-cell{
+    		text-align: center;
+    		white-space: nowrap;
+		}
+
+		.room-action-cell .btn{
+		        display: inline-flex;
+		        align-items: center;
+		        justify-content: center;
+		        gap: 6px;
+		        padding: 6px 12px;
+		        min-width: 90px;
+		        border-radius: 8px;
+		}
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
         }
         /* CSS cho trạng thái phòng */
         .badge-available { background-color: #198754; color: white; }
@@ -23,13 +48,13 @@
 <body>
 
 <div class="container-fluid">
-    
+
     <div class="row">
         <div class="col-12">
             <h1 class="mt-4 mb-4" th:text="${pageTitle}">Chi Tiết Tòa Nhà</h1>
         </div>
     </div>
-    
+
     <div class="row mb-3">
         <div class="col-12">
             <a th:href="@{/admin/buildings}" class="btn btn-secondary">
@@ -53,29 +78,29 @@
                 </div>
                 <div class="col-md-6">
                     <p>
-                        <strong>Ngày tạo:</strong> 
+                        <strong>Ngày tạo:</strong>
                         <span th:text="${#temporals.format(building.createdAt, 'dd-MM-yyyy HH:mm:ss')}"></span>
                     </p>
                     <p>
-    					<strong>Số lượng Phòng:</strong> 
+    					<strong>Số lượng Phòng:</strong>
     					<span th:text="${rooms != null ? rooms.size() : 0}">0</span>
 					</p>
                 </div>
             </div>
-            
+
             <hr>
-            
+
             <h5>Mô tả chi tiết</h5>
             <p th:text="${building.description ?: 'Không có mô tả.'}">Mô tả chi tiết của tòa nhà...</p>
         </div>
     </div>
-    
+
     <hr class="mt-5">
 
     <div class="row">
         <div class="col-12">
             <h2 class="mt-4">Danh sách Phòng trong Tòa nhà</h2>
-            
+
             <table class="table table-striped rooms-table">
                 <thead class="table-dark">
                     <tr>
@@ -91,18 +116,17 @@
                         <td th:text="${room.id}">101</td>
                         <td th:text="${room.roomNumber}">A101</td> <td th:text="${room.floor}">1</td>
                         <td th:text="${room.slot}">4</td>
-                        <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">12,000,000 VNĐ</td> 
-                        
-                        <td class="text-center">
-                            <span th:switch="${room.status}">
-                                <span th:case="'AVAILABLE'" class="badge badge-available">Còn chỗ</span>
-                                <span th:case="'FULL'" class="badge badge-full">Đầy</span>
-                                <span th:case="'REPAIR'" class="badge badge-repair">Bảo trì</span>
-                                <span th:case="*" class="badge bg-secondary">Không rõ</span>
-                            </span>
+                        <td th:text="${#numbers.formatDecimal(room.pricePerYear, 0, 'POINT', 0, 'COMMA')} + ' VNĐ'">12,000,000 VNĐ</td>
+
+                        <td class="room-status-cell">
+                            <span th:if="${room.status == T(com.group7.DMS.entity.Rooms.RoomStatus).MAINTENANCE}" class="badge badge-repair">Bảo trì</span>
+                            <span th:if="${room.status != T(com.group7.DMS.entity.Rooms.RoomStatus).MAINTENANCE}"
+                            	class="badge"
+                            	th:classappend="${room.currentOccupants >= room.slot} ? ' badge-full' : ' badge-available'"
+                            	th:text="${room.currentOccupants >= room.slot} ? 'Đầy' : 'Còn chỗ'"> Còn chỗ </span>
                         </td>
-                        
-                        <td>
+
+                        <td class="room-action-cell">
                             <a th:href="@{/admin/rooms/details/{id}(id=${room.id})}" class="btn btn-info btn-sm">
                                 <i class="fas fa-eye"></i> Xem
                             </a>
