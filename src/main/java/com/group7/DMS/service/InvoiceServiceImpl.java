@@ -289,7 +289,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 		long countOverdue = 0;
 
 		for (Invoices invoice : allInvoices) {
-			BigDecimal amount = invoice.getLivingTotalAmount();
+			// Sử dụng getTotalAmount() thay vì getLivingTotalAmount() để tính đầy đủ
+			BigDecimal amount = invoice.getTotalAmount();
 
 			if (invoice.getStatus() == InvoiceStatus.PAID) {
 				totalPaid = totalPaid.add(amount);
