@@ -81,17 +81,20 @@
                         <!-- Room & Student Info -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h6 class="text-primary">Thông tin phòng</h6>
-                                <p class="mb-1">
+                                <h6 class="text-primary mb-2">Thông tin phòng</h6>
+                                <div class="d-flex gap-4 flex-wrap">
+                                <div>
                                     <strong>Tòa nhà:</strong> <span th:text="${invoice.room.building.name}">Tòa A</span>
-                                </p>
-                                <p class="mb-1">
+                                </div>
+                                <div>
                                     <strong>Phòng:</strong> <span th:text="${invoice.room.roomNumber}">101</span>
-                                </p>
-                                <p class="mb-0">
+                                </div>
+                                <div>
                                     <strong>Tầng:</strong> <span th:text="${invoice.room.floor}">1</span>
-                                </p>
+                                </div>
+                                </div>
                             </div>
+                            <!--
                             <div class="col-md-6" th:if="${invoice.contract != null}">
                                 <h6 class="text-primary">Thông tin sinh viên</h6>
                                 <p class="mb-1">
@@ -108,6 +111,7 @@
                                 <h6 class="text-muted">Chưa có sinh viên</h6>
                                 <p class="text-muted fst-italic">Phòng này chưa có hợp đồng nào</p>
                             </div>
+                            -->
                         </div>
 
                         <hr>
@@ -147,16 +151,9 @@
                         <div class="d-flex justify-content-between fs-4">
                             <strong class="text-primary">TỔNG CỘNG:</strong>
                             <strong class="text-primary"
-                                    th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    th:text="${#numbers.formatDecimal(invoice.livingTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                                 785,000 VNĐ
                             </strong>
-                        </div>
-
-                        <div class="alert alert-info mt-3 mb-0">
-                            <small>
-                                <strong>Lưu ý:</strong> Hóa đơn này chỉ bao gồm phí sinh hoạt.
-                                Tiền phòng đóng riêng theo năm.
-                            </small>
                         </div>
                     </div>
                 </div>
@@ -228,7 +225,7 @@
                     </div>
                 </div>
 
-                <!-- Contract Info (if exists) -->
+                <!-- Contract Info (if exists)
                 <div class="card" th:if="${invoice.contract != null}">
                     <div class="card-body">
                         <h6 class="card-title">Hợp đồng</h6>
@@ -252,6 +249,7 @@
                         </p>
                     </div>
                 </div>
+                -->
             </div>
         </div>
     </div>
