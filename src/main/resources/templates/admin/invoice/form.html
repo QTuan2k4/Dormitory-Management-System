@@ -104,7 +104,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Năm (*)</label>
                                     <select class="form-select" name="year" id="yearSelect" required>
-                                        <option th:each="y : ${#numbers.sequence(2024, 2026)}"
+                                        <option th:each="y : ${#numbers.sequence(2024, 2030)}"
                                                 th:value="${y}"
                                                 th:text="${y}"
                                                 th:selected="${y == currentYear}"></option>
