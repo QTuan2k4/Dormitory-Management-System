@@ -10,6 +10,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Iterator;
 
 @Service
 public class VNPayService {
@@ -40,8 +41,10 @@ public class VNPayService {
         vnp_Params.put("vnp_ReturnUrl", paymentConfig.getVnpReturnUrl());
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        // Sử dụng timezone Việt Nam
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
@@ -80,19 +83,29 @@ public class VNPayService {
         String vnp_SecureHash = params.get("vnp_SecureHash");
         if (vnp_SecureHash == null) return false;
 
-        params.remove("vnp_SecureHash");
-        params.remove("vnp_SecureHashType");
+        // Tạo bản copy để không ảnh hưởng params gốc
+        Map<String, String> fields = new HashMap<>(params);
+        fields.remove("vnp_SecureHash");
+        fields.remove("vnp_SecureHashType");
 
-        List<String> fieldNames = new ArrayList<>(params.keySet());
+        List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
         
-        for (String fieldName : fieldNames) {
-            String fieldValue = params.get(fieldName);
+        Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
+            String fieldValue = fields.get(fieldName);
             if (fieldValue != null && !fieldValue.isEmpty()) {
-                hashData.append(fieldName).append('=')
-                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
-                if (fieldNames.indexOf(fieldName) < fieldNames.size() - 1) {
+                // Encode lại giá trị vì Spring đã decode khi nhận request
+                try {
+                    hashData.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    hashData.append('=');
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                } catch (Exception e) {
+                    hashData.append(fieldName).append('=').append(fieldValue);
+                }
+                if (itr.hasNext()) {
                     hashData.append('&');
                 }
             }

@@ -119,20 +119,20 @@
                                     th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">15/10/25</td>
                                 
                                 <td>
-                                    <span th:switch="${invoice.status}">
-                                        <span th:case="0" class="badge bg-success">ĐÃ THANH TOÁN</span>
-                                        <span th:case="2" class="badge bg-danger">QUÁ HẠN</span>
+                                    <span th:switch="${invoice.status.name()}">
+                                        <span th:case="'PAID'" class="badge bg-success">ĐÃ THANH TOÁN</span>
+                                        <span th:case="'OVERDUE'" class="badge bg-danger">QUÁ HẠN</span>
                                         <span th:case="*" class="badge bg-warning">CHƯA THANH TOÁN</span>
                                     </span>
                                 </td>
 
                                 <td>
-                                    <div th:if="${invoice.status == 0}">
+                                    <div th:if="${invoice.status.name() == 'PAID'}">
                                         <button class="btn btn-sm btn-success" disabled>
                                             <i class="fas fa-check"></i> Đã đóng
                                         </button>
                                     </div>
-                                    <div th:unless="${invoice.status == 0}">
+                                    <div th:unless="${invoice.status.name() == 'PAID'}">
                                         <a th:href="@{/student/invoices/{id}/payment(id=${invoice.id})}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-credit-card me-1"></i>Thanh toán
                                         </a>
