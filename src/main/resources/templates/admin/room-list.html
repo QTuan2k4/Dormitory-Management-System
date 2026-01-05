@@ -123,6 +123,7 @@
                                         <th>Giá (năm)</th>
                                         <th>Trạng Thái</th>
                                         <th>Thao tác</th>
+                                        <th>Xem chi tiết</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -164,6 +165,11 @@
 											    return confirm('Bạn có chắc chắn muốn xóa phòng này không?');
 											  }
 											</script>
+                                        </td>
+                                        <td>
+                                        	<a th:href="@{/admin/rooms/{id}(id=${room.id})}" class="btn btn-sm btn-info me-2" title="Xem Chi tiết">
+                                               <i class="fas fa-eye"></i> 
+                                            </a>
                                         </td>
                                     </tr>
                                     <tr th:if="${roomList.empty}">

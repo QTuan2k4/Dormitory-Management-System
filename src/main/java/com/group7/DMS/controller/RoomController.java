@@ -1,9 +1,12 @@
 package com.group7.DMS.controller;
 
 import com.group7.DMS.entity.Buildings;
+import com.group7.DMS.entity.Contracts;
 import com.group7.DMS.entity.Rooms;
 import com.group7.DMS.service.RoomService;
 import com.group7.DMS.service.BuildingService;
+import com.group7.DMS.service.ContractService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Controller
@@ -23,11 +27,13 @@ public class RoomController {
 
     private final RoomService roomService;
     private final BuildingService buildingService; 
+    private final ContractService contractService;
 
     @Autowired
-    public RoomController(RoomService roomService, BuildingService buildingService) {
+    public RoomController(RoomService roomService, BuildingService buildingService, ContractService contractService) {
         this.roomService = roomService;
         this.buildingService = buildingService;
+        this.contractService = contractService;
     }
 
     // --- 1. GET: Hiển thị Danh sách Phòng với Tìm kiếm, Lọc và Phân trang ---
@@ -132,5 +138,35 @@ public class RoomController {
             ra.addFlashAttribute("errorMessage", "Không thể xóa Phòng ID " + id.toString() + ". Có thể phòng này đang có hợp đồng liên quan.");
         }
         return "redirect:/admin/rooms";
+    }
+    
+ // --- 6. GET: Chi tiết phòng + danh sách sinh viên đang ở (theo hợp đồng ACTIVE) ---
+    @GetMapping("/{id}")
+    public String viewRoomDetail(@PathVariable("id") Integer id, Model model, RedirectAttributes ra) {
+
+        Optional<Rooms> roomOpt = roomService.findRoomById(id);
+        if (roomOpt.isEmpty()) {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy phòng ID: " + id);
+            return "redirect:/admin/rooms";
+        }
+
+        Rooms room = roomOpt.get();
+
+        // Lấy hợp đồng ACTIVE theo phòng
+        List<Contracts> activeContracts = contractService.findActiveContractsByRoom(id);
+
+        // Lấy danh sách sinh viên từ hợp đồng
+        List<com.group7.DMS.entity.Students> studentsInRoom = activeContracts.stream()
+                .map(Contracts::getStudent)
+                .filter(Objects::nonNull)
+                .toList();
+
+        model.addAttribute("room", room);
+        model.addAttribute("activeContracts", activeContracts);
+        model.addAttribute("studentsInRoom", studentsInRoom);
+        model.addAttribute("activeCount", activeContracts.size());
+        model.addAttribute("pageTitle", "Chi tiết phòng " + room.getRoomNumber());
+
+        return "admin/room-detail";
     }
 }

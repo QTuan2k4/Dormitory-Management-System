@@ -299,7 +299,7 @@ public class AdminContractController {
     }
 
     /**
-     * (Tuỳ chọn) Xoá hợp đồng
+     * Xoá hợp đồng
      * POST /admin/contracts/delete/{id}
      */
     @PostMapping("/delete/{id}")
