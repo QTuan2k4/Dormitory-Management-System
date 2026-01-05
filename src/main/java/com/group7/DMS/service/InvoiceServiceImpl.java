@@ -235,7 +235,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 		}
 
 		if (invoice.getStatus() == InvoiceStatus.OVERDUE) {
-			throw new RuntimeException("Không thể xóa hóa đơn đã quá hạn");
+			throw new RuntimeException("Không thể xóa hóa đơn quá hạn");
+		}
+
+		// Kiểm tra thêm: nếu status là UNPAID nhưng đã quá hạn (dueDate < today)
+		// thì cũng không cho xóa (trường hợp scheduler chưa cập nhật status)
+		LocalDate today = LocalDate.now();
+		if (invoice.getStatus() == InvoiceStatus.UNPAID && invoice.getDueDate().isBefore(today)) {
+			throw new RuntimeException("Không thể xóa hóa đơn quá hạn");
 		}
 
 		invoiceRepository.delete(invoice);
@@ -294,11 +301,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 			if (invoice.getStatus() == InvoiceStatus.PAID) {
 				totalPaid = totalPaid.add(amount);
 				countPaid++;
+			} else if (invoice.getStatus() == InvoiceStatus.OVERDUE) {
+				// Đã được đánh dấu quá hạn
+				totalOverdue = totalOverdue.add(amount);
+				countOverdue++;
 			} else {
-				// Chưa thanh toán
-				// Kiểm tra xem đã quá hạn chưa
+				// Status = UNPAID, kiểm tra thêm dueDate để xác định thực sự quá hạn chưa
 				if (invoice.getDueDate().isBefore(today)) {
-					// Quá hạn
+					// Quá hạn (scheduler chưa cập nhật status)
 					totalOverdue = totalOverdue.add(amount);
 					countOverdue++;
 				} else {

@@ -39,7 +39,7 @@ public interface BuildingRepository extends JpaRepository<Buildings, Integer> {
          Pageable pageable);
     
     // Lấy danh sách tòa nhà đang hoạt động (không bao gồm "Bảo trì")
-    @Query("SELECT b FROM Buildings b WHERE b.status = 'Hoạt động'")
+    @Query("SELECT b FROM Buildings b WHERE b.status = 'ACTIVE'")
     List<Buildings> findActiveBuildings();
     
 }
