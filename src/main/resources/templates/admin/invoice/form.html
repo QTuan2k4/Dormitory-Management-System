@@ -87,30 +87,30 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
 
-                        <form method="post" th:action="@{/admin/invoices/create}" id="invoiceForm">
+                        <form method="post" th:action="@{/admin/invoices/create}" id="invoiceForm"
+                        	  th:data-electricity-price="${electricityPrice}"
+      						  th:data-water-price="${waterPrice}"
+      						  th:data-internet-fee="${internetFee}">
                             <input type="hidden" name="roomId" th:value="${room.id}">
 
-                            <!-- Month and Year -->
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label class="form-label">Tháng (*)</label>
-                                    <select class="form-select" name="month" id="monthSelect" required>
-                                        <option th:each="m : ${#numbers.sequence(1, 12)}"
-                                                th:value="${m}"
-                                                th:text="'Tháng ' + ${m}"
-                                                th:selected="${m == currentMonth}"></option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Năm (*)</label>
-                                    <select class="form-select" name="year" id="yearSelect" required>
-                                        <option th:each="y : ${#numbers.sequence(2024, 2030)}"
-                                                th:value="${y}"
-                                                th:text="${y}"
-                                                th:selected="${y == currentYear}"></option>
-                                    </select>
-                                </div>
-                            </div>
+                            <!-- Kỳ hóa đơn (tự động theo hiện tại) -->
+						<div class="row mb-4">
+    						<div class="col-md-6">
+        						<label class="form-label">Kỳ hóa đơn (Tháng/Năm)</label>
+        						<input type="text" class="form-control"
+               						th:value="${currentMonth} + '/' + ${currentYear}" readonly>
+    						</div>
+
+    						<div class="col-md-6">
+        					<label class="form-label">Ngày xuất</label>
+        					<input type="text" class="form-control"
+               					th:value="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}" readonly>
+    						</div>
+						</div>
+
+						<!-- vẫn gửi month/year lên server để lưu đúng kỳ -->
+						<input type="hidden" name="month" th:value="${currentMonth}">
+						<input type="hidden" name="year" th:value="${currentYear}">
 
                             <hr>
 
@@ -119,10 +119,9 @@
                             <!-- Electricity Usage -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Số Điện (kWh) (*)</label>
+                                    <label class="form-label">Số Điện (kWh)</label>
                                     <input type="number" class="form-control" name="electricityUsage"
                                            id="electricityUsage" min="0" value="0" required>
-                                    <small class="form-text text-muted">Đơn vị: kWh - Giá: 3,500 VNĐ/kWh</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tiền Điện</label>
@@ -136,10 +135,9 @@
                             <!-- Water Usage -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Số Nước (m³) (*)</label>
+                                    <label class="form-label">Số Nước (m³)</label>
                                     <input type="number" class="form-control" name="waterUsage"
                                            id="waterUsage" min="0" value="0" required>
-                                    <small class="form-text text-muted">Đơn vị: m³ - Giá: 20,000 VNĐ/m³</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tiền Nước</label>
@@ -154,15 +152,7 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Phí Internet</label>
-                                    <input type="text" class="form-control" value="100,000 VNĐ" readonly>
-                                    <small class="form-text text-muted">Phí cố định hàng tháng</small>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Phí Internet</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" value="100,000" readonly>
-                                        <span class="input-group-text">VNĐ</span>
-                                    </div>
+                                    <input type="text" class="form-control" id="internetFee" readonly>
                                 </div>
                             </div>
 
@@ -193,34 +183,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Tính toán tự động khi nhập số điện/nước
-        const ELECTRICITY_PRICE = 3500;
-        const WATER_PRICE = 20000;
-        const INTERNET_FEE = 100000;
+    <script th:src="@{/js/invoice-living.js}"></script>
 
-        function formatNumber(num) {
-            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-
-        function calculateTotal() {
-            const electricity = parseInt(document.getElementById('electricityUsage').value) || 0;
-            const water = parseInt(document.getElementById('waterUsage').value) || 0;
-
-            const electricityFee = electricity * ELECTRICITY_PRICE;
-            const waterFee = water * WATER_PRICE;
-            const total = electricityFee + waterFee + INTERNET_FEE;
-
-            document.getElementById('electricityFee').value = formatNumber(electricityFee);
-            document.getElementById('waterFee').value = formatNumber(waterFee);
-            document.getElementById('totalAmount').textContent = formatNumber(total) + ' VNĐ';
-        }
-
-        document.getElementById('electricityUsage').addEventListener('input', calculateTotal);
-        document.getElementById('waterUsage').addEventListener('input', calculateTotal);
-
-        // Tính toán ban đầu
-        calculateTotal();
-    </script>
 </body>
 </html>

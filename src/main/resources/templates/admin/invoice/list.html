@@ -64,8 +64,8 @@
                             <div>
                                 <h6 class="text-muted mb-2">Đã Thu</h6>
                                 <h4 class="mb-0 text-success"
-                                    th:text="${#numbers.formatDecimal(summary.totalPaidAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
-                                <small class="text-muted" th:text="${summary.countPaid} + ' hóa đơn'">0 hóa đơn</small>
+    								th:text="${#numbers.formatDecimal(summary['totalPaidAmount'], 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
+								<small class="text-muted" th:text="${summary['countPaid']} + ' hóa đơn'">0 hóa đơn</small>
                             </div>
                             <i class="fas fa-check-circle fa-3x text-success opacity-25"></i>
                         </div>
@@ -79,8 +79,8 @@
                             <div>
                                 <h6 class="text-muted mb-2">Chưa Thu</h6>
                                 <h4 class="mb-0 text-warning"
-                                    th:text="${#numbers.formatDecimal(summary.totalUnpaidAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
-                                <small class="text-muted" th:text="${summary.countUnpaid} + ' hóa đơn'">0 hóa đơn</small>
+                                    th:text="${#numbers.formatDecimal(summary['totalUnpaidAmount'], 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
+                                <small class="text-muted" th:text="${summary['countUnpaid']} + ' hóa đơn'">0 hóa đơn</small>
                             </div>
                             <i class="fas fa-clock fa-3x text-warning opacity-25"></i>
                         </div>
@@ -94,8 +94,8 @@
                             <div>
                                 <h6 class="text-muted mb-2">Quá Hạn</h6>
                                 <h4 class="mb-0 text-danger"
-                                    th:text="${#numbers.formatDecimal(summary.totalOverdueAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
-                                <small class="text-muted" th:text="${summary.countOverdue} + ' hóa đơn'">0 hóa đơn</small>
+                                    th:text="${#numbers.formatDecimal(summary['totalOverdueAmount'], 0, 'COMMA', 0, 'POINT')} + ' đ'">0đ</h4>
+                                <small class="text-muted" th:text="${summary['countOverdue']} + ' hóa đơn'">0 hóa đơn</small>
                             </div>
                             <i class="fas fa-exclamation-triangle fa-3x text-danger opacity-25"></i>
                         </div>
@@ -108,7 +108,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="text-muted mb-2">Tổng Số HĐ</h6>
-                                <h4 class="mb-0 text-info" th:text="${summary.totalInvoices}">0</h4>
+                                <h4 class="mb-0 text-info" th:text="${summary['totalInvoices']}">0</h4>
                                 <small class="text-muted">hóa đơn</small>
                             </div>
                             <i class="fas fa-file-invoice fa-3x text-info opacity-25"></i>
@@ -128,7 +128,7 @@
                             <i class="fas fa-plus me-1"></i>Tạo Hóa Đơn
                         </a>
                         <a th:href="@{/admin/invoices/bulk-create}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-layer-group me-1"></i>Tạo Hàng Loạt
+                        	<i class="fas fa-layer-group me-1"></i>Tạo Hàng Loạt
                         </a>
                     </div>
                 </div>
@@ -150,8 +150,8 @@
                         </div>
                         <div class="col-md-2">
                             <label class="form-label small">Số phòng</label>
-                            <input type="text" name="roomNumber" class="form-select form-select-sm"
-                                   th:value="${roomNumber}" placeholder="VD: 101">
+                            <input type="text" name="roomNumber" class="form-control form-control-sm"
+                                   th:value="${roomNumber}" >
                         </div>
                         <div class="col-md-2">
                             <label class="form-label small">Trạng thái</label>
@@ -183,9 +183,7 @@
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-secondary btn-sm w-100">
-                                <i class="fas fa-filter me-1"></i>Lọc
-                            </button>
+                            <button type="submit" class="btn btn-secondary btn-sm w-100">Lọc</button>
                         </div>
                     </div>
                 </form>
@@ -197,7 +195,6 @@
                             <tr>
                                 <th style="width: 10%">Mã HĐ</th>
                                 <th style="width: 15%">Phòng</th>
-                                <th style="width: 15%">Sinh Viên</th>
                                 <th style="width: 10%">Tháng/Năm</th>
                                 <th style="width: 10%">Ngày Xuất</th>
                                 <th style="width: 10%">Hạn TT</th>
@@ -214,10 +211,12 @@
                                 <td>
                                     <strong th:text="${invoice.room.building.name + ' - ' + invoice.room.roomNumber}">Tòa A - 101</strong>
                                 </td>
+                                <!--
                                 <td>
                                     <span th:if="${invoice.contract != null}" th:text="${invoice.contract.student.fullName}">Nguyễn Văn A</span>
                                     <span th:if="${invoice.contract == null}" class="text-muted fst-italic">Chưa có HĐ</span>
                                 </td>
+                                -->
                                 <td>
                                     <span th:text="${#temporals.format(invoice.issueDate, 'MM/yyyy')}">12/2024</span>
                                 </td>
@@ -226,12 +225,12 @@
                                 </td>
                                 <td>
                                     <small th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}"
-                                           th:classappend="${invoice.status.name() == 'OVERDUE'} ? 'text-danger fw-bold' : ''">
+                                           th:classappend="${invoice.dueDate.isBefore(T(java.time.LocalDate).now()) && invoice.status.name() != 'PAID'} ? 'text-danger fw-bold' : ''">
                                         31/12/2024
                                     </small>
                                 </td>
                                 <td class="text-end">
-                                    <strong th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    <strong th:text="${#numbers.formatDecimal(invoice.livingTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
                                         785,000đ
                                     </strong>
                                 </td>
@@ -239,10 +238,10 @@
                                     <span th:if="${invoice.status.name() == 'PAID'}" class="badge bg-success">
                                         <i class="fas fa-check-circle me-1"></i>Đã TT
                                     </span>
-                                    <span th:if="${invoice.status.name() == 'UNPAID'}" class="badge bg-warning text-dark">
+                                    <span th:if="${invoice.status.name() != 'PAID' && !invoice.dueDate.isBefore(T(java.time.LocalDate).now())}" class="badge bg-warning text-dark">
                                         <i class="fas fa-clock me-1"></i>Chưa TT
                                     </span>
-                                    <span th:if="${invoice.status.name() == 'OVERDUE'}" class="badge bg-danger">
+                                    <span th:if="${invoice.status.name() != 'PAID' && invoice.dueDate.isBefore(T(java.time.LocalDate).now())}" class="badge bg-danger">
                                         <i class="fas fa-exclamation-triangle me-1"></i>Quá hạn
                                     </span>
                                 </td>
@@ -264,7 +263,6 @@
                                 <td colspan="9" class="text-center text-muted py-5">
                                     <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                     <h5>Không có hóa đơn nào</h5>
-                                    <p>Thử thay đổi bộ lọc hoặc tạo hóa đơn mới</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -307,4 +305,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-xóa hết các thẻ <i> để loại bỏ icon

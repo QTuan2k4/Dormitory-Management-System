@@ -10,10 +10,10 @@ import java.math.BigDecimal;
 public class InvoicePricingConfig {
 
 	// Giá điện (VNĐ/kWh)
-	private BigDecimal electricityPricePerKwh = new BigDecimal("3500");
+	private BigDecimal electricityPricePerKwh = new BigDecimal("4000");
 
 	// Giá nước (VNĐ/m³)
-	private BigDecimal waterPricePerM3 = new BigDecimal("20000");
+	private BigDecimal waterPricePerM3 = new BigDecimal("8000");
 
 	// Giá Internet (VNĐ/tháng) - cố định
 	private BigDecimal internetFeePerMonth = new BigDecimal("100000");
