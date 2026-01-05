@@ -35,8 +35,9 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Integer> {
 	@Query("SELECT i FROM Invoices i " + "JOIN i.room r " + "JOIN r.building b "
 			+ "WHERE (:buildingId IS NULL OR b.id = :buildingId) "
 			+ "AND (:roomNumber IS NULL OR r.roomNumber LIKE %:roomNumber%) "
-			+ "AND (:status IS NULL OR i.status = :status) " + "AND (:month IS NULL OR MONTH(i.issueDate) = :month) "
-			+ "AND (:year IS NULL OR YEAR(i.issueDate) = :year)")
+			+ "AND (:status IS NULL OR i.status = :status) " 
+			+ "AND (:month IS NULL OR i.month = :month) "
+			+ "AND (:year IS NULL OR i.year = :year)")
 	Page<Invoices> searchInvoices(@Param("buildingId") Integer buildingId, @Param("roomNumber") String roomNumber,
 			@Param("status") InvoiceStatus status, @Param("month") Integer month, @Param("year") Integer year,
 			Pageable pageable);
