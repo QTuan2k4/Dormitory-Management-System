@@ -77,7 +77,7 @@ public class InvoiceController {
 	@GetMapping("/select-room")
 	public String selectRoomPage(@RequestParam(required = false) Integer buildingId, Model model) {
 
-		// Chỉ lấy tòa nhà đang hoạt động (không bao gồm "Bảo trì")
+		// Chỉ lấy tòa nhà không bảo trì
 		List<Buildings> buildings = buildingRepository.findActiveBuildings();
 		model.addAttribute("buildings", buildings);
 
@@ -135,7 +135,7 @@ public class InvoiceController {
 	 */
 	@GetMapping("/bulk-create")
 	public String showBulkCreateForm(Model model) {
-		// Chỉ lấy tòa nhà đang hoạt động (không bao gồm "Bảo trì")
+		// Chỉ lấy tòa nhà không bảo trì
 		List<Buildings> buildings = buildingRepository.findActiveBuildings();
 		model.addAttribute("buildings", buildings);
 

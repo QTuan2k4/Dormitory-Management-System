@@ -13,33 +13,30 @@ import java.util.Optional;
 
 @Repository
 public interface BuildingRepository extends JpaRepository<Buildings, Integer> {
-    List<Buildings> findByNameContainingIgnoreCase(String name);
-    
-    boolean existsByNameIgnoreCase(String name);
-    boolean existsByNameIgnoreCaseAndIdNot(String name, int id);
-    
+	List<Buildings> findByNameContainingIgnoreCase(String name);
+
+	boolean existsByNameIgnoreCase(String name);
+
+	boolean existsByNameIgnoreCaseAndIdNot(String name, int id);
+
 //    @Query("SELECT b FROM Buildings b WHERE b.name LIKE %:name%")
-    List<Buildings> searchByName(@Param("name") String name);
-    
-    @Query("SELECT b FROM Buildings b LEFT JOIN FETCH b.rooms r WHERE b.id = :id")
-    Optional<Buildings> findByIdWithRooms(@Param("id") int id);
-    
-    @Query("SELECT b FROM Buildings b " +
-            "WHERE (:name IS NULL OR :name = '' OR b.name LIKE %:name%) " +
-            "AND (:status IS NULL OR :status = '' OR b.status = :status)")
-     List<Buildings> searchAndFilter(@Param("name") String name, @Param("status") String status);
-    
-    Page<Buildings> findAll(Pageable pageable);
-    @Query("SELECT b FROM Buildings b WHERE "
-            + "(:name IS NULL OR b.name LIKE %:name%) AND "
-            + "(:status IS NULL OR b.status = :status)")
-     Page<Buildings> searchAndFilter(
-         @Param("name") String name,
-         @Param("status") String status,
-         Pageable pageable);
-    
-    // Lấy danh sách tòa nhà đang hoạt động (không bao gồm "Bảo trì")
-    @Query("SELECT b FROM Buildings b WHERE b.status = 'Hoạt động'")
-    List<Buildings> findActiveBuildings();
-    
+	List<Buildings> searchByName(@Param("name") String name);
+
+	@Query("SELECT b FROM Buildings b LEFT JOIN FETCH b.rooms r WHERE b.id = :id")
+	Optional<Buildings> findByIdWithRooms(@Param("id") int id);
+
+	@Query("SELECT b FROM Buildings b " + "WHERE (:name IS NULL OR :name = '' OR b.name LIKE %:name%) "
+			+ "AND (:status IS NULL OR :status = '' OR b.status = :status)")
+	List<Buildings> searchAndFilter(@Param("name") String name, @Param("status") String status);
+
+	Page<Buildings> findAll(Pageable pageable);
+
+	@Query("SELECT b FROM Buildings b WHERE " + "(:name IS NULL OR b.name LIKE %:name%) AND "
+			+ "(:status IS NULL OR b.status = :status)")
+	Page<Buildings> searchAndFilter(@Param("name") String name, @Param("status") String status, Pageable pageable);
+
+	// Lấy danh sách tòa nhà không bảo trì (cho form tạo hóa đơn)
+	@Query("SELECT b FROM Buildings b WHERE b.status != 'Bảo trì'")
+	List<Buildings> findActiveBuildings();
+
 }
