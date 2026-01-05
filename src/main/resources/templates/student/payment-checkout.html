@@ -64,35 +64,23 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <!-- VNPay -->
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="payment-method-card card h-100 text-center p-3" onclick="selectPayment('vnpay')">
                                     <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" 
                                          alt="VNPay" class="payment-logo mx-auto mb-2">
                                     <h6 class="mb-1">VNPay</h6>
-                                    <small class="text-muted">Quét mã QR / Thẻ ATM</small>
+                                    <small class="text-muted">Quét mã QR / Thẻ ATM / Thẻ quốc tế</small>
                                     <input type="radio" name="paymentMethod" value="vnpay" class="d-none">
                                 </div>
                             </div>
 
-                            <!-- MoMo -->
-                            <div class="col-md-4">
-                                <div class="payment-method-card card h-100 text-center p-3" onclick="selectPayment('momo')">
-                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" 
-                                         alt="MoMo" class="payment-logo mx-auto mb-2">
-                                    <h6 class="mb-1">MoMo</h6>
-                                    <small class="text-muted">Ví điện tử MoMo</small>
-                                    <input type="radio" name="paymentMethod" value="momo" class="d-none">
-                                </div>
-                            </div>
-
-                            <!-- ZaloPay -->
-                            <div class="col-md-4">
-                                <div class="payment-method-card card h-100 text-center p-3" onclick="selectPayment('zalopay')">
-                                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay.png" 
-                                         alt="ZaloPay" class="payment-logo mx-auto mb-2">
-                                    <h6 class="mb-1">ZaloPay</h6>
-                                    <small class="text-muted">Ví điện tử ZaloPay</small>
-                                    <input type="radio" name="paymentMethod" value="zalopay" class="d-none">
+                            <!-- Tiền mặt -->
+                            <div class="col-md-6">
+                                <div class="payment-method-card card h-100 text-center p-3" onclick="selectPayment('cash')">
+                                    <i class="fas fa-money-bill-wave text-success mb-2" style="font-size: 50px;"></i>
+                                    <h6 class="mb-1">Tiền mặt</h6>
+                                    <small class="text-muted">Thanh toán trực tiếp tại văn phòng</small>
+                                    <input type="radio" name="paymentMethod" value="cash" class="d-none">
                                 </div>
                             </div>
                         </div>
@@ -101,10 +89,7 @@
                         <form id="vnpayForm" th:action="@{/payment/vnpay/create}" method="post" class="d-none">
                             <input type="hidden" name="invoiceId" th:value="${invoice.id}">
                         </form>
-                        <form id="momoForm" th:action="@{/payment/momo/create}" method="post" class="d-none">
-                            <input type="hidden" name="invoiceId" th:value="${invoice.id}">
-                        </form>
-                        <form id="zalopayForm" th:action="@{/payment/zalopay/create}" method="post" class="d-none">
+                        <form id="cashForm" th:action="@{/payment/cash/create}" method="post" class="d-none">
                             <input type="hidden" name="invoiceId" th:value="${invoice.id}">
                         </form>
 

@@ -127,12 +127,12 @@
                                 </td>
 
                                 <td>
-                                    <div th:if="${invoice.status == 0}">
+                                    <div th:if="${invoice.status.name() == 'PAID'}">
                                         <button class="btn btn-sm btn-success" disabled>
                                             <i class="fas fa-check"></i> Đã đóng
                                         </button>
                                     </div>
-                                    <div th:unless="${invoice.status == 0}">
+                                    <div th:unless="${invoice.status.name() == 'PAID'}">
                                         <a th:href="@{/student/invoices/{id}/payment(id=${invoice.id})}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-credit-card me-1"></i>Thanh toán
                                         </a>

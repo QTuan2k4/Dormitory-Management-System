@@ -38,4 +38,8 @@ public interface BuildingRepository extends JpaRepository<Buildings, Integer> {
          @Param("status") String status,
          Pageable pageable);
     
+    // Lấy danh sách tòa nhà không bảo trì (cho form tạo hóa đơn)
+    @Query("SELECT b FROM Buildings b WHERE b.status != 'Bảo trì'")
+    List<Buildings> findActiveBuildings();
+    
 }
