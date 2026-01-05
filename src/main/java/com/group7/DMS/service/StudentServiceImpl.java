@@ -35,7 +35,7 @@ public class StudentServiceImpl implements StudentService {
 
 	@Autowired
 	private InvoiceService invoiceService;
-	
+
 	@Autowired
 	private MailService mailService;
 
@@ -107,46 +107,41 @@ public class StudentServiceImpl implements StudentService {
 		// 9. Duyệt hồ sơ sinh viên
 		student.setRegistrationStatus(Students.RegistrationStatus.APPROVED);
 		studentRepository.save(student);
-		
-        // 10. Gửi mial thông báo
-        try {
-            String to = null;
 
-            if (student.getUser() != null) {
-                to = student.getUser().getEmail();
-            }
+		// 10. Gửi mail thông báo
+		try {
+			String to = null;
 
-            if (to != null && !to.isBlank()) {
-                String subject = "Thông báo duyệt hồ sơ & phân phòng KTX";
+			if (student.getUser() != null) {
+				to = student.getUser().getEmail();
+			}
 
-                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+			if (to != null && !to.isBlank()) {
+				String subject = "Thông báo duyệt hồ sơ & phân phòng KTX";
 
-                String buildingName = (room.getBuilding() != null && room.getBuilding().getName() != null)
-                        ? room.getBuilding().getName()
-                        : "N/A";
+				DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-                String body =
-                        "Xin chào " + (student.getFullName() != null ? student.getFullName() : "bạn") + ",\n\n" +
-                        "Hồ sơ đăng ký ký túc xá của bạn đã được DUYỆT.\n" +
-                        "Bạn đã được phân phòng như sau:\n" +
-                        "- Tòa: " + buildingName + "\n" +
-                        "- Phòng: " + room.getRoomNumber() + "\n" +
-                        "- Tầng: " + room.getFloor() + "\n" +
-                        "- Thời hạn hợp đồng: " + contract.getStartDate().format(fmt) +
-                        " đến " + contract.getEndDate().format(fmt) + "\n" +
-                        "- Phí (theo tầng): " + manualFee.toPlainString() + " VNĐ\n\n" +
-                        "Vui lòng đăng nhập hệ thống để xem chi tiết hợp đồng.\n\n" +
-                        "Trân trọng.";
+				String buildingName = (room.getBuilding() != null && room.getBuilding().getName() != null)
+						? room.getBuilding().getName()
+						: "N/A";
 
-                mailService.send(to, subject, body);
-            } else {
-                // không có email thì bỏ qua
-                System.out.println("[MAIL] Student has no email, skip sending. studentId=" + studentId);
-            }
-        } catch (Exception ex) {
-            // IMPORTANT: không throw để tránh rollback duyệt hồ sơ vì lỗi mail
-            ex.printStackTrace();
-        }
+				String body = "Xin chào " + (student.getFullName() != null ? student.getFullName() : "bạn") + ",\n\n"
+						+ "Hồ sơ đăng ký ký túc xá của bạn đã được DUYỆT.\n" + "Bạn đã được phân phòng như sau:\n"
+						+ "- Tòa: " + buildingName + "\n" + "- Phòng: " + room.getRoomNumber() + "\n" + "- Tầng: "
+						+ room.getFloor() + "\n" + "- Thời hạn hợp đồng: " + contract.getStartDate().format(fmt)
+						+ " đến " + contract.getEndDate().format(fmt) + "\n" + "- Phí (theo tầng): "
+						+ manualFee.toPlainString() + " VNĐ\n\n"
+						+ "Vui lòng đăng nhập hệ thống để xem chi tiết hợp đồng.\n\n" + "Trân trọng.";
+
+				mailService.send(to, subject, body);
+			} else {
+				// không có email thì bỏ qua
+				System.out.println("[MAIL] Student has no email, skip sending. studentId=" + studentId);
+			}
+		} catch (Exception ex) {
+			// IMPORTANT: không throw để tránh rollback duyệt hồ sơ vì lỗi mail
+			ex.printStackTrace();
+		}
 
 	}
 
