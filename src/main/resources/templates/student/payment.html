@@ -7,15 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
+        body { background-color: #f8f9fa; }
         .sidebar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 250px;
             z-index: 1000;
         }
@@ -30,54 +27,80 @@
             background-color: rgba(255, 255, 255, 0.1);
             transform: translateX(5px);
         }
-        .sidebar .nav-link.active {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 20px;
-        }
-        .header {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
+        .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.2); }
+        .main-content { margin-left: 250px; padding: 20px; }
         .card {
             border: none;
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
-        .btn-logout {
-            background: #dc3545;
-            border: none;
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 8px 15px;
-            border-radius: 8px;
-        }
-        .btn-logout:hover {
-            background: #c82333;
-            color: white;
-        }
-        .qr-code {
-            width: 200px;
-            height: 200px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
+            border-radius: 15px 15px 0 0 !important;
         }
         .cost-item {
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
-        .cost-item:last-child {
-            border-bottom: none;
+        .cost-item:last-child { border-bottom: none; }
+        .payment-method-card {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
         }
+        .payment-method-card:hover { border-color: #667eea; }
+        .payment-method-card.selected {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        .payment-method-card input[type="radio"] { display: none; }
+        .qr-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        .qr-code-img {
+            max-width: 250px;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+        }
+        .bank-info {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .total-amount {
+            font-size: 1.8rem;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .step {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+        .step.active { background: #667eea; color: white; }
+        .step.completed { background: #28a745; color: white; }
     </style>
 </head>
 <body>
@@ -86,140 +109,258 @@
 
     <!-- Main Content -->
     <div class="main-content">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-file-invoice me-2"></i>Phí sinh hoạt | Mã HD: <span th:text="${invoice.invoiceNumber}">[Mã HD]</span> | Phòng: <span th:text="${invoice.contract.room.roomNumber}">[P102]</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="mb-3">Chi tiết Hóa đơn</h6>
-                            <div class="mb-2">
-                                <strong>NGÀY PHÁT HÀNH:</strong> <span th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}"></span>
-                            </div>
-                            <div class="mb-2">
-                                <strong>HẠN THANH TOÁN:</strong> <span th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}"></span>
-                            </div>
-                            <div class="mb-2">
-                                <strong>TIỀN ĐIỆN (Đơn giá/đơn vị):</strong> <span th:text="${invoice.electricityFee} + ' VNĐ'"></span>
-                            </div>
-                            <div class="mb-3">
-                                <strong>TIỀN NƯỚC (Đơn giá/đơn vị):</strong> <span th:text="${invoice.waterFee} + ' VNĐ'"></span>
-                            </div>
+        <!-- Alert messages -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-                            <h6 class="mb-3">Tổng hợp chi phí</h6>
-                            
-                            <div class="cost-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Phí phòng:</span>
-                                    <span th:text="${#numbers.formatDecimal(invoice.roomFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
-                                </div>
-                            </div>
-                            <div class="cost-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Tiền điện:</span>
-                                    <span th:text="${#numbers.formatDecimal(invoice.electricityFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
-                                </div>
-                            </div>
-                            <div class="cost-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Tiền nước:</span>
-                                    <span th:text="${#numbers.formatDecimal(invoice.waterFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
-                                </div>
-                            </div>
-                            <div class="cost-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Tiền mạng:</span>
-                                    <span th:text="${#numbers.formatDecimal(invoice.internetFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[100.000 Đ]</span>
-                                </div>
-                            </div>
-                             <div class="cost-item">
-                                <div class="d-flex justify-content-between">
-                                    <span>Phí khác/Bảo trì:</span>
-                                    <span>0 VNĐ</span>
-                                </div>
-                            </div>
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step active">1</div>
+            <div class="step">2</div>
+            <div class="step">3</div>
+        </div>
+        <p class="text-center text-muted mb-4">Bước 1: Chọn phương thức → Bước 2: Thanh toán → Bước 3: Xác nhận</p>
 
+        <div class="row">
+            <!-- Invoice Details -->
+            <div class="col-lg-5 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-invoice me-2"></i>Chi tiết hóa đơn
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Mã hóa đơn:</span>
+                            <strong th:text="${invoice.invoiceNumber}"></strong>
                         </div>
-                        <div class="col-md-6">
-                            <div class="text-center">
-                                <h6 class="mb-3">Thanh toán</h6>
-                                <div class="qr-code">
-                                    <i class="fas fa-qrcode fa-3x text-muted"></i>
-                                </div>
-                                <div class="mt-3 text-danger fw-bold fs-5">
-                                    <span th:with="total=${invoice.getTotalAmount()}">
-                                        Tổng tiền: <span th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[400.000 Đ]</span>
-                                    </span>
-                                </div>
-                                <small class="text-muted">Vui lòng thanh toán chính xác số tiền này.</small>
-                            </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Phòng:</span>
+                            <strong th:text="${invoice.contract.room.roomNumber}"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Ngày phát hành:</span>
+                            <span th:text="${#temporals.format(invoice.issueDate, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Hạn thanh toán:</span>
+                            <span class="text-danger fw-bold" th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        
+                        <hr>
+                        <h6 class="mb-3">Chi tiết chi phí</h6>
+                        
+                        <div class="cost-item d-flex justify-content-between">
+                            <span>Phí phòng:</span>
+                            <span th:text="${#numbers.formatDecimal(invoice.roomFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                        <div class="cost-item d-flex justify-content-between">
+                            <span>Tiền điện:</span>
+                            <span th:text="${#numbers.formatDecimal(invoice.electricityFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                        <div class="cost-item d-flex justify-content-between">
+                            <span>Tiền nước:</span>
+                            <span th:text="${#numbers.formatDecimal(invoice.waterFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                        <div class="cost-item d-flex justify-content-between">
+                            <span>Tiền mạng:</span>
+                            <span th:text="${#numbers.formatDecimal(invoice.internetFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                        
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-5">TỔNG CỘNG:</span>
+                            <span class="total-amount" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán
-                    </h5>
+            <!-- Payment Methods -->
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/student/invoices/{id}/payment(id=${invoice.id})}" method="post" id="paymentForm">
+                            
+                            <!-- Payment Method Selection -->
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label class="payment-method-card" onclick="selectMethod('BANK_TRANSFER')">
+                                        <input type="radio" name="paymentMethod" value="BANK_TRANSFER" checked>
+                                        <div class="text-center">
+                                            <i class="fas fa-university fa-2x text-primary mb-2"></i>
+                                            <div class="fw-bold">Chuyển khoản</div>
+                                            <small class="text-muted">QR Code / Banking</small>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="payment-method-card" onclick="selectMethod('CARD')">
+                                        <input type="radio" name="paymentMethod" value="CARD">
+                                        <div class="text-center">
+                                            <i class="fas fa-credit-card fa-2x text-success mb-2"></i>
+                                            <div class="fw-bold">Thẻ ATM/Visa</div>
+                                            <small class="text-muted">Thanh toán online</small>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="payment-method-card" onclick="selectMethod('CASH')">
+                                        <input type="radio" name="paymentMethod" value="CASH">
+                                        <div class="text-center">
+                                            <i class="fas fa-money-bill-wave fa-2x text-warning mb-2"></i>
+                                            <div class="fw-bold">Tiền mặt</div>
+                                            <small class="text-muted">Tại văn phòng</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- QR Code Section (for Bank Transfer) -->
+                            <div id="qrSection" class="qr-section mb-4">
+                                <h6 class="mb-3"><i class="fas fa-qrcode me-2"></i>Quét mã QR để thanh toán</h6>
+                                
+                                <!-- VietQR Code - Thay thông tin ngân hàng thực tế -->
+                                <img th:src="@{'https://img.vietqr.io/image/VCB-1234567890-compact2.png?amount=' + ${invoice.totalAmount} + '&addInfo=HD' + ${invoice.invoiceNumber} + '&accountName=KTX%20DAI%20HOC'}" 
+                                     alt="QR Code thanh toán" 
+                                     class="qr-code-img mb-3"
+                                     onerror="this.src='https://via.placeholder.com/250x250?text=QR+Code'">
+                                
+                                <div class="bank-info text-start">
+                                    <h6><i class="fas fa-building me-2"></i>Thông tin chuyển khoản:</h6>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Ngân hàng:</small>
+                                            <div class="fw-bold">Vietcombank</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Số tài khoản:</small>
+                                            <div class="fw-bold">1234567890</div>
+                                        </div>
+                                        <div class="col-6 mt-2">
+                                            <small class="text-muted">Chủ tài khoản:</small>
+                                            <div class="fw-bold">KTX ĐẠI HỌC ABC</div>
+                                        </div>
+                                        <div class="col-6 mt-2">
+                                            <small class="text-muted">Nội dung CK:</small>
+                                            <div class="fw-bold text-primary" th:text="'HD' + ${invoice.invoiceNumber}"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Section (hidden by default) -->
+                            <div id="cardSection" class="mb-4" style="display: none;">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Tính năng thanh toán thẻ đang được phát triển. Vui lòng sử dụng chuyển khoản ngân hàng.
+                                </div>
+                            </div>
+
+                            <!-- Cash Section (hidden by default) -->
+                            <div id="cashSection" class="mb-4" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    <strong>Thanh toán tiền mặt:</strong><br>
+                                    Địa chỉ: Phòng Quản lý KTX, Tầng 1, Tòa nhà A<br>
+                                    Giờ làm việc: 8:00 - 17:00 (Thứ 2 - Thứ 6)<br>
+                                    Mang theo CCCD/CMND và mã hóa đơn khi đến thanh toán.
+                                </div>
+                            </div>
+
+                            <!-- Transaction ID -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-hashtag me-2"></i>Mã giao dịch / Mã tham chiếu
+                                </label>
+                                <input type="text" class="form-control form-control-lg" name="transactionId" 
+                                       placeholder="Nhập mã giao dịch sau khi chuyển khoản" required
+                                       pattern="[A-Za-z0-9\-_]+" title="Chỉ chấp nhận chữ cái, số và dấu gạch ngang">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Mã giao dịch được cung cấp sau khi bạn hoàn tất chuyển khoản từ ngân hàng.
+                                </small>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                    <i class="fas fa-check-circle me-2"></i>Xác nhận đã thanh toán
+                                </button>
+                                <a th:href="@{/student/invoices}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách hóa đơn
+                                </a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form th:action="@{/student/invoices/{id}/payment(id=${invoice.id})}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Chọn phương thức</label>
-                            <select class="form-select" name="paymentMethod" required>
-                                <option value="BANK_TRANSFER">Chuyển khoản Ngân hàng (Ưu tiên)</option>
-                                <option value="CARD">Thẻ ATM/Visa</option>
-                                <option value="CASH">Tiền mặt (Chỉ áp dụng tại văn phòng)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Mã giao dịch/Mã tham chiếu</label>
-                            <input type="text" class="form-control" name="transactionId" placeholder="Nhập mã giao dịch" required>
-                            <small class="text-danger">Bắt buộc phải nhập mã giao dịch để xác minh thanh toán.</small>
-                        </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-check me-2"></i>Xác nhận đã thanh toán
-                            </button>
-                        </div>
-                    </form>
+                <!-- Instructions -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb text-warning me-2"></i>Hướng dẫn thanh toán</h6>
+                        <ol class="small mb-0">
+                            <li>Chọn phương thức thanh toán phù hợp</li>
+                            <li>Quét mã QR hoặc chuyển khoản thủ công theo thông tin trên</li>
+                            <li>Nhập <strong>đúng số tiền</strong> và <strong>nội dung chuyển khoản</strong></li>
+                            <li>Sau khi chuyển khoản thành công, nhập mã giao dịch vào form</li>
+                            <li>Nhấn "Xác nhận đã thanh toán" để hoàn tất</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
-
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Hướng dẫn
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <ol class="small">
-                        <li>Quét mã QR bằng ứng dụng ngân hàng</li>
-                        <li th:with="total=${invoice.getTotalAmount()}">Nhập số tiền: 
-                            <strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">[400.000 Đ]</strong>
-                        </li>
-                        <li>Nhập nội dung chuyển khoản: **HD[Mã Hóa đơn]_[Tên sinh viên]** (Ví dụ: HD<span th:text="${invoice.invoiceNumber}"></span>_AN)</li>
-                        <li>Xác nhận giao dịch</li>
-                        <li>Nhập mã giao dịch vào form bên cạnh</li>
-                    </ol>
-                </div>
-            </div>
         </div>
-    </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize first payment method as selected
+        document.querySelector('.payment-method-card').classList.add('selected');
+        
+        function selectMethod(method) {
+            // Update card selection UI
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Show/hide sections based on method
+            document.getElementById('qrSection').style.display = (method === 'BANK_TRANSFER') ? 'block' : 'none';
+            document.getElementById('cardSection').style.display = (method === 'CARD') ? 'block' : 'none';
+            document.getElementById('cashSection').style.display = (method === 'CASH') ? 'block' : 'none';
+        }
+        
+        // Form validation
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            const transactionId = document.querySelector('input[name="transactionId"]').value.trim();
+            if (!transactionId) {
+                e.preventDefault();
+                alert('Vui lòng nhập mã giao dịch!');
+                return false;
+            }
+            
+            // Confirm before submit
+            if (!confirm('Bạn xác nhận đã thanh toán hóa đơn này?\n\nLưu ý: Hệ thống sẽ kiểm tra giao dịch. Nếu thông tin không chính xác, hóa đơn sẽ không được cập nhật.')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Disable button to prevent double submit
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+        });
+    </script>
 </body>
 </html>

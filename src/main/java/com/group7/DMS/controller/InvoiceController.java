@@ -77,7 +77,8 @@ public class InvoiceController {
 	@GetMapping("/select-room")
 	public String selectRoomPage(@RequestParam(required = false) Integer buildingId, Model model) {
 
-		List<Buildings> buildings = buildingRepository.findAll();
+		// Chỉ lấy tòa nhà đang hoạt động (không bao gồm "Bảo trì")
+		List<Buildings> buildings = buildingRepository.findActiveBuildings();
 		model.addAttribute("buildings", buildings);
 
 		if (buildingId != null) {
@@ -134,7 +135,8 @@ public class InvoiceController {
 	 */
 	@GetMapping("/bulk-create")
 	public String showBulkCreateForm(Model model) {
-		List<Buildings> buildings = buildingRepository.findAll();
+		// Chỉ lấy tòa nhà đang hoạt động (không bao gồm "Bảo trì")
+		List<Buildings> buildings = buildingRepository.findActiveBuildings();
 		model.addAttribute("buildings", buildings);
 
 		YearMonth currentMonth = YearMonth.now();
