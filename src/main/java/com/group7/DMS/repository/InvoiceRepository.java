@@ -35,8 +35,7 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Integer> {
 	@Query("SELECT i FROM Invoices i " + "JOIN i.room r " + "JOIN r.building b "
 			+ "WHERE (:buildingId IS NULL OR b.id = :buildingId) "
 			+ "AND (:roomNumber IS NULL OR r.roomNumber LIKE %:roomNumber%) "
-			+ "AND (:status IS NULL OR i.status = :status) " 
-			+ "AND (:month IS NULL OR i.month = :month) "
+			+ "AND (:status IS NULL OR i.status = :status) " + "AND (:month IS NULL OR i.month = :month) "
 			+ "AND (:year IS NULL OR i.year = :year)")
 	Page<Invoices> searchInvoices(@Param("buildingId") Integer buildingId, @Param("roomNumber") String roomNumber,
 			@Param("status") InvoiceStatus status, @Param("month") Integer month, @Param("year") Integer year,
@@ -46,6 +45,10 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Integer> {
 			+ "FROM Invoices i WHERE i.status = :status")
 	BigDecimal sumTotalAmountByStatus(@Param("status") InvoiceStatus status);
 
+	@Query("SELECT COALESCE(SUM(COALESCE(i.electricityFee,0) + COALESCE(i.waterFee,0) + COALESCE(i.internetFee,0)), 0) "
+			+ "FROM Invoices i WHERE i.status = :status")
+	BigDecimal sumLivingTotalAmountByStatus(@Param("status") InvoiceStatus status);
+
 	long countByStatus(InvoiceStatus status);
 
 	@Query("SELECT i FROM Invoices i WHERE i.status = 'UNPAID' AND i.dueDate < :currentDate")
@@ -53,7 +56,8 @@ public interface InvoiceRepository extends JpaRepository<Invoices, Integer> {
 
 	List<Invoices> findByMonthAndYear(int month, int year);
 
-	// Tìm hóa đơn theo student ID (thông qua contract) - chỉ lấy invoice có room hợp lệ
+	// Tìm hóa đơn theo student ID (thông qua contract) - chỉ lấy invoice có room
+	// hợp lệ
 	@Query("SELECT i FROM Invoices i WHERE i.contract.student.id = :studentId AND i.room.id > 0")
 	List<Invoices> findByStudentId(@Param("studentId") int studentId);
 

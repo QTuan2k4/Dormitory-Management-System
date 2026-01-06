@@ -94,12 +94,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 		invoice.setElectricityUsage(electricityUsage);
 		invoice.setWaterUsage(waterUsage);
 
-		// Tính tiền phòng theo tháng (giá phòng/năm chia 12)
-		BigDecimal roomFee = BigDecimal.ZERO;
-		if (room.getPricePerYear() != null && room.getPricePerYear().compareTo(BigDecimal.ZERO) > 0) {
-			roomFee = room.getPricePerYear().divide(new BigDecimal(12), 0, java.math.RoundingMode.CEILING);
-		}
-		invoice.setRoomFee(roomFee);
+		invoice.setRoomFee(BigDecimal.ZERO);
 
 		BigDecimal electricityFee = pricingConfig.getElectricityPricePerKwh()
 				.multiply(new BigDecimal(electricityUsage));
@@ -143,7 +138,6 @@ public class InvoiceServiceImpl implements InvoiceService {
 		invoice.setDueDate(dueDate);
 		invoice.setStatus(InvoiceStatus.UNPAID);
 
-		// Tính tiền phòng theo tháng
 		BigDecimal roomFee = BigDecimal.ZERO;
 		if (contract.getRoom() != null && contract.getRoom().getPricePerYear() != null
 				&& contract.getRoom().getPricePerYear().compareTo(BigDecimal.ZERO) > 0) {
@@ -289,8 +283,54 @@ public class InvoiceServiceImpl implements InvoiceService {
 		long countOverdue = 0;
 
 		for (Invoices invoice : allInvoices) {
-			// Sử dụng getTotalAmount() thay vì getLivingTotalAmount() để tính đầy đủ
 			BigDecimal amount = invoice.getTotalAmount();
+
+			if (invoice.getStatus() == InvoiceStatus.PAID) {
+				totalPaid = totalPaid.add(amount);
+				countPaid++;
+			} else {
+				// Chưa thanh toán
+				// Kiểm tra xem đã quá hạn chưa
+				if (invoice.getDueDate().isBefore(today)) {
+					// Quá hạn
+					totalOverdue = totalOverdue.add(amount);
+					countOverdue++;
+				} else {
+					// Chưa quá hạn
+					totalUnpaid = totalUnpaid.add(amount);
+					countUnpaid++;
+				}
+			}
+		}
+
+		summary.put("totalPaidAmount", totalPaid);
+		summary.put("totalUnpaidAmount", totalUnpaid);
+		summary.put("totalOverdueAmount", totalOverdue);
+		summary.put("countPaid", countPaid);
+		summary.put("countUnpaid", countUnpaid);
+		summary.put("countOverdue", countOverdue);
+		summary.put("totalInvoices", countPaid + countUnpaid + countOverdue);
+
+		return summary;
+	}
+
+	@Override
+	public Map<String, Object> getLivingInvoiceSummary() {
+		Map<String, Object> summary = new HashMap<>();
+		LocalDate today = LocalDate.now();
+
+		// Lấy tất cả hóa đơn và tính toán
+		List<Invoices> allInvoices = invoiceRepository.findAll();
+
+		BigDecimal totalPaid = BigDecimal.ZERO;
+		BigDecimal totalUnpaid = BigDecimal.ZERO;
+		BigDecimal totalOverdue = BigDecimal.ZERO;
+		long countPaid = 0;
+		long countUnpaid = 0;
+		long countOverdue = 0;
+
+		for (Invoices invoice : allInvoices) {
+			BigDecimal amount = invoice.getLivingTotalAmount();
 
 			if (invoice.getStatus() == InvoiceStatus.PAID) {
 				totalPaid = totalPaid.add(amount);
