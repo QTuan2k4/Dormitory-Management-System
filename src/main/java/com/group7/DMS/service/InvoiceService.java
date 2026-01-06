@@ -78,6 +78,8 @@ public interface InvoiceService {
 	 */
 	Map<String, Object> getInvoiceSummary();
 
+	Map<String, Object> getLivingInvoiceSummary();
+
 	/**
 	 * Cập nhật hóa đơn quá hạn
 	 */
@@ -106,7 +108,7 @@ public interface InvoiceService {
 	/**
 	 * Xử lý thanh toán
 	 */
-	com.group7.DMS.entity.Payments processPayment(int invoiceId, BigDecimal amount, 
+	com.group7.DMS.entity.Payments processPayment(int invoiceId, BigDecimal amount,
 			com.group7.DMS.entity.Payments.PaymentMethod method, String transactionId);
 
 }

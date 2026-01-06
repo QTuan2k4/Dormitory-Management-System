@@ -54,7 +54,7 @@ public class InvoiceController {
 				size);
 
 		// Thống kê
-		Map<String, Object> summary = invoiceService.getInvoiceSummary();
+		Map<String, Object> summary = invoiceService.getLivingInvoiceSummary();
 
 		model.addAttribute("invoices", invoicesPage.getContent());
 		model.addAttribute("currentPage", page);
